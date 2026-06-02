@@ -3,205 +3,251 @@
 import React from 'react';
 import Link from 'next/link';
 import { useAuth } from '@repo/auth';
+import { CockpitLayout } from '@repo/ui/cockpit-layout';
 
 export default function OperatorHome() {
   const auth = useAuth();
 
   const stats = [
-    { label: 'Em Fila de Revisão', value: '4', color: '#D97706', bg: '#FEF3C7', border: '#FCD34D' },
-    { label: 'Aprovados Hoje', value: '18', color: '#059669', bg: '#D1FAE5', border: '#A7F3D0' },
-    { label: 'Rejeitados Hoje', value: '7', color: '#DC2626', bg: '#FEE2E2', border: '#FCA5A5' },
-    { label: 'Tempo Médio Decisão', value: '4.2m', color: '#2563EB', bg: '#DBEAFE', border: '#BFDBFE' },
+    { label: 'Em Fila de Revisão', value: '4', color: 'var(--color-secondary)', bg: 'hsla(24, 100%, 50%, 0.08)', border: 'hsla(24, 100%, 50%, 0.25)' },
+    { label: 'Aprovados Hoje', value: '18', color: 'var(--color-emerald)', bg: 'hsla(142, 76%, 45%, 0.08)', border: 'hsla(142, 76%, 45%, 0.25)' },
+    { label: 'Rejeitados Hoje', value: '7', color: 'var(--color-rose)', bg: 'hsla(346, 84%, 61%, 0.08)', border: 'hsla(346, 84%, 61%, 0.25)' },
+    { label: 'Tempo Médio Decisão', value: '4.2m', color: 'var(--color-primary)', bg: 'hsla(262, 80%, 60%, 0.08)', border: 'hsla(262, 80%, 60%, 0.25)' },
   ];
 
   return (
-    <div
-      style={{
-        maxWidth: '1100px',
-        margin: '0 auto',
-        padding: '3rem 2rem',
-        fontFamily: 'Inter, system-ui, sans-serif',
-        backgroundColor: '#FAFAFA',
-        minHeight: '95vh',
-      }}
-    >
-      {/* Top Welcome Panel */}
+    <CockpitLayout activeLink="home" portalType="operator">
       <div
         style={{
-          display: 'flex',
-          justifyContent: 'space-between',
-          alignItems: 'center',
-          backgroundColor: '#FFFFFF',
-          padding: '2rem',
-          borderRadius: '16px',
-          border: '1px solid #E5E7EB',
-          boxShadow: '0 4px 6px -1px rgba(0,0,0,0.05)',
-          marginBottom: '2.5rem',
+          maxWidth: '1200px',
+          margin: '0 auto',
+          padding: '1rem 0',
+          animation: 'fadeIn 0.6s cubic-bezier(0.16, 1, 0.3, 1) forwards',
         }}
       >
-        <div>
-          <h1 style={{ margin: 0, fontSize: '1.75rem', fontWeight: 800, color: '#111827' }}>
-            Painel de Decisão da Mesa de Crédito
-          </h1>
-          <p style={{ margin: '0.25rem 0 0 0', fontSize: '0.875rem', color: '#6B7280' }}>
-            Central de Intervenção Humana (HITL) para propostas de crédito especiais
-          </p>
-        </div>
-        {auth && (
-          <div style={{ textAlign: 'right' }}>
-            <span style={{ fontSize: '0.875rem', color: '#4B5563', fontWeight: 600 }}>
-              Operador: {auth.user_id}
-            </span>
-            <div style={{ fontSize: '0.75rem', color: '#9CA3AF', marginTop: '0.125rem' }}>
-              Perfil: {auth.role}
-            </div>
+        {/* Top Welcome Panel */}
+        <div
+          style={{
+            display: 'flex',
+            justifyContent: 'space-between',
+            alignItems: 'center',
+            backgroundColor: 'var(--bg-card)',
+            backdropFilter: 'blur(16px)',
+            WebkitBackdropFilter: 'blur(16px)',
+            padding: '2rem 2.5rem',
+            borderRadius: '16px',
+            border: 'var(--border-glass)',
+            boxShadow: 'var(--shadow-main), inset 0 1px 1px hsla(0, 0%, 100%, 0.05)',
+            marginBottom: '2.5rem',
+            transition: 'background 0.3s ease, border-color 0.3s ease',
+          }}
+        >
+          <div>
+            <h1 
+              style={{ 
+                margin: 0, 
+                fontSize: '1.75rem', 
+                fontWeight: 800, 
+                color: 'var(--text-primary)',
+                fontFamily: "var(--font-heading)",
+                letterSpacing: '-0.02em',
+              }}
+            >
+              Mesa de Análise de Crédito
+            </h1>
+            <p style={{ margin: '0.4rem 0 0 0', fontSize: '0.875rem', color: 'var(--text-secondary)' }}>
+              Central de Intervenção Humana (HITL) para propostas de crédito especiais
+            </p>
           </div>
-        )}
-      </div>
+          {auth && (
+            <div style={{ textAlign: 'right' }}>
+              <span style={{ fontSize: '0.9rem', color: 'var(--text-primary)', fontWeight: 700, fontFamily: "var(--font-heading)" }}>
+                👤 Operador: {auth.user_id}
+              </span>
+              <div style={{ fontSize: '0.75rem', color: 'var(--text-muted)', marginTop: '0.2rem', fontWeight: 600 }}>
+                Perfil: {auth.role}
+              </div>
+            </div>
+          )}
+        </div>
 
-      {/* Metric Cards Row */}
-      <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(220px, 1fr))', gap: '1.5rem', marginBottom: '3rem' }}>
-        {stats.map((stat, idx) => (
+        {/* Metric Cards Row */}
+        <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(220px, 1fr))', gap: '1.5rem', marginBottom: '3rem' }}>
+          {stats.map((stat, idx) => (
+            <div
+              key={idx}
+              style={{
+                padding: '1.5rem',
+                borderRadius: '12px',
+                backgroundColor: stat.bg,
+                border: `1px solid ${stat.border}`,
+                boxShadow: '0 4px 15px -3px rgba(0, 0, 0, 0.1)',
+                transition: 'transform 0.2s',
+              }}
+              onMouseOver={(e) => (e.currentTarget.style.transform = 'translateY(-2px)')}
+              onMouseOut={(e) => (e.currentTarget.style.transform = 'translateY(0)')}
+            >
+              <span style={{ display: 'block', fontSize: '0.8rem', color: 'var(--text-secondary)', fontWeight: 700, textTransform: 'uppercase', letterSpacing: '0.05em', fontFamily: "var(--font-heading)" }}>
+                {stat.label}
+              </span>
+              <span style={{ display: 'block', fontSize: '2.25rem', fontWeight: 900, color: stat.color, marginTop: '0.5rem', fontFamily: 'var(--font-heading)' }}>
+                {stat.value}
+              </span>
+            </div>
+          ))}
+        </div>
+
+        {/* Main Hub Actions */}
+        <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(320px, 1fr))', gap: '2rem' }}>
+          {/* Card 1: Review Queue */}
           <div
-            key={idx}
             style={{
-              padding: '1.5rem',
-              borderRadius: '12px',
-              backgroundColor: stat.bg,
-              border: `1px solid ${stat.border}`,
-              boxShadow: '0 2px 4px rgba(0,0,0,0.02)',
+              backgroundColor: 'var(--bg-card)',
+              backdropFilter: 'blur(16px)',
+              WebkitBackdropFilter: 'blur(16px)',
+              padding: '2.5rem',
+              borderRadius: '16px',
+              border: 'var(--border-glass)',
+              boxShadow: 'var(--shadow-main)',
+              display: 'flex',
+              flexDirection: 'column',
+              justifyContent: 'space-between',
+              minHeight: '260px',
+              transition: 'background 0.3s ease, border-color 0.3s ease',
             }}
           >
-            <span style={{ display: 'block', fontSize: '0.875rem', color: '#4B5563', fontWeight: 500 }}>
-              {stat.label}
-            </span>
-            <span style={{ display: 'block', fontSize: '2.25rem', fontWeight: 800, color: stat.color, marginTop: '0.5rem' }}>
-              {stat.value}
-            </span>
-          </div>
-        ))}
-      </div>
-
-      {/* Main Hub Actions */}
-      <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '2rem' }}>
-        {/* Card 1: Review Queue */}
-        <div
-          style={{
-            backgroundColor: '#FFFFFF',
-            padding: '2rem',
-            borderRadius: '16px',
-            border: '1px solid #E5E7EB',
-            boxShadow: '0 4px 6px -1px rgba(0,0,0,0.05)',
-            display: 'flex',
-            flexDirection: 'column',
-            justifyContent: 'space-between',
-          }}
-        >
-          <div>
-            <div
+            <div>
+              <div
+                style={{
+                  width: '44px',
+                  height: '44px',
+                  borderRadius: '10px',
+                  backgroundColor: 'hsla(38, 92%, 50%, 0.12)',
+                  color: 'hsl(38, 92%, 60%)',
+                  display: 'flex',
+                  alignItems: 'center',
+                  justifyContent: 'center',
+                  fontSize: '1.5rem',
+                  marginBottom: '1.25rem',
+                  border: '1px solid hsla(38, 92%, 50%, 0.25)',
+                }}
+              >
+                📋
+              </div>
+              <h3 style={{ margin: 0, fontSize: '1.3rem', fontWeight: 800, color: 'var(--text-primary)', fontFamily: "var(--font-heading)", letterSpacing: '-0.02em' }}>
+                Fila de Análises Pendentes
+              </h3>
+              <p style={{ margin: '0.6rem 0 1.5rem 0', fontSize: '0.875rem', color: 'var(--text-secondary)', lineHeight: 1.6 }}>
+                Acesse a fila de solicitações que exigem intervenção manual por limite excedido ou indisponibilidade de bureau.
+              </p>
+            </div>
+            <Link
+              href="/queue"
               style={{
-                width: '40px',
-                height: '40px',
-                borderRadius: '8px',
-                backgroundColor: '#FFFBEB',
-                color: '#D97706',
-                display: 'flex',
+                display: 'inline-flex',
                 alignItems: 'center',
                 justifyContent: 'center',
-                fontSize: '1.25rem',
-                fontWeight: 'bold',
-                marginBottom: '1rem',
+                padding: '0.85rem 1rem',
+                backgroundColor: 'var(--color-primary)',
+                color: '#FFFFFF',
+                borderRadius: '8px',
+                textDecoration: 'none',
+                fontWeight: 800,
+                fontSize: '0.875rem',
+                fontFamily: "var(--font-heading)",
+                boxShadow: '0 4px 10px -3px var(--color-primary-glow)',
+                transition: 'background-color 0.2s, transform 0.2s',
+                textAlign: 'center',
+              }}
+              onMouseOver={(e) => {
+                e.currentTarget.style.backgroundColor = 'hsl(262, 80%, 52%)';
+                e.currentTarget.style.transform = 'translateY(-1px)';
+              }}
+              onMouseOut={(e) => {
+                e.currentTarget.style.backgroundColor = 'var(--color-primary)';
+                e.currentTarget.style.transform = 'translateY(0)';
               }}
             >
-              📋
-            </div>
-            <h3 style={{ margin: 0, fontSize: '1.25rem', fontWeight: 700, color: '#111827' }}>
-              Fila de Análises Pendentes
-            </h3>
-            <p style={{ margin: '0.5rem 0 1.5rem 0', fontSize: '0.875rem', color: '#6B7280', lineHeight: 1.5 }}>
-              Acesse a fila de solicitações que exigem intervenção manual por limite excedido ou indisponibilidade de bureau.
-            </p>
+              Visualizar Fila (Revisão HITL)
+            </Link>
           </div>
-          <Link
-            href="/queue"
+
+          {/* Card 2: Performance Dashboard */}
+          <div
             style={{
-              display: 'inline-flex',
-              alignItems: 'center',
-              justifyContent: 'center',
-              padding: '0.75rem 1rem',
-              backgroundColor: '#4F46E5',
-              color: '#FFFFFF',
-              borderRadius: '8px',
-              textDecoration: 'none',
-              fontWeight: 700,
-              fontSize: '0.875rem',
-              transition: 'background-color 0.2s',
-              textAlign: 'center',
+              backgroundColor: 'var(--bg-card)',
+              backdropFilter: 'blur(16px)',
+              WebkitBackdropFilter: 'blur(16px)',
+              padding: '2.5rem',
+              borderRadius: '16px',
+              border: 'var(--border-glass)',
+              boxShadow: 'var(--shadow-main)',
+              display: 'flex',
+              flexDirection: 'column',
+              justifyContent: 'space-between',
+              minHeight: '260px',
+              transition: 'background 0.3s ease, border-color 0.3s ease',
             }}
           >
-            Visualizar Fila (4 pendentes)
-          </Link>
-        </div>
-
-        {/* Card 2: Performance Dashboard */}
-        <div
-          style={{
-            backgroundColor: '#FFFFFF',
-            padding: '2rem',
-            borderRadius: '16px',
-            border: '1px solid #E5E7EB',
-            boxShadow: '0 4px 6px -1px rgba(0,0,0,0.05)',
-            display: 'flex',
-            flexDirection: 'column',
-            justifyContent: 'space-between',
-          }}
-        >
-          <div>
-            <div
+            <div>
+              <div
+                style={{
+                  width: '44px',
+                  height: '44px',
+                  borderRadius: '10px',
+                  backgroundColor: 'hsla(142, 76%, 45%, 0.12)',
+                  color: 'hsl(142, 76%, 50%)',
+                  display: 'flex',
+                  alignItems: 'center',
+                  justifyContent: 'center',
+                  fontSize: '1.5rem',
+                  marginBottom: '1.25rem',
+                  border: '1px solid hsla(142, 76%, 45%, 0.25)',
+                }}
+              >
+                📊
+              </div>
+              <h3 style={{ margin: 0, fontSize: '1.3rem', fontWeight: 800, color: 'var(--text-primary)', fontFamily: "var(--font-heading)", letterSpacing: '-0.02em' }}>
+                Dashboard de Métricas
+              </h3>
+              <p style={{ margin: '0.6rem 0 1.5rem 0', fontSize: '0.875rem', color: 'var(--text-secondary)', lineHeight: 1.6 }}>
+                Visualize relatórios de performance, contabilidade de tokens de FinOps do Gateway e estatísticas de rejeições regulatórias.
+              </p>
+            </div>
+            <Link
+              href="/dashboard"
               style={{
-                width: '40px',
-                height: '40px',
-                borderRadius: '8px',
-                backgroundColor: '#ECFDF5',
-                color: '#059669',
-                display: 'flex',
+                display: 'inline-flex',
                 alignItems: 'center',
                 justifyContent: 'center',
-                fontSize: '1.25rem',
-                fontWeight: 'bold',
-                marginBottom: '1rem',
+                padding: '0.85rem 1rem',
+                backgroundColor: 'hsla(0, 0%, 100%, 0.05)',
+                color: 'var(--text-primary)',
+                border: '1px solid var(--border-glass)',
+                borderRadius: '8px',
+                textDecoration: 'none',
+                fontWeight: 800,
+                fontSize: '0.875rem',
+                fontFamily: "var(--font-heading)",
+                transition: 'all 0.2s',
+                textAlign: 'center',
+              }}
+              onMouseOver={(e) => {
+                e.currentTarget.style.backgroundColor = 'hsla(0, 0%, 100%, 0.1)';
+                e.currentTarget.style.borderColor = 'var(--color-primary)';
+                e.currentTarget.style.transform = 'translateY(-1px)';
+              }}
+              onMouseOut={(e) => {
+                e.currentTarget.style.backgroundColor = 'hsla(0, 0%, 100%, 0.05)';
+                e.currentTarget.style.borderColor = 'var(--border-glass)';
+                e.currentTarget.style.transform = 'translateY(0)';
               }}
             >
-              📊
-            </div>
-            <h3 style={{ margin: 0, fontSize: '1.25rem', fontWeight: 700, color: '#111827' }}>
-              Dashboard de Métricas
-            </h3>
-            <p style={{ margin: '0.5rem 0 1.5rem 0', fontSize: '0.875rem', color: '#6B7280', lineHeight: 1.5 }}>
-              Visualize relatórios de performance, contabilidade de tokens de FinOps do Gateway e estatísticas de rejeições regulatórias.
-            </p>
+              Acessar Métricas & FinOps
+            </Link>
           </div>
-          <Link
-            href="/dashboard"
-            style={{
-              display: 'inline-flex',
-              alignItems: 'center',
-              justifyContent: 'center',
-              padding: '0.75rem 1rem',
-              backgroundColor: '#E5E7EB',
-              color: '#374151',
-              borderRadius: '8px',
-              textDecoration: 'none',
-              fontWeight: 700,
-              fontSize: '0.875rem',
-              transition: 'background-color 0.2s',
-              textAlign: 'center',
-            }}
-          >
-            Acessar Métricas & FinOps
-          </Link>
         </div>
       </div>
-    </div>
+    </CockpitLayout>
   );
 }

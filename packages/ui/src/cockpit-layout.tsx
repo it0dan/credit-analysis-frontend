@@ -2,7 +2,7 @@ import React, { useState, useEffect } from 'react';
 
 interface CockpitLayoutProps {
   children: React.ReactNode;
-  activeLink: 'proposal' | 'status' | 'queue' | 'review' | 'analytics' | 'settings';
+  activeLink: 'home' | 'proposal' | 'status' | 'queue' | 'review' | 'analytics' | 'settings';
   portalType: 'customer' | 'operator';
   request_id?: string;
 }
@@ -30,8 +30,9 @@ export function CockpitLayout({ children, activeLink, portalType, request_id }: 
         { id: 'settings', label: '⚙️ Configurações', path: '#', disabled: true },
       ]
     : [
+        { id: 'home', label: '🏠 Início', path: '/' },
         { id: 'queue', label: '📋 Fila de Análise', path: '/queue' },
-        { id: 'analytics', label: '📊 Painel Geral', path: '#', disabled: true },
+        { id: 'analytics', label: '📊 Painel Geral', path: '/dashboard' },
         { id: 'settings', label: '⚙️ Auditoria e PLD', path: '#', disabled: true },
       ];
 
