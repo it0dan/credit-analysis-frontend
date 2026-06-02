@@ -1,16 +1,25 @@
-@import url('https://fonts.googleapis.com/css2?family=Outfit:wght@300;400;500;600;700;800&family=Plus+Jakarta+Sans:wght@300;400;500;600;700;800&display=swap');
+@import url('https://fonts.googleapis.com/css2?family=Montserrat:wght@300;400;500;600;700;800;900&display=swap');
 
 :root {
-  --font-primary: 'Plus Jakarta Sans', -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
-  --font-heading: 'Outfit', sans-serif;
+  --font-primary: 'Montserrat', sans-serif;
+  --font-heading: 'Montserrat', sans-serif;
 
-  /* HSL Color System - Ultra Premium Deep Space Navy */
-  --bg-app: linear-gradient(135deg, hsl(224, 71%, 4%) 0%, hsl(223, 47%, 8%) 100%);
-  --bg-card: hsla(223, 47%, 12%, 0.6);
-  --bg-card-hover: hsla(223, 47%, 16%, 0.85);
+  /* Default Theme: Dark Space Navy */
+  --bg-app: linear-gradient(135deg, hsl(240, 25%, 7%) 0%, hsl(240, 30%, 4%) 100%);
+  --bg-card: hsla(240, 20%, 12%, 0.6);
+  --bg-card-hover: hsla(240, 20%, 16%, 0.85);
+  --bg-sidebar: hsl(240, 25%, 8%);
+  --bg-navbar: hsla(240, 25%, 8%, 0.8);
+  --bg-footer: hsl(240, 25%, 5%);
   
-  --color-primary: hsl(217, 91%, 60%);
-  --color-primary-glow: hsla(217, 91%, 60%, 0.35);
+  --border-glass: 1px solid hsla(262, 80%, 60%, 0.15);
+  --border-glass-hover: 1px solid hsla(262, 80%, 60%, 0.3);
+  
+  --color-primary: hsl(262, 80%, 60%); /* Sensedia Purple */
+  --color-primary-glow: hsla(262, 80%, 60%, 0.35);
+  
+  --color-secondary: hsl(24, 100%, 50%); /* Sensedia Orange */
+  --color-secondary-glow: hsla(24, 100%, 50%, 0.35);
   
   --color-emerald: hsl(142, 76%, 45%);
   --color-emerald-glow: hsla(142, 76%, 45%, 0.25);
@@ -21,12 +30,45 @@
   --color-amber: hsl(38, 92%, 50%);
   --color-amber-glow: hsla(38, 92%, 50%, 0.25);
 
-  --border-glass: 1px solid hsla(217, 91%, 60%, 0.15);
-  --border-glass-hover: 1px solid hsla(217, 91%, 60%, 0.3);
-
   --text-primary: hsl(210, 40%, 98%);
   --text-secondary: hsl(215, 20%, 75%);
   --text-muted: hsl(215, 16%, 50%);
+  
+  --shadow-main: 0 10px 30px -10px rgba(0, 0, 0, 0.5);
+}
+
+/* Light Theme Variables */
+[data-theme="light"] {
+  --bg-app: linear-gradient(135deg, hsl(250, 20%, 98%) 0%, hsl(240, 15%, 94%) 100%);
+  --bg-card: hsla(240, 15%, 98%, 0.8);
+  --bg-card-hover: hsla(240, 15%, 99%, 0.95);
+  --bg-sidebar: hsl(240, 20%, 97%);
+  --bg-navbar: hsla(240, 20%, 98%, 0.8);
+  --bg-footer: hsl(240, 15%, 92%);
+  
+  --border-glass: 1px solid hsla(262, 80%, 50%, 0.12);
+  --border-glass-hover: 1px solid hsla(262, 80%, 50%, 0.25);
+  
+  --color-primary: hsl(262, 80%, 50%); /* Sensedia Purple */
+  --color-primary-glow: hsla(262, 80%, 50%, 0.15);
+  
+  --color-secondary: hsl(24, 100%, 50%); /* Sensedia Orange */
+  --color-secondary-glow: hsla(24, 100%, 50%, 0.15);
+  
+  --color-emerald: hsl(142, 76%, 36%);
+  --color-emerald-glow: hsla(142, 76%, 36%, 0.1);
+  
+  --color-rose: hsl(346, 84%, 48%);
+  --color-rose-glow: hsla(346, 84%, 48%, 0.1);
+  
+  --color-amber: hsl(38, 92%, 45%);
+  --color-amber-glow: hsla(38, 92%, 45%, 0.1);
+
+  --text-primary: hsl(224, 71%, 4%);
+  --text-secondary: hsl(220, 15%, 35%);
+  --text-muted: hsl(220, 10%, 55%);
+  
+  --shadow-main: 0 4px 20px -2px rgba(0, 0, 0, 0.05);
 }
 
 * {
@@ -45,11 +87,12 @@ body {
   min-height: 100vh;
   -webkit-font-smoothing: antialiased;
   -moz-osx-font-smoothing: grayscale;
+  transition: background 0.3s ease, color 0.3s ease;
 }
 
 h1, h2, h3, h4, h5, h6 {
   font-family: var(--font-heading);
-  letter-spacing: -0.025em;
+  letter-spacing: -0.02em;
 }
 
 /* Glassmorphism Styles */
@@ -59,20 +102,39 @@ h1, h2, h3, h4, h5, h6 {
   -webkit-backdrop-filter: blur(16px);
   border: var(--border-glass);
   border-radius: 16px;
-  box-shadow: 0 10px 30px -10px rgba(0, 0, 0, 0.5),
-              inset 0 1px 1px hsla(0, 0%, 100%, 0.05);
+  box-shadow: var(--shadow-main), inset 0 1px 1px hsla(0, 0%, 100%, 0.05);
   transition: transform 0.3s cubic-bezier(0.16, 1, 0.3, 1), 
               box-shadow 0.3s cubic-bezier(0.16, 1, 0.3, 1),
-              border-color 0.3s ease;
+              border-color 0.3s ease,
+              background 0.3s ease;
 }
 
 .glass-container:hover {
   background: var(--bg-card-hover);
   border: var(--border-glass-hover);
-  box-shadow: 0 20px 40px -15px rgba(0, 0, 0, 0.7),
+  box-shadow: 0 20px 40px -15px rgba(0, 0, 0, 0.3),
               0 0 20px var(--color-primary-glow),
               inset 0 1px 1px hsla(0, 0%, 100%, 0.1);
   transform: translateY(-2px);
+}
+
+/* Custom Scrollbar for premium feel */
+::-webkit-scrollbar {
+  width: 6px;
+  height: 6px;
+}
+
+::-webkit-scrollbar-track {
+  background: transparent;
+}
+
+::-webkit-scrollbar-thumb {
+  background: var(--border-glass);
+  border-radius: 4px;
+}
+
+::-webkit-scrollbar-thumb:hover {
+  background: var(--color-primary);
 }
 
 /* Animations */

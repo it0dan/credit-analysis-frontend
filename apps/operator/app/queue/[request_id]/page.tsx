@@ -5,6 +5,7 @@ import { useParams, useSearchParams, useRouter } from 'next/navigation';
 import Link from 'next/link';
 import { TraceTimeline } from '@repo/ui/trace-timeline';
 import { HITLPanel } from '@repo/ui/hitl-panel';
+import { CockpitLayout } from '@repo/ui/cockpit-layout';
 import type { HITLRequest, OperatorDecision, AgentTrajectory } from '@repo/types';
 
 export default function OperatorReviewDetailPage() {
@@ -144,259 +145,254 @@ export default function OperatorReviewDetailPage() {
       });
   };
 
-  if (decisionSubmitted) {
-    return (
+  return (
+    <CockpitLayout activeLink="queue" portalType="operator">
       <div
         style={{
-          maxWidth: '800px',
-          margin: '5rem auto',
-          padding: '3rem 2.5rem',
-          backgroundColor: 'hsla(223, 47%, 12%, 0.6)',
-          backdropFilter: 'blur(16px)',
-          WebkitBackdropFilter: 'blur(16px)',
-          borderRadius: '16px',
-          border: '1px solid hsla(217, 91%, 60%, 0.15)',
-          boxShadow: '0 10px 30px -10px rgba(0, 0, 0, 0.5), inset 0 1px 1px hsla(0, 0%, 100%, 0.05)',
-          fontFamily: "'Plus Jakarta Sans', system-ui, sans-serif",
-          textAlign: 'center',
-          animation: 'fadeIn 0.6s ease-out',
+          maxWidth: '1200px',
+          margin: '0 auto',
+          padding: '1rem 0',
+          animation: 'fadeIn 0.6s cubic-bezier(0.16, 1, 0.3, 1) forwards',
         }}
       >
-        <div
-          className="glow-pulse-emerald"
-          style={{
-            display: 'inline-flex',
-            alignItems: 'center',
-            justifyContent: 'center',
-            width: '64px',
-            height: '64px',
-            borderRadius: '50%',
-            backgroundColor: 'hsla(142, 76%, 45%, 0.15)',
-            color: 'hsl(142, 76%, 50%)',
-            border: '2px solid hsla(142, 76%, 45%, 0.3)',
-            fontSize: '2rem',
-            fontWeight: 800,
-            marginBottom: '1.5rem',
-            fontFamily: "'Outfit', sans-serif"
-          }}
-        >
-          ✓
-        </div>
-        
-        <h1 
-          style={{ 
-            margin: 0, 
-            fontSize: '1.65rem', 
-            fontWeight: 800, 
-            color: 'hsl(210, 40%, 98%)',
-            fontFamily: "'Outfit', sans-serif",
-            letterSpacing: '-0.02em',
-          }}
-        >
-          Decisão Processada com Sucesso!
-        </h1>
-        
-        <p style={{ margin: '0.85rem 0 2rem 0', fontSize: '0.925rem', color: 'hsl(215, 20%, 75%)', lineHeight: 1.6 }}>
-          A decisão do operador <strong style={{ color: 'hsl(217, 91%, 70%)' }}>{decisionSubmitted.operator_id}</strong> foi gravada no registro de conformidade.<br />
-          O Turno 3 (T3 - decision-agent) foi retomado de forma assíncrona para finalizar a análise de crédito.
-        </p>
-
-        <div 
-          style={{ 
-            backgroundColor: 'hsla(223, 47%, 8%, 0.5)', 
-            padding: '1.5rem', 
-            borderRadius: '12px', 
-            border: '1px solid hsla(217, 91%, 60%, 0.1)', 
-            display: 'flex', 
-            flexDirection: 'column', 
-            gap: '0.75rem', 
-            textAlign: 'left', 
-            maxWidth: '520px', 
-            margin: '0 auto 2.5rem auto' 
-          }}
-        >
-          <div style={{ display: 'flex', justifyContent: 'space-between' }}>
-            <span style={{ fontSize: '0.8rem', color: 'hsl(215, 16%, 50%)', textTransform: 'uppercase', fontWeight: 800, fontFamily: "'Outfit', sans-serif" }}>ID Proposta:</span>
-            <span style={{ fontSize: '0.9rem', fontWeight: 700, fontFamily: 'monospace', color: 'hsl(210, 40%, 98%)' }}>{decisionSubmitted.request_id}</span>
+        {/* Navigation */}
+        <div style={{ marginBottom: '2rem' }}>
+          <div style={{ display: 'flex', gap: '0.5rem', fontSize: '0.8rem', color: 'var(--text-secondary)', marginBottom: '0.6rem', textTransform: 'uppercase', letterSpacing: '0.05em', fontFamily: "var(--font-heading)", fontWeight: 700 }}>
+            <Link href="/" style={{ color: 'var(--color-primary)', textDecoration: 'none' }}>Home</Link>
+            <span>/</span>
+            <Link href="/queue" style={{ color: 'var(--color-primary)', textDecoration: 'none' }}>Fila de Revisão</Link>
+            <span>/</span>
+            <span>Detalhes Proposta {reqIdStr}</span>
           </div>
-          <div style={{ display: 'flex', justifyContent: 'space-between', borderTop: '1px solid hsla(0, 0%, 100%, 0.04)', paddingTop: '0.75rem' }}>
-            <span style={{ fontSize: '0.8rem', color: 'hsl(215, 16%, 50%)', textTransform: 'uppercase', fontWeight: 800, fontFamily: "'Outfit', sans-serif" }}>Decisão Aplicada:</span>
-            <span style={{ fontSize: '0.9rem', fontWeight: 800, color: decisionSubmitted.decision === 'approve' ? 'hsl(142, 76%, 50%)' : 'hsl(346, 84%, 60%)', textTransform: 'uppercase', letterSpacing: '0.05em', fontFamily: "'Outfit', sans-serif" }}>
-              {decisionSubmitted.decision === 'approve' ? 'Aprovar' : decisionSubmitted.decision === 'reject' ? 'Reprovar' : 'Escalar'}
-            </span>
-          </div>
-          <div style={{ borderTop: '1px solid hsla(0, 0%, 100%, 0.04)', paddingTop: '0.75rem' }}>
-            <span style={{ display: 'block', fontSize: '0.8rem', color: 'hsl(215, 16%, 50%)', textTransform: 'uppercase', fontWeight: 800, marginBottom: '0.35rem', fontFamily: "'Outfit', sans-serif" }}>Justificativa Auditoria:</span>
-            <span style={{ fontSize: '0.9rem', fontStyle: 'italic', color: 'hsl(215, 20%, 85%)', display: 'block', lineHeight: 1.5 }}>&quot;{decisionSubmitted.justification}&quot;</span>
-          </div>
-        </div>
-
-        <button
-          onClick={() => router.push('/queue')}
-          style={{
-            padding: '0.85rem 2rem',
-            backgroundColor: 'hsl(217, 91%, 60%)',
-            color: '#FFFFFF',
-            border: 'none',
-            borderRadius: '8px',
-            fontWeight: 800,
-            fontSize: '0.875rem',
-            fontFamily: "'Outfit', sans-serif",
-            cursor: 'pointer',
-            boxShadow: '0 4px 15px -3px hsla(217, 91%, 60%, 0.4)',
-            transition: 'background-color 0.2s, transform 0.2s',
-          }}
-          onMouseOver={(e) => {
-            e.currentTarget.style.backgroundColor = 'hsl(217, 91%, 52%)';
-            e.currentTarget.style.transform = 'translateY(-1px)';
-          }}
-          onMouseOut={(e) => {
-            e.currentTarget.style.backgroundColor = 'hsl(217, 91%, 60%)';
-            e.currentTarget.style.transform = 'translateY(0)';
-          }}
-        >
-          Voltar para a Fila de Revisão
-        </button>
-      </div>
-    );
-  }
-
-  return (
-    <div
-      style={{
-        maxWidth: '1100px',
-        margin: '0 auto',
-        padding: '3rem 2rem',
-        minHeight: '95vh',
-        display: 'flex',
-        flexDirection: 'column',
-        gap: '2.5rem',
-        animation: 'fadeIn 0.6s cubic-bezier(0.16, 1, 0.3, 1) forwards',
-      }}
-    >
-      {/* Navigation */}
-      <div>
-        <div style={{ display: 'flex', gap: '0.5rem', fontSize: '0.8rem', color: 'hsl(215, 20%, 75%)', marginBottom: '0.6rem', textTransform: 'uppercase', letterSpacing: '0.05em', fontFamily: "'Outfit', sans-serif", fontWeight: 700 }}>
-          <Link href="/" style={{ color: 'hsl(217, 91%, 60%)', textDecoration: 'none' }}>Home</Link>
-          <span>/</span>
-          <Link href="/queue" style={{ color: 'hsl(217, 91%, 60%)', textDecoration: 'none' }}>Fila de Revisão</Link>
-          <span>/</span>
-          <span>Detalhes Proposta {reqIdStr}</span>
-        </div>
-        <h1 
-          style={{ 
-            margin: 0, 
-            fontSize: '1.65rem', 
-            fontWeight: 800, 
-            color: 'hsl(210, 40%, 98%)',
-            fontFamily: "'Outfit', sans-serif",
-            letterSpacing: '-0.02em',
-          }}
-        >
-          Análise Técnica da Proposta {reqIdStr}
-        </h1>
-      </div>
-
-      {error && (
-        <div
-          className="glow-pulse-amber"
-          style={{
-            backgroundColor: 'hsla(38, 92%, 50%, 0.1)',
-            border: '1px solid hsla(38, 92%, 50%, 0.3)',
-            color: 'hsl(38, 92%, 65%)',
-            padding: '1rem 1.5rem',
-            borderRadius: '12px',
-            fontSize: '0.85rem',
-            fontWeight: 600,
-          }}
-        >
-          ⚠️ {error}
-        </div>
-      )}
-
-      {loading ? (
-        <div
-          style={{
-            display: 'flex',
-            flexDirection: 'column',
-            alignItems: 'center',
-            justifyContent: 'center',
-            padding: '8rem',
-            backgroundColor: 'hsla(223, 47%, 12%, 0.4)',
-            borderRadius: '16px',
-            border: '1px solid hsla(217, 91%, 60%, 0.1)',
-            textAlign: 'center',
-          }}
-        >
-          <div
-            style={{
-              width: '40px',
-              height: '40px',
-              border: '3px solid hsla(217, 91%, 60%, 0.15)',
-              borderTop: '3px solid hsl(217, 91%, 60%)',
-              borderRadius: '50%',
-              animation: 'spin 1s linear infinite',
-              marginBottom: '1rem',
-            }}
-          />
-          <h3 style={{ margin: 0, color: 'hsl(210, 40%, 98%)', fontSize: '1.125rem', fontWeight: 600 }}>
-            Carregando detalhes da proposta...
-          </h3>
-        </div>
-      ) : submitting ? (
-        <div
-          style={{
-            display: 'flex',
-            flexDirection: 'column',
-            alignItems: 'center',
-            justifyContent: 'center',
-            padding: '8rem',
-            backgroundColor: 'hsla(223, 47%, 12%, 0.4)',
-            borderRadius: '16px',
-            border: '1px solid hsla(217, 91%, 60%, 0.1)',
-            textAlign: 'center',
-            boxShadow: '0 8px 32px 0 rgba(0, 0, 0, 0.3)',
-          }}
-        >
-          <div
-            style={{
-              width: '44px',
-              height: '44px',
-              border: '3px solid hsla(217, 91%, 60%, 0.15)',
-              borderTop: '3px solid hsl(217, 91%, 60%)',
-              borderRadius: '50%',
-              animation: 'spin 1s linear infinite',
-              marginBottom: '1.5rem',
-            }}
-          />
-          <h3 
+          <h1 
             style={{ 
               margin: 0, 
-              color: 'hsl(210, 40%, 98%)', 
-              fontSize: '1.25rem', 
-              fontWeight: 700,
-              fontFamily: "'Outfit', sans-serif" 
+              fontSize: '1.65rem', 
+              fontWeight: 800, 
+              color: 'var(--text-primary)',
+              fontFamily: "var(--font-heading)",
+              letterSpacing: '-0.02em',
             }}
           >
-            Processando Decisão...
-          </h3>
-          <p style={{ margin: '0.4rem 0 0 0', color: 'hsl(215, 20%, 75%)', fontSize: '0.875rem' }}>
-            Autenticando via Bearer Token e enviando sinal de retomada (resume) para o orquestrador.
-          </p>
+            Análise Técnica da Proposta {reqIdStr}
+          </h1>
         </div>
-      ) : (
-        <div style={{ display: 'grid', gridTemplateColumns: '1fr', gap: '2.5rem' }}>
-          {/* Visualizar Spans & Traces na linha do tempo */}
-          {trajectory && <TraceTimeline trajectory={trajectory} />}
 
-          {/* Painel do operador para emitir justificativa e decisão final */}
-          {hitlRequest && (
-            <div style={{ display: 'flex', justifyContent: 'center' }}>
-              <HITLPanel request={hitlRequest} onDecide={handleDecide} />
+        {error && (
+          <div
+            className="glow-pulse-amber"
+            style={{
+              backgroundColor: 'hsla(38, 92%, 50%, 0.1)',
+              border: '1px solid hsla(38, 92%, 50%, 0.3)',
+              color: 'hsl(38, 92%, 65%)',
+              padding: '1rem 1.5rem',
+              borderRadius: '12px',
+              fontSize: '0.85rem',
+              fontWeight: 600,
+              marginBottom: '2rem',
+            }}
+          >
+            ⚠️ {error}
+          </div>
+        )}
+
+        {loading ? (
+          <div
+            style={{
+              display: 'flex',
+              flexDirection: 'column',
+              alignItems: 'center',
+              justifyContent: 'center',
+              padding: '8rem',
+              backgroundColor: 'var(--bg-card)',
+              borderRadius: '16px',
+              border: 'var(--border-glass)',
+              textAlign: 'center',
+            }}
+          >
+            <div
+              style={{
+                width: '40px',
+                height: '40px',
+                border: '3px solid var(--border-glass)',
+                borderTop: '3px solid var(--color-primary)',
+                borderRadius: '50%',
+                animation: 'spin 1s linear infinite',
+                marginBottom: '1rem',
+              }}
+            />
+            <h3 style={{ margin: 0, color: 'var(--text-primary)', fontSize: '1.125rem', fontWeight: 600 }}>
+              Carregando detalhes da proposta...
+            </h3>
+          </div>
+        ) : submitting ? (
+          <div
+            style={{
+              display: 'flex',
+              flexDirection: 'column',
+              alignItems: 'center',
+              justifyContent: 'center',
+              padding: '8rem',
+              backgroundColor: 'var(--bg-card)',
+              borderRadius: '16px',
+              border: 'var(--border-glass)',
+              textAlign: 'center',
+              boxShadow: 'var(--shadow-main)',
+            }}
+          >
+            <div
+              style={{
+                width: '44px',
+                height: '44px',
+                border: '3px solid var(--border-glass)',
+                borderTop: '3px solid var(--color-primary)',
+                borderRadius: '50%',
+                animation: 'spin 1s linear infinite',
+                marginBottom: '1.5rem',
+              }}
+            />
+            <h3 
+              style={{ 
+                margin: 0, 
+                color: 'var(--text-primary)', 
+                fontSize: '1.25rem', 
+                fontWeight: 700,
+                fontFamily: "var(--font-heading)" 
+              }}
+            >
+              Processando Decisão...
+            </h3>
+            <p style={{ margin: '0.4rem 0 0 0', color: 'var(--text-secondary)', fontSize: '0.875rem' }}>
+              Autenticando via Bearer Token e enviando sinal de retomada (resume) para o orquestrador.
+            </p>
+          </div>
+        ) : decisionSubmitted ? (
+          <div
+            style={{
+              maxWidth: '800px',
+              margin: '3rem auto',
+              padding: '3.5rem 2.5rem',
+              backgroundColor: 'var(--bg-card)',
+              backdropFilter: 'blur(16px)',
+              WebkitBackdropFilter: 'blur(16px)',
+              borderRadius: '16px',
+              border: 'var(--border-glass)',
+              boxShadow: 'var(--shadow-main), inset 0 1px 1px hsla(0, 0%, 100%, 0.05)',
+              fontFamily: "var(--font-primary)",
+              textAlign: 'center',
+              animation: 'fadeIn 0.6s ease-out',
+            }}
+          >
+            <div
+              className="glow-pulse-emerald"
+              style={{
+                display: 'inline-flex',
+                alignItems: 'center',
+                justifyContent: 'center',
+                width: '64px',
+                height: '64px',
+                borderRadius: '50%',
+                backgroundColor: 'hsla(142, 76%, 45%, 0.15)',
+                color: 'hsl(142, 76%, 50%)',
+                border: '2px solid hsla(142, 76%, 45%, 0.3)',
+                fontSize: '2rem',
+                fontWeight: 800,
+                marginBottom: '1.5rem',
+                fontFamily: "var(--font-heading)"
+              }}
+            >
+              ✓
             </div>
-          )}
-        </div>
-      )}
-    </div>
+            
+            <h1 
+              style={{ 
+                margin: 0, 
+                fontSize: '1.65rem', 
+                fontWeight: 800, 
+                color: 'var(--text-primary)',
+                fontFamily: "var(--font-heading)",
+                letterSpacing: '-0.02em',
+              }}
+            >
+              Decisão Processada com Sucesso!
+            </h1>
+            
+            <p style={{ margin: '0.85rem 0 2rem 0', fontSize: '0.925rem', color: 'var(--text-secondary)', lineHeight: 1.6 }}>
+              A decisão do operador <strong style={{ color: 'var(--color-primary)' }}>{decisionSubmitted.operator_id}</strong> foi gravada no registro de conformidade.<br />
+              O Turno 3 (T3 - decision-agent) foi retomado de forma assíncrona para finalizar a análise de crédito.
+            </p>
+
+            <div 
+              style={{ 
+                backgroundColor: 'hsla(0, 0%, 100%, 0.02)', 
+                padding: '1.5rem', 
+                borderRadius: '12px', 
+                border: '1px solid var(--border-glass)', 
+                display: 'flex', 
+                flexDirection: 'column', 
+                gap: '0.75rem', 
+                textAlign: 'left', 
+                maxWidth: '520px', 
+                margin: '0 auto 2.5rem auto' 
+              }}
+            >
+              <div style={{ display: 'flex', justifyContent: 'space-between' }}>
+                <span style={{ fontSize: '0.8rem', color: 'var(--text-muted)', textTransform: 'uppercase', fontWeight: 800, fontFamily: "var(--font-heading)" }}>ID Proposta:</span>
+                <span style={{ fontSize: '0.9rem', fontWeight: 700, fontFamily: 'monospace', color: 'var(--text-primary)' }}>{decisionSubmitted.request_id}</span>
+              </div>
+              <div style={{ display: 'flex', justifyContent: 'space-between', borderTop: '1px solid hsla(0, 0%, 100%, 0.04)', paddingTop: '0.75rem' }}>
+                <span style={{ fontSize: '0.8rem', color: 'var(--text-muted)', textTransform: 'uppercase', fontWeight: 800, fontFamily: "var(--font-heading)" }}>Decisão Aplicada:</span>
+                <span style={{ fontSize: '0.9rem', fontWeight: 800, color: decisionSubmitted.decision === 'approve' ? 'hsl(142, 76%, 50%)' : 'hsl(346, 84%, 60%)', textTransform: 'uppercase', letterSpacing: '0.05em', fontFamily: "var(--font-heading)" }}>
+                  {decisionSubmitted.decision === 'approve' ? 'Aprovar' : decisionSubmitted.decision === 'reject' ? 'Reprovar' : 'Escalar'}
+                </span>
+              </div>
+              <div style={{ borderTop: '1px solid hsla(0, 0%, 100%, 0.04)', paddingTop: '0.75rem' }}>
+                <span style={{ display: 'block', fontSize: '0.8rem', color: 'var(--text-muted)', textTransform: 'uppercase', fontWeight: 800, marginBottom: '0.35rem', fontFamily: "var(--font-heading)" }}>Justificativa Auditoria:</span>
+                <span style={{ fontSize: '0.9rem', fontStyle: 'italic', color: 'var(--text-primary)', display: 'block', lineHeight: 1.5 }}>&quot;{decisionSubmitted.justification}&quot;</span>
+              </div>
+            </div>
+
+            <button
+              onClick={() => router.push('/queue')}
+              style={{
+                padding: '0.85rem 2rem',
+                backgroundColor: 'var(--color-primary)',
+                color: '#FFFFFF',
+                border: 'none',
+                borderRadius: '8px',
+                fontWeight: 800,
+                fontSize: '0.875rem',
+                fontFamily: "var(--font-heading)",
+                cursor: 'pointer',
+                boxShadow: '0 4px 15px -3px var(--color-primary-glow)',
+                transition: 'background-color 0.2s, transform 0.2s',
+              }}
+              onMouseOver={(e) => {
+                e.currentTarget.style.backgroundColor = 'hsl(262, 80%, 52%)';
+                e.currentTarget.style.transform = 'translateY(-1px)';
+              }}
+              onMouseOut={(e) => {
+                e.currentTarget.style.backgroundColor = 'var(--color-primary)';
+                e.currentTarget.style.transform = 'translateY(0)';
+              }}
+            >
+              Voltar para a Fila de Revisão
+            </button>
+          </div>
+        ) : (
+          <div style={{ display: 'grid', gridTemplateColumns: '1fr', gap: '2.5rem' }}>
+            {/* Visualizar Spans & Traces na linha do tempo */}
+            {trajectory && <TraceTimeline trajectory={trajectory} />}
+
+            {/* Painel do operador para emitir justificativa e decisão final */}
+            {hitlRequest && (
+              <div style={{ display: 'flex', justifyContent: 'center' }}>
+                <HITLPanel request={hitlRequest} onDecide={handleDecide} />
+              </div>
+            )}
+          </div>
+        )}
+      </div>
+    </CockpitLayout>
   );
 }

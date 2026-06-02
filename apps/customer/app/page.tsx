@@ -2,6 +2,7 @@
 
 import React, { useState } from 'react';
 import { useRouter } from 'next/navigation';
+import { CockpitLayout } from '@repo/ui/cockpit-layout';
 
 export default function CustomerHome() {
   const [cpf, setCpf] = useState('');
@@ -73,224 +74,226 @@ export default function CustomerHome() {
   };
 
   return (
-    <div
-      style={{
-        display: 'flex',
-        flexDirection: 'column',
-        alignItems: 'center',
-        justifyContent: 'center',
-        minHeight: '90vh',
-        padding: '2rem',
-        animation: 'fadeIn 0.6s cubic-bezier(0.16, 1, 0.3, 1) forwards',
-      }}
-    >
+    <CockpitLayout activeLink="proposal" portalType="customer">
       <div
         style={{
-          width: '100%',
-          maxWidth: '480px',
-          backgroundColor: 'hsla(223, 47%, 12%, 0.6)',
-          backdropFilter: 'blur(16px)',
-          WebkitBackdropFilter: 'blur(16px)',
-          padding: '2.5rem',
-          borderRadius: '16px',
-          border: '1px solid hsla(217, 91%, 60%, 0.15)',
-          boxShadow: '0 10px 30px -10px rgba(0, 0, 0, 0.5), inset 0 1px 1px hsla(0, 0%, 100%, 0.05)',
-          transition: 'border-color 0.3s ease, box-shadow 0.3s ease',
-        }}
-        onMouseOver={(e) => {
-          e.currentTarget.style.borderColor = 'hsla(217, 91%, 60%, 0.3)';
-          e.currentTarget.style.boxShadow = '0 20px 40px -15px rgba(0, 0, 0, 0.7), 0 0 20px hsla(217, 91%, 60%, 0.25)';
-        }}
-        onMouseOut={(e) => {
-          e.currentTarget.style.borderColor = 'hsla(217, 91%, 60%, 0.15)';
-          e.currentTarget.style.boxShadow = '0 10px 30px -10px rgba(0, 0, 0, 0.5)';
+          display: 'flex',
+          flexDirection: 'column',
+          alignItems: 'center',
+          justifyContent: 'center',
+          minHeight: '70vh',
+          animation: 'fadeIn 0.6s cubic-bezier(0.16, 1, 0.3, 1) forwards',
         }}
       >
-        <div style={{ textAlign: 'center', marginBottom: '2rem' }}>
-          <div
-            className="glow-pulse-primary"
-            style={{
-              display: 'inline-flex',
-              alignItems: 'center',
-              justifyContent: 'center',
-              width: '56px',
-              height: '56px',
-              borderRadius: '14px',
-              backgroundColor: 'hsla(217, 91%, 60%, 0.12)',
-              color: 'hsl(217, 91%, 60%)',
-              fontSize: '1.75rem',
-              fontWeight: 800,
-              marginBottom: '1.25rem',
-              border: '1px solid hsla(217, 91%, 60%, 0.3)',
-              fontFamily: "'Outfit', sans-serif",
-            }}
-          >
-            $
-          </div>
-          <h1 
-            style={{ 
-              margin: 0, 
-              fontSize: '1.65rem', 
-              fontWeight: 800, 
-              color: 'hsl(210, 40%, 98%)',
-              fontFamily: "'Outfit', sans-serif",
-              letterSpacing: '-0.02em',
-            }}
-          >
-            Crédito A2A Inteligente
-          </h1>
-          <p style={{ margin: '0.5rem 0 0 0', fontSize: '0.875rem', color: 'hsl(215, 20%, 75%)' }}>
-            Consulte sua proposta de crédito com aprovação multiagente em segundos
-          </p>
-        </div>
-
-        <form onSubmit={handleSubmit} style={{ display: 'flex', flexDirection: 'column', gap: '1.5rem' }}>
-          <div style={{ display: 'flex', flexDirection: 'column', gap: '0.45rem' }}>
-            <label 
-              htmlFor="cpf" 
-              style={{ 
-                fontSize: '0.75rem', 
-                fontWeight: 800, 
-                color: 'hsl(215, 20%, 75%)',
-                textTransform: 'uppercase',
-                letterSpacing: '0.05em',
-                fontFamily: "'Outfit', sans-serif",
+        <div
+          style={{
+            width: '100%',
+            maxWidth: '520px',
+            backgroundColor: 'var(--bg-card)',
+            backdropFilter: 'blur(16px)',
+            WebkitBackdropFilter: 'blur(16px)',
+            padding: '3rem',
+            borderRadius: '16px',
+            border: 'var(--border-glass)',
+            boxShadow: 'var(--shadow-main), inset 0 1px 1px hsla(0, 0%, 100%, 0.05)',
+            transition: 'border-color 0.3s ease, box-shadow 0.3s ease, background 0.3s ease',
+          }}
+          onMouseOver={(e) => {
+            e.currentTarget.style.borderColor = 'var(--border-glass-hover)';
+            e.currentTarget.style.boxShadow = '0 20px 40px -15px rgba(0, 0, 0, 0.25), 0 0 20px var(--color-primary-glow)';
+          }}
+          onMouseOut={(e) => {
+            e.currentTarget.style.borderColor = 'var(--border-glass)';
+            e.currentTarget.style.boxShadow = 'var(--shadow-main)';
+          }}
+        >
+          <div style={{ textAlign: 'center', marginBottom: '2.5rem' }}>
+            <div
+              className="glow-pulse-primary"
+              style={{
+                display: 'inline-flex',
+                alignItems: 'center',
+                justifyContent: 'center',
+                width: '60px',
+                height: '60px',
+                borderRadius: '16px',
+                backgroundColor: 'var(--color-primary-glow)',
+                color: 'var(--color-primary)',
+                fontSize: '2rem',
+                fontWeight: 900,
+                marginBottom: '1.25rem',
+                border: '1px solid var(--border-glass)',
+                fontFamily: "var(--font-heading)",
               }}
             >
-              CPF do Titular
-            </label>
-            <input
-              id="cpf"
-              type="text"
-              placeholder="000.000.000-00"
-              value={cpf}
-              onChange={handleCpfChange}
-              disabled={loading}
-              style={{
-                padding: '0.85rem 1rem',
-                borderRadius: '8px',
-                backgroundColor: 'hsla(223, 47%, 8%, 0.5)',
-                border: '1px solid hsla(217, 91%, 60%, 0.15)',
-                color: 'hsl(210, 40%, 98%)',
-                fontSize: '1rem',
-                outline: 'none',
-                transition: 'border-color 0.2s, box-shadow 0.2s',
-                fontFamily: 'monospace',
-                letterSpacing: '0.05em',
-              }}
-              onFocus={(e) => {
-                e.currentTarget.style.borderColor = 'hsl(217, 91%, 60%)';
-                e.currentTarget.style.boxShadow = '0 0 10px hsla(217, 91%, 60%, 0.2)';
-              }}
-              onBlur={(e) => {
-                e.currentTarget.style.borderColor = 'hsla(217, 91%, 60%, 0.15)';
-                e.currentTarget.style.boxShadow = 'none';
-              }}
-            />
-          </div>
-
-          <div style={{ display: 'flex', flexDirection: 'column', gap: '0.45rem' }}>
-            <label 
-              htmlFor="amount" 
-              style={{ 
-                fontSize: '0.75rem', 
-                fontWeight: 800, 
-                color: 'hsl(215, 20%, 75%)',
-                textTransform: 'uppercase',
-                letterSpacing: '0.05em',
-                fontFamily: "'Outfit', sans-serif",
-              }}
-            >
-              Valor Solicitado (R$)
-            </label>
-            <input
-              id="amount"
-              type="number"
-              placeholder="Ex: 25000"
-              value={amount}
-              onChange={(e) => {
-                setAmount(e.target.value);
-                setError(null);
-              }}
-              disabled={loading}
-              style={{
-                padding: '0.85rem 1rem',
-                borderRadius: '8px',
-                backgroundColor: 'hsla(223, 47%, 8%, 0.5)',
-                border: '1px solid hsla(217, 91%, 60%, 0.15)',
-                color: 'hsl(210, 40%, 98%)',
-                fontSize: '1rem',
-                outline: 'none',
-                transition: 'border-color 0.2s, box-shadow 0.2s',
-              }}
-              onFocus={(e) => {
-                e.currentTarget.style.borderColor = 'hsl(217, 91%, 60%)';
-                e.currentTarget.style.boxShadow = '0 0 10px hsla(217, 91%, 60%, 0.2)';
-              }}
-              onBlur={(e) => {
-                e.currentTarget.style.borderColor = 'hsla(217, 91%, 60%, 0.15)';
-                e.currentTarget.style.boxShadow = 'none';
-              }}
-            />
-          </div>
-
-          {error && (
-            <div style={{ fontSize: '0.825rem', color: 'hsl(346, 84%, 65%)', fontWeight: 600 }}>
-              ⚠️ {error}
+              $
             </div>
-          )}
+            <h1 
+              style={{ 
+                margin: 0, 
+                fontSize: '1.75rem', 
+                fontWeight: 800, 
+                color: 'var(--text-primary)',
+                fontFamily: "var(--font-heading)",
+                letterSpacing: '-0.02em',
+              }}
+            >
+              Crédito A2A Inteligente
+            </h1>
+            <p style={{ margin: '0.6rem 0 0 0', fontSize: '0.875rem', color: 'var(--text-secondary)' }}>
+              Consulte sua proposta de crédito com aprovação multiagente em segundos
+            </p>
+          </div>
 
-          <button
-            type="submit"
-            disabled={loading}
-            style={{
-              padding: '0.95rem',
-              backgroundColor: loading ? 'hsla(215, 16%, 50%, 0.3)' : 'hsl(217, 91%, 60%)',
-              color: loading ? 'hsl(215, 20%, 75%)' : '#FFFFFF',
-              border: 'none',
-              borderRadius: '8px',
-              fontWeight: 800,
-              fontSize: '1rem',
-              fontFamily: "'Outfit', sans-serif",
-              cursor: loading ? 'not-allowed' : 'pointer',
-              transition: 'background-color 0.2s, transform 0.2s, box-shadow 0.2s',
-              boxShadow: loading ? 'none' : '0 4px 15px -3px hsla(217, 91%, 60%, 0.4)',
-              marginTop: '0.5rem',
-              display: 'flex',
-              alignItems: 'center',
-              justifyContent: 'center',
-              gap: '0.5rem',
-            }}
-            onMouseOver={(e) => {
-              if (!loading) {
-                e.currentTarget.style.backgroundColor = 'hsl(217, 91%, 52%)';
-                e.currentTarget.style.transform = 'translateY(-1px)';
-              }
-            }}
-            onMouseOut={(e) => {
-              if (!loading) {
-                e.currentTarget.style.backgroundColor = 'hsl(217, 91%, 60%)';
-                e.currentTarget.style.transform = 'translateY(0)';
-              }
-            }}
-          >
-            {loading && (
-              <span 
+          <form onSubmit={handleSubmit} style={{ display: 'flex', flexDirection: 'column', gap: '1.75rem' }}>
+            <div style={{ display: 'flex', flexDirection: 'column', gap: '0.5rem' }}>
+              <label 
+                htmlFor="cpf" 
+                style={{ 
+                  fontSize: '0.75rem', 
+                  fontWeight: 800, 
+                  color: 'var(--text-secondary)',
+                  textTransform: 'uppercase',
+                  letterSpacing: '0.08em',
+                  fontFamily: "var(--font-heading)",
+                }}
+              >
+                CPF do Titular
+              </label>
+              <input
+                id="cpf"
+                type="text"
+                placeholder="000.000.000-00"
+                value={cpf}
+                onChange={handleCpfChange}
+                disabled={loading}
                 style={{
-                  width: '16px',
-                  height: '16px',
-                  border: '2.5px solid hsla(0, 0%, 100%, 0.2)',
-                  borderTop: '2.5px solid #FFFFFF',
-                  borderRadius: '50%',
-                  animation: 'spin 0.8s linear infinite',
-                  display: 'inline-block',
+                  padding: '0.9rem 1.1rem',
+                  borderRadius: '8px',
+                  backgroundColor: 'hsla(0, 0%, 100%, 0.03)',
+                  border: '1px solid var(--border-glass)',
+                  color: 'var(--text-primary)',
+                  fontSize: '1rem',
+                  fontFamily: 'monospace',
+                  letterSpacing: '0.05em',
+                  outline: 'none',
+                  transition: 'border-color 0.2s, box-shadow 0.2s',
+                }}
+                onFocus={(e) => {
+                  e.currentTarget.style.borderColor = 'var(--color-primary)';
+                  e.currentTarget.style.boxShadow = '0 0 10px var(--color-primary-glow)';
+                }}
+                onBlur={(e) => {
+                  e.currentTarget.style.borderColor = 'var(--border-glass)';
+                  e.currentTarget.style.boxShadow = 'none';
                 }}
               />
+            </div>
+
+            <div style={{ display: 'flex', flexDirection: 'column', gap: '0.5rem' }}>
+              <label 
+                htmlFor="amount" 
+                style={{ 
+                  fontSize: '0.75rem', 
+                  fontWeight: 800, 
+                  color: 'var(--text-secondary)',
+                  textTransform: 'uppercase',
+                  letterSpacing: '0.08em',
+                  fontFamily: "var(--font-heading)",
+                }}
+              >
+                Valor Solicitado (R$)
+              </label>
+              <input
+                id="amount"
+                type="number"
+                placeholder="Ex: 25000"
+                value={amount}
+                onChange={(e) => {
+                  setAmount(e.target.value);
+                  setError(null);
+                }}
+                disabled={loading}
+                style={{
+                  padding: '0.9rem 1.1rem',
+                  borderRadius: '8px',
+                  backgroundColor: 'hsla(0, 0%, 100%, 0.03)',
+                  border: '1px solid var(--border-glass)',
+                  color: 'var(--text-primary)',
+                  fontSize: '1rem',
+                  fontFamily: 'var(--font-primary)',
+                  outline: 'none',
+                  transition: 'border-color 0.2s, box-shadow 0.2s',
+                }}
+                onFocus={(e) => {
+                  e.currentTarget.style.borderColor = 'var(--color-primary)';
+                  e.currentTarget.style.boxShadow = '0 0 10px var(--color-primary-glow)';
+                }}
+                onBlur={(e) => {
+                  e.currentTarget.style.borderColor = 'var(--border-glass)';
+                  e.currentTarget.style.boxShadow = 'none';
+                }}
+              />
+            </div>
+
+            {error && (
+              <div style={{ fontSize: '0.825rem', color: 'var(--color-rose)', fontWeight: 700 }}>
+                ⚠️ {error}
+              </div>
             )}
-            {loading ? 'Inicializando Agentes...' : 'Iniciar Análise de Crédito'}
-          </button>
-        </form>
+
+            <button
+              type="submit"
+              disabled={loading}
+              style={{
+                padding: '1rem',
+                backgroundColor: loading ? 'hsla(0, 0%, 100%, 0.05)' : 'var(--color-primary)',
+                color: '#FFFFFF',
+                border: 'none',
+                borderRadius: '8px',
+                fontWeight: 800,
+                fontSize: '1rem',
+                fontFamily: "var(--font-heading)",
+                cursor: loading ? 'not-allowed' : 'pointer',
+                transition: 'background-color 0.2s, transform 0.2s, box-shadow 0.2s',
+                boxShadow: loading ? 'none' : '0 4px 15px -3px var(--color-primary-glow)',
+                marginTop: '0.5rem',
+                display: 'flex',
+                alignItems: 'center',
+                justifyContent: 'center',
+                gap: '0.5rem',
+              }}
+              onMouseOver={(e) => {
+                if (!loading) {
+                  e.currentTarget.style.backgroundColor = 'hsl(262, 80%, 52%)';
+                  e.currentTarget.style.transform = 'translateY(-1px)';
+                }
+              }}
+              onMouseOut={(e) => {
+                if (!loading) {
+                  e.currentTarget.style.backgroundColor = 'var(--color-primary)';
+                  e.currentTarget.style.transform = 'translateY(0)';
+                }
+              }}
+            >
+              {loading && (
+                <span 
+                  style={{
+                    width: '16px',
+                    height: '16px',
+                    border: '2.5px solid hsla(0, 0%, 100%, 0.2)',
+                    borderTop: '2.5px solid #FFFFFF',
+                    borderRadius: '50%',
+                    animation: 'spin 0.8s linear infinite',
+                    display: 'inline-block',
+                  }}
+                />
+              )}
+              {loading ? 'Inicializando Agentes...' : 'Iniciar Análise de Crédito'}
+            </button>
+          </form>
+        </div>
       </div>
-    </div>
+    </CockpitLayout>
   );
 }
