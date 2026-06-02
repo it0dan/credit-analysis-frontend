@@ -8,41 +8,46 @@ interface StatusBadgeProps {
 export function StatusBadge({ status }: StatusBadgeProps) {
   const styles: Record<CreditAnalysisStatus, React.CSSProperties> = {
     pending: {
-      backgroundColor: '#FEF3C7',
-      color: '#D97706',
-      border: '1px solid #FCD34D',
+      backgroundColor: 'hsla(38, 92%, 50%, 0.1)',
+      color: 'hsl(38, 92%, 65%)',
+      border: '1px solid hsla(38, 92%, 50%, 0.3)',
+      boxShadow: '0 0 10px hsla(38, 92%, 50%, 0.1)',
     },
     analyzing: {
-      backgroundColor: '#E0F2FE',
-      color: '#0284C7',
-      border: '1px solid #BAE6FD',
+      backgroundColor: 'hsla(217, 91%, 60%, 0.1)',
+      color: 'hsl(217, 91%, 70%)',
+      border: '1px solid hsla(217, 91%, 60%, 0.3)',
+      boxShadow: '0 0 10px hsla(217, 91%, 60%, 0.15)',
     },
     hitl_required: {
-      backgroundColor: '#FEE2E2',
-      color: '#DC2626',
-      border: '1px solid #FCA5A5',
+      backgroundColor: 'hsla(346, 84%, 61%, 0.15)',
+      color: 'hsl(346, 84%, 70%)',
+      border: '1px solid hsla(346, 84%, 61%, 0.4)',
+      boxShadow: '0 0 15px hsla(346, 84%, 61%, 0.25)',
       fontWeight: 'bold',
-      animation: 'pulse 2s infinite',
     },
     approved: {
-      backgroundColor: '#D1FAE5',
-      color: '#059669',
-      border: '1px solid #A7F3D0',
+      backgroundColor: 'hsla(142, 76%, 45%, 0.15)',
+      color: 'hsl(142, 76%, 55%)',
+      border: '1px solid hsla(142, 76%, 45%, 0.4)',
+      boxShadow: '0 0 15px hsla(142, 76%, 45%, 0.25)',
+      fontWeight: 'bold',
     },
     rejected: {
-      backgroundColor: '#F3F4F6',
-      color: '#4B5563',
-      border: '1px solid #E5E7EB',
+      backgroundColor: 'hsla(215, 16%, 50%, 0.15)',
+      color: 'hsl(215, 20%, 75%)',
+      border: '1px solid hsla(215, 16%, 50%, 0.3)',
     },
     expired: {
-      backgroundColor: '#E5E7EB',
-      color: '#6B7280',
-      border: '1px solid #D1D5DB',
+      backgroundColor: 'hsla(215, 16%, 50%, 0.1)',
+      color: 'hsl(215, 16%, 60%)',
+      border: '1px solid hsla(215, 16%, 50%, 0.2)',
     },
     error: {
-      backgroundColor: '#FEE2E2',
-      color: '#DC2626',
-      border: '1px solid #FCA5A5',
+      backgroundColor: 'hsla(346, 84%, 61%, 0.15)',
+      color: 'hsl(346, 84%, 70%)',
+      border: '1px solid hsla(346, 84%, 61%, 0.3)',
+      boxShadow: '0 0 10px hsla(346, 84%, 61%, 0.15)',
     },
   };
 
@@ -60,20 +65,34 @@ export function StatusBadge({ status }: StatusBadgeProps) {
 
   return (
     <span
+      className={status === 'hitl_required' ? 'glow-pulse-rose' : status === 'analyzing' ? 'glow-pulse-primary' : status === 'approved' ? 'glow-pulse-emerald' : ''}
       style={{
         display: 'inline-flex',
         alignItems: 'center',
-        padding: '0.25rem 0.75rem',
+        padding: '0.35rem 0.9rem',
         borderRadius: '9999px',
-        fontSize: '0.875rem',
-        fontWeight: 500,
+        fontSize: '0.75rem',
+        fontWeight: 700,
         textTransform: 'uppercase',
-        letterSpacing: '0.05em',
-        fontFamily: 'Inter, system-ui, sans-serif',
-        transition: 'all 0.2s ease',
+        letterSpacing: '0.08em',
+        fontFamily: "'Outfit', system-ui, sans-serif",
+        transition: 'all 0.3s ease',
         ...badgeStyle,
       }}
     >
+      {status === 'analyzing' && (
+        <span 
+          style={{
+            width: '6px',
+            height: '6px',
+            borderRadius: '50%',
+            backgroundColor: 'hsl(217, 91%, 70%)',
+            marginRight: '0.5rem',
+            animation: 'spin 1s linear infinite',
+            display: 'inline-block',
+          }}
+        />
+      )}
       {labels[status] || status}
     </span>
   );

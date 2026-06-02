@@ -17,18 +17,18 @@ export function CostDisplay({ cost_brl }: CostDisplayProps) {
       style={{
         display: 'inline-flex',
         flexDirection: 'column',
-        padding: '0.75rem 1.25rem',
-        borderRadius: '8px',
-        backgroundColor: '#ECFDF5',
-        border: '1px solid #A7F3D0',
-        fontFamily: 'Inter, system-ui, sans-serif',
-        boxShadow: '0 1px 2px rgba(0,0,0,0.02)',
+        padding: '0.85rem 1.5rem',
+        borderRadius: '12px',
+        backgroundColor: 'hsla(142, 76%, 45%, 0.06)',
+        border: '1px solid hsla(142, 76%, 45%, 0.25)',
+        fontFamily: "'Plus Jakarta Sans', system-ui, sans-serif",
+        boxShadow: '0 0 15px hsla(142, 76%, 45%, 0.1)',
       }}
     >
-      <span style={{ fontSize: '0.75rem', fontWeight: 600, color: '#047857', textTransform: 'uppercase', letterSpacing: '0.05em' }}>
+      <span style={{ fontSize: '0.7rem', fontWeight: 800, color: 'hsl(142, 76%, 60%)', textTransform: 'uppercase', letterSpacing: '0.08em', fontFamily: "'Outfit', sans-serif" }}>
         Custo FinOps Estimado
       </span>
-      <span style={{ fontSize: '1.25rem', fontWeight: 800, color: '#065F46', marginTop: '0.25rem', fontFamily: 'monospace' }}>
+      <span style={{ fontSize: '1.25rem', fontWeight: 800, color: 'hsl(142, 76%, 50%)', marginTop: '0.25rem', fontFamily: 'monospace', textShadow: '0 0 10px hsla(142, 76%, 45%, 0.25)' }}>
         {formatted}
       </span>
     </div>

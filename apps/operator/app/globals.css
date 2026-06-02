@@ -1,24 +1,32 @@
+@import url('https://fonts.googleapis.com/css2?family=Outfit:wght@300;400;500;600;700;800&family=Plus+Jakarta+Sans:wght@300;400;500;600;700;800&display=swap');
+
 :root {
-  --background: #ffffff;
-  --foreground: #171717;
-}
+  --font-primary: 'Plus Jakarta Sans', -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
+  --font-heading: 'Outfit', sans-serif;
 
-@media (prefers-color-scheme: dark) {
-  :root {
-    --background: #0a0a0a;
-    --foreground: #ededed;
-  }
-}
+  /* HSL Color System - Ultra Premium Deep Space Navy */
+  --bg-app: linear-gradient(135deg, hsl(224, 71%, 4%) 0%, hsl(223, 47%, 8%) 100%);
+  --bg-card: hsla(223, 47%, 12%, 0.6);
+  --bg-card-hover: hsla(223, 47%, 16%, 0.85);
+  
+  --color-primary: hsl(217, 91%, 60%);
+  --color-primary-glow: hsla(217, 91%, 60%, 0.35);
+  
+  --color-emerald: hsl(142, 76%, 45%);
+  --color-emerald-glow: hsla(142, 76%, 45%, 0.25);
+  
+  --color-rose: hsl(346, 84%, 61%);
+  --color-rose-glow: hsla(346, 84%, 61%, 0.25);
+  
+  --color-amber: hsl(38, 92%, 50%);
+  --color-amber-glow: hsla(38, 92%, 50%, 0.25);
 
-html,
-body {
-  max-width: 100vw;
-  overflow-x: hidden;
-}
+  --border-glass: 1px solid hsla(217, 91%, 60%, 0.15);
+  --border-glass-hover: 1px solid hsla(217, 91%, 60%, 0.3);
 
-body {
-  color: var(--foreground);
-  background: var(--background);
+  --text-primary: hsl(210, 40%, 98%);
+  --text-secondary: hsl(215, 20%, 75%);
+  --text-muted: hsl(215, 16%, 50%);
 }
 
 * {
@@ -27,24 +35,106 @@ body {
   margin: 0;
 }
 
-a {
-  color: inherit;
-  text-decoration: none;
+html,
+body {
+  max-width: 100vw;
+  overflow-x: hidden;
+  font-family: var(--font-primary);
+  background: var(--bg-app);
+  color: var(--text-primary);
+  min-height: 100vh;
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
 }
 
-.imgDark {
-  display: none;
+h1, h2, h3, h4, h5, h6 {
+  font-family: var(--font-heading);
+  letter-spacing: -0.025em;
 }
 
-@media (prefers-color-scheme: dark) {
-  html {
-    color-scheme: dark;
-  }
+/* Glassmorphism Styles */
+.glass-container {
+  background: var(--bg-card);
+  backdrop-filter: blur(16px);
+  -webkit-backdrop-filter: blur(16px);
+  border: var(--border-glass);
+  border-radius: 16px;
+  box-shadow: 0 10px 30px -10px rgba(0, 0, 0, 0.5),
+              inset 0 1px 1px hsla(0, 0%, 100%, 0.05);
+  transition: transform 0.3s cubic-bezier(0.16, 1, 0.3, 1), 
+              box-shadow 0.3s cubic-bezier(0.16, 1, 0.3, 1),
+              border-color 0.3s ease;
+}
 
-  .imgLight {
-    display: none;
+.glass-container:hover {
+  background: var(--bg-card-hover);
+  border: var(--border-glass-hover);
+  box-shadow: 0 20px 40px -15px rgba(0, 0, 0, 0.7),
+              0 0 20px var(--color-primary-glow),
+              inset 0 1px 1px hsla(0, 0%, 100%, 0.1);
+  transform: translateY(-2px);
+}
+
+/* Animations */
+@keyframes spin {
+  from {
+    transform: rotate(0deg);
   }
-  .imgDark {
-    display: unset;
+  to {
+    transform: rotate(360deg);
   }
+}
+
+@keyframes fadeIn {
+  from {
+    opacity: 0;
+    transform: translateY(10px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+@keyframes pulseGlow {
+  0% {
+    box-shadow: 0 0 5px var(--pulse-color, var(--color-primary-glow));
+  }
+  50% {
+    box-shadow: 0 0 20px var(--pulse-color, var(--color-primary-glow));
+  }
+  100% {
+    box-shadow: 0 0 5px var(--pulse-color, var(--color-primary-glow));
+  }
+}
+
+@keyframes drawPath {
+  to {
+    stroke-dashoffset: 0;
+  }
+}
+
+/* Helper utilities */
+.animate-fade-in {
+  animation: fadeIn 0.6s cubic-bezier(0.16, 1, 0.3, 1) forwards;
+}
+
+.glow-pulse-primary {
+  --pulse-color: var(--color-primary-glow);
+  animation: pulseGlow 2s infinite ease-in-out;
+}
+
+.glow-pulse-emerald {
+  --pulse-color: var(--color-emerald-glow);
+  animation: pulseGlow 2s infinite ease-in-out;
+}
+
+.glow-pulse-rose {
+  --pulse-color: var(--color-rose-glow);
+  animation: pulseGlow 2s infinite ease-in-out;
+}
+
+.glow-pulse-amber {
+  --pulse-color: var(--color-amber-glow);
+  animation: pulseGlow 2s infinite ease-in-out;
 }

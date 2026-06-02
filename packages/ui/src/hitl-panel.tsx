@@ -11,8 +11,20 @@ export function HITLPanel({ request, onDecide }: HITLPanelProps) {
   const [error, setError] = useState<string | null>(null);
 
   const handleSubmit = (decisionType: 'approve' | 'reject' | 'escalate') => {
-    if (!justification.trim()) {
-      setError('A justificativa é obrigatória para processar a decisão.');
+    const trimmed = justification.trim();
+    
+    if (!trimmed) {
+      setError('A justificativa de auditoria é obrigatória para processar a decisão.');
+      return;
+    }
+
+    if (trimmed.length < 50) {
+      setError(`Sua justificativa é muito curta (${trimmed.length} caracteres). É obrigatório conter no mínimo 50 caracteres para fins de auditoria de conformidade.`);
+      return;
+    }
+
+    if (trimmed.length > 300) {
+      setError(`Sua justificativa é muito longa (${trimmed.length} caracteres). Deve conter no máximo 300 caracteres.`);
       return;
     }
 
@@ -20,7 +32,7 @@ export function HITLPanel({ request, onDecide }: HITLPanelProps) {
     onDecide({
       request_id: request.request_id,
       decision: decisionType,
-      justification: justification.trim(),
+      justification: trimmed,
       operator_id: 'OP-1002', // Fictional mock operator id
     });
   };
@@ -30,88 +42,115 @@ export function HITLPanel({ request, onDecide }: HITLPanelProps) {
       style={{
         display: 'flex',
         flexDirection: 'column',
-        gap: '1.5rem',
+        gap: '1.75rem',
         padding: '2rem',
-        backgroundColor: '#FFFFFF',
-        borderRadius: '12px',
-        border: '1px solid #E5E7EB',
-        boxShadow: '0 10px 15px -3px rgba(0, 0, 0, 0.05)',
-        fontFamily: 'Inter, system-ui, sans-serif',
-        maxWidth: '750px',
+        backgroundColor: 'hsla(223, 47%, 12%, 0.6)',
+        backdropFilter: 'blur(16px)',
+        WebkitBackdropFilter: 'blur(16px)',
+        borderRadius: '16px',
+        border: '1px solid hsla(217, 91%, 60%, 0.15)',
+        boxShadow: '0 10px 30px -10px rgba(0, 0, 0, 0.5), inset 0 1px 1px hsla(0, 0%, 100%, 0.05)',
+        fontFamily: "'Plus Jakarta Sans', system-ui, sans-serif",
+        color: 'hsl(210, 40%, 98%)',
+        maxWidth: '780px',
+        width: '100%',
+        animation: 'fadeIn 0.6s ease-out',
       }}
     >
       {/* Header */}
-      <div style={{ borderBottom: '1px solid #F3F4F6', paddingBottom: '1rem' }}>
-        <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
-          <h2 style={{ margin: 0, fontSize: '1.25rem', fontWeight: 800, color: '#111827' }}>
+      <div style={{ borderBottom: '1px solid hsla(0, 0%, 100%, 0.05)', paddingBottom: '1.25rem' }}>
+        <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', flexWrap: 'wrap', gap: '0.75rem' }}>
+          <h2 
+            style={{ 
+              margin: 0, 
+              fontSize: '1.35rem', 
+              fontWeight: 800, 
+              color: 'hsl(210, 40%, 98%)',
+              fontFamily: "'Outfit', sans-serif",
+              letterSpacing: '-0.02em',
+            }}
+          >
             Painel de Revisão Humana (HITL)
           </h2>
           <span
+            className="glow-pulse-amber"
             style={{
-              fontSize: '0.75rem',
-              fontWeight: 700,
-              padding: '0.25rem 0.5rem',
-              borderRadius: '6px',
-              backgroundColor: '#FEF3C7',
-              color: '#D97706',
-              border: '1px solid #FCD34D',
+              fontSize: '0.7rem',
+              fontWeight: 800,
+              padding: '0.25rem 0.6rem',
+              borderRadius: '9999px',
+              backgroundColor: 'hsla(38, 92%, 50%, 0.1)',
+              color: 'hsl(38, 92%, 65%)',
+              border: '1px solid hsla(38, 92%, 50%, 0.3)',
+              textTransform: 'uppercase',
+              letterSpacing: '0.05em',
             }}
           >
             Aguardando Operador
           </span>
         </div>
-        <p style={{ margin: '0.25rem 0 0 0', fontSize: '0.875rem', color: '#6B7280' }}>
-          Solicitação: <strong style={{ color: '#374151' }}>{request.request_id}</strong> | Trace: {request.trace_id}
+        <p style={{ margin: '0.5rem 0 0 0', fontSize: '0.85rem', color: 'hsl(215, 20%, 75%)' }}>
+          Solicitação: <strong style={{ color: 'hsl(217, 91%, 70%)', fontFamily: 'monospace' }}>{request.request_id}</strong> | Trace: <span style={{ fontFamily: 'monospace', fontSize: '0.8rem' }}>{request.trace_id}</span>
         </p>
       </div>
 
       {/* Overview Metadata */}
-      <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '1rem', backgroundColor: '#F9FAFB', padding: '1rem', borderRadius: '8px' }}>
+      <div 
+        style={{ 
+          display: 'grid', 
+          gridTemplateColumns: 'repeat(auto-fit, minmax(200px, 1fr))', 
+          gap: '1.25rem', 
+          backgroundColor: 'hsla(223, 47%, 8%, 0.5)', 
+          padding: '1.25rem', 
+          borderRadius: '12px',
+          border: '1px solid hsla(217, 91%, 60%, 0.08)'
+        }}
+      >
         <div>
-          <span style={{ display: 'block', fontSize: '0.75rem', color: '#9CA3AF', textTransform: 'uppercase', fontWeight: 600 }}>CPF do Solicitante</span>
-          <span style={{ fontSize: '1rem', fontWeight: 700, color: '#374151', fontFamily: 'monospace' }}>{request.cpf_masked}</span>
+          <span style={{ display: 'block', fontSize: '0.7rem', color: 'hsl(215, 16%, 50%)', textTransform: 'uppercase', fontWeight: 800, letterSpacing: '0.05em', fontFamily: "'Outfit', sans-serif" }}>CPF do Solicitante</span>
+          <span style={{ fontSize: '1rem', fontWeight: 700, color: 'hsl(210, 40%, 98%)', fontFamily: 'monospace' }}>{request.cpf_masked}</span>
         </div>
         <div>
-          <span style={{ display: 'block', fontSize: '0.75rem', color: '#9CA3AF', textTransform: 'uppercase', fontWeight: 600 }}>Gatilho de Intervenção</span>
-          <span style={{ fontSize: '1rem', fontWeight: 700, color: '#DC2626' }}>{request.reason}</span>
+          <span style={{ display: 'block', fontSize: '0.7rem', color: 'hsl(215, 16%, 50%)', textTransform: 'uppercase', fontWeight: 800, letterSpacing: '0.05em', fontFamily: "'Outfit', sans-serif" }}>Gatilho de Intervenção</span>
+          <span style={{ fontSize: '0.95rem', fontWeight: 700, color: 'hsl(346, 84%, 61%)', textShadow: '0 0 10px hsla(346, 84%, 61%, 0.15)' }}>{request.reason}</span>
         </div>
       </div>
 
       {/* T1 and T2 Results */}
-      <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '1.5rem' }}>
+      <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(300px, 1fr))', gap: '1.5rem' }}>
         <div>
-          <h4 style={{ margin: '0 0 0.5rem 0', fontSize: '0.875rem', fontWeight: 700, color: '#4B5563' }}>Relatório do Turno 1 (T1)</h4>
+          <h4 style={{ margin: '0 0 0.6rem 0', fontSize: '0.85rem', fontWeight: 800, color: 'hsl(215, 20%, 75%)', textTransform: 'uppercase', letterSpacing: '0.05em', fontFamily: "'Outfit', sans-serif" }}>Relatório do Turno 1 (T1)</h4>
           <pre
             style={{
               margin: 0,
               padding: '1rem',
-              backgroundColor: '#F3F4F6',
+              backgroundColor: 'hsla(223, 47%, 8%, 0.6)',
               borderRadius: '8px',
               fontSize: '0.75rem',
-              maxHeight: '150px',
+              maxHeight: '160px',
               overflowY: 'auto',
-              border: '1px solid #E5E7EB',
+              border: '1px solid hsla(217, 91%, 60%, 0.1)',
               fontFamily: 'monospace',
-              color: '#1F2937',
+              color: 'hsl(217, 91%, 85%)',
             }}
           >
             {JSON.stringify(request.t1_results, null, 2)}
           </pre>
         </div>
         <div>
-          <h4 style={{ margin: '0 0 0.5rem 0', fontSize: '0.875rem', fontWeight: 700, color: '#4B5563' }}>Relatório do Turno 2 (T2)</h4>
+          <h4 style={{ margin: '0 0 0.6rem 0', fontSize: '0.85rem', fontWeight: 800, color: 'hsl(215, 20%, 75%)', textTransform: 'uppercase', letterSpacing: '0.05em', fontFamily: "'Outfit', sans-serif" }}>Relatório do Turno 2 (T2)</h4>
           <pre
             style={{
               margin: 0,
               padding: '1rem',
-              backgroundColor: '#F3F4F6',
+              backgroundColor: 'hsla(223, 47%, 8%, 0.6)',
               borderRadius: '8px',
               fontSize: '0.75rem',
-              maxHeight: '150px',
+              maxHeight: '160px',
               overflowY: 'auto',
-              border: '1px solid #E5E7EB',
+              border: '1px solid hsla(217, 91%, 60%, 0.1)',
               fontFamily: 'monospace',
-              color: '#1F2937',
+              color: 'hsl(217, 91%, 85%)',
             }}
           >
             {JSON.stringify(request.t2_results, null, 2)}
@@ -120,76 +159,104 @@ export function HITLPanel({ request, onDecide }: HITLPanelProps) {
       </div>
 
       {/* Operator input */}
-      <div style={{ display: 'flex', flexDirection: 'column', gap: '0.5rem' }}>
-        <label htmlFor="justification" style={{ fontSize: '0.875rem', fontWeight: 700, color: '#4B5563' }}>
-          Justificativa Técnica da Decisão *
-        </label>
+      <div style={{ display: 'flex', flexDirection: 'column', gap: '0.6rem' }}>
+        <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
+          <label htmlFor="justification" style={{ fontSize: '0.85rem', fontWeight: 800, color: 'hsl(215, 20%, 75%)', textTransform: 'uppercase', letterSpacing: '0.05em', fontFamily: "'Outfit', sans-serif" }}>
+            Justificativa Técnica da Decisão *
+          </label>
+          <span style={{ fontSize: '0.75rem', color: justification.length >= 50 && justification.length <= 300 ? 'hsl(142, 76%, 55%)' : 'hsl(215, 16%, 50%)' }}>
+            {justification.length} / 50-300 caracteres
+          </span>
+        </div>
         <textarea
           id="justification"
-          placeholder="Descreva detalhadamente o parecer de aprovação, reprovação ou escalonamento desta proposta..."
+          placeholder="Descreva detalhadamente o parecer de aprovação ou reprovação para fins de auditoria obrigatória de crédito (mínimo 50 caracteres)..."
           value={justification}
           onChange={(e) => {
             setJustification(e.target.value);
-            if (e.target.value.trim()) setError(null);
+            if (e.target.value.trim().length >= 50) setError(null);
           }}
           rows={4}
           style={{
-            padding: '0.75rem',
+            padding: '1rem',
             borderRadius: '8px',
-            border: error ? '1px solid #EF4444' : '1px solid #D1D5DB',
-            fontSize: '0.875rem',
+            backgroundColor: 'hsla(223, 47%, 8%, 0.5)',
+            border: error ? '1px solid hsl(346, 84%, 61%)' : '1px solid hsla(217, 91%, 60%, 0.15)',
+            color: 'hsl(210, 40%, 98%)',
+            fontSize: '0.9rem',
             fontFamily: 'inherit',
             resize: 'vertical',
             outline: 'none',
+            transition: 'border-color 0.2s ease',
+          }}
+          onFocus={(e) => {
+            if (!error) e.currentTarget.style.borderColor = 'hsl(217, 91%, 60%)';
+          }}
+          onBlur={(e) => {
+            if (!error) e.currentTarget.style.borderColor = 'hsla(217, 91%, 60%, 0.15)';
           }}
         />
         {error && (
-          <span style={{ fontSize: '0.75rem', color: '#EF4444', fontWeight: 500 }}>
+          <span style={{ fontSize: '0.8rem', color: 'hsl(346, 84%, 65%)', fontWeight: 600 }}>
             ⚠️ {error}
           </span>
         )}
       </div>
 
       {/* Actions */}
-      <div style={{ display: 'flex', gap: '1rem', marginTop: '0.5rem', flexWrap: 'wrap' }}>
+      <div style={{ display: 'flex', gap: '1.25rem', marginTop: '0.5rem', flexWrap: 'wrap' }}>
         <button
           onClick={() => handleSubmit('approve')}
           style={{
             flex: 1,
-            padding: '0.75rem 1.5rem',
-            backgroundColor: '#10B981',
+            padding: '0.85rem 1.5rem',
+            backgroundColor: 'hsl(142, 76%, 45%)',
             color: '#FFFFFF',
             border: 'none',
             borderRadius: '8px',
-            fontWeight: 700,
-            fontSize: '0.875rem',
+            fontWeight: 800,
+            fontSize: '0.9rem',
             cursor: 'pointer',
-            transition: 'background-color 0.2s ease',
-            boxShadow: '0 2px 4px rgba(16, 185, 129, 0.2)',
+            fontFamily: "'Outfit', sans-serif",
+            transition: 'background-color 0.2s ease, transform 0.2s ease',
+            boxShadow: '0 4px 15px -3px hsla(142, 76%, 45%, 0.4)',
           }}
-          onMouseOver={(e) => (e.currentTarget.style.backgroundColor = '#059669')}
-          onMouseOut={(e) => (e.currentTarget.style.backgroundColor = '#10B981')}
+          onMouseOver={(e) => {
+            e.currentTarget.style.backgroundColor = 'hsl(142, 76%, 38%)';
+            e.currentTarget.style.transform = 'translateY(-1px)';
+          }}
+          onMouseOut={(e) => {
+            e.currentTarget.style.backgroundColor = 'hsl(142, 76%, 45%)';
+            e.currentTarget.style.transform = 'translateY(0)';
+          }}
         >
-          Aprovar Crédito
+          Aprovar Proposta
         </button>
 
         <button
           onClick={() => handleSubmit('reject')}
           style={{
             flex: 1,
-            padding: '0.75rem 1.5rem',
-            backgroundColor: '#EF4444',
+            padding: '0.85rem 1.5rem',
+            backgroundColor: 'hsl(346, 84%, 61%)',
             color: '#FFFFFF',
             border: 'none',
             borderRadius: '8px',
-            fontWeight: 700,
-            fontSize: '0.875rem',
+            fontWeight: 800,
+            fontSize: '0.9rem',
             cursor: 'pointer',
-            transition: 'background-color 0.2s ease',
-            boxShadow: '0 2px 4px rgba(239, 68, 68, 0.2)',
+            fontFamily: "'Outfit', sans-serif",
+            transition: 'background-color 0.2s ease, transform 0.2s ease',
+            boxShadow: '0 4px 15px -3px hsla(346, 84%, 61%, 0.4)',
           }}
-          onMouseOver={(e) => (e.currentTarget.style.backgroundColor = '#DC2626')}
-          onMouseOut={(e) => (e.currentTarget.style.backgroundColor = '#EF4444')}
+          onMouseOver={(e) => {
+            e.currentTarget.style.backgroundColor = 'hsl(346, 84%, 53%)';
+            e.currentTarget.style.transform = 'translateY(-1px)';
+          }}
+          onMouseOut={(e) => {
+            e.currentTarget.style.backgroundColor = 'hsl(346, 84%, 61%)';
+            e.currentTarget.style.transform = 'translateY(0)';
+          }}
         >
           Reprovar Proposta
         </button>
@@ -197,21 +264,24 @@ export function HITLPanel({ request, onDecide }: HITLPanelProps) {
         <button
           onClick={() => handleSubmit('escalate')}
           style={{
-            padding: '0.75rem 1.5rem',
-            backgroundColor: '#FFFBEB',
-            color: '#D97706',
-            border: '1px solid #FCD34D',
+            padding: '0.85rem 1.5rem',
+            backgroundColor: 'hsla(38, 92%, 50%, 0.1)',
+            color: 'hsl(38, 92%, 65%)',
+            border: '1px solid hsla(38, 92%, 50%, 0.3)',
             borderRadius: '8px',
-            fontWeight: 700,
-            fontSize: '0.875rem',
+            fontWeight: 800,
+            fontSize: '0.9rem',
             cursor: 'pointer',
-            transition: 'background-color 0.2s ease',
+            fontFamily: "'Outfit', sans-serif",
+            transition: 'background-color 0.2s ease, transform 0.2s ease',
           }}
           onMouseOver={(e) => {
-            e.currentTarget.style.backgroundColor = '#FEF3C7';
+            e.currentTarget.style.backgroundColor = 'hsla(38, 92%, 50%, 0.18)';
+            e.currentTarget.style.transform = 'translateY(-1px)';
           }}
           onMouseOut={(e) => {
-            e.currentTarget.style.backgroundColor = '#FFFBEB';
+            e.currentTarget.style.backgroundColor = 'hsla(38, 92%, 50%, 0.1)';
+            e.currentTarget.style.transform = 'translateY(0)';
           }}
         >
           Escalar Caso

@@ -2,11 +2,10 @@
 
 import React, { useEffect, useState } from 'react';
 import { useParams, useSearchParams } from 'next/navigation';
-import { useAgentStream } from '@repo/ag-ui-client';
 import { StatusBadge } from '@repo/ui/status-badge';
 import { TraceTimeline } from '@repo/ui/trace-timeline';
 import { CostDisplay } from '@repo/ui/cost-display';
-import type { AgentTrajectory } from '@repo/types';
+import type { AgentTrajectory, CreditAnalysisStatus } from '@repo/types';
 
 export default function CustomerStatusPage() {
   const { request_id } = useParams();
@@ -14,29 +13,72 @@ export default function CustomerStatusPage() {
   const cpf = searchParams.get('cpf') || 'XXX.XXX.XXX-XX';
   const amount = searchParams.get('amount') || '50000';
 
-  // Construct SSE endpoint
-  const baseUrl = process.env.NEXT_PUBLIC_ORCHESTRATOR_URL;
-  const sseUrl = baseUrl ? `${baseUrl}/v1/analysis/${request_id}/stream` : '';
+  const reqIdStr = (Array.isArray(request_id) ? request_id[0] : request_id) || 'req-xyz';
 
-  // Retrieve streaming state from AG-UI SSE client
-  const streamResult = useAgentStream(sseUrl);
-
-  // local simulation state for previewing flow in development mode
+  // Live polling state
+  const [status, setStatus] = useState<CreditAnalysisStatus>('pending');
+  const [trajectory, setTrajectory] = useState<AgentTrajectory | null>(null);
+  const [error, setError] = useState<string | null>(null);
   const [isSimulated, setIsSimulated] = useState(false);
+
+  // local simulation state for fallback previewing flow in development mode
   const [simState, setSimState] = useState({
     status: 'pending',
     trajectory: null as AgentTrajectory | null,
     error: null as string | null,
   });
 
+  // Effect for live polling from Python backend on port 8086
   useEffect(() => {
-    // If no orchestrator URL is provided, we simulate the SSE updates for frontend scaffolding preview
-    if (!baseUrl) {
-      setIsSimulated(true);
-      console.warn('[AG-UI] NEXT_PUBLIC_ORCHESTRATOR_URL not defined. Starting local simulated SSE analysis stream.');
-      
-      const reqIdStr = (Array.isArray(request_id) ? request_id[0] : request_id) || 'req-xyz';
-      
+    let active = true;
+    let pollTimer: NodeJS.Timeout;
+    let failureCount = 0;
+
+    const poll = () => {
+      fetch(`http://localhost:8086/analysis/${reqIdStr}/status`)
+        .then((res) => {
+          if (!res.ok) throw new Error('Falha ao consultar status.');
+          return res.json();
+        })
+        .then((data) => {
+          if (!active) return;
+          failureCount = 0; // reset
+          setStatus(data.status);
+          setTrajectory(data.trajectory);
+          setError(null);
+          setIsSimulated(false);
+
+          if (data.status === 'pending' || data.status === 'analyzing') {
+            pollTimer = setTimeout(poll, 2000);
+          }
+        })
+        .catch((err) => {
+          if (!active) return;
+          console.warn('[Status] Polling failed, retrying...', err);
+          failureCount++;
+          
+          // If server fails 3 times, fall back to simulated experience
+          if (failureCount >= 3) {
+            console.warn('[Status] Backend unreachable. Activating simulated fallback.');
+            setIsSimulated(true);
+            setError(null); // Clear connection error to show smooth mock
+          } else {
+            pollTimer = setTimeout(poll, 2000);
+          }
+        });
+    };
+
+    poll();
+
+    return () => {
+      active = false;
+      clearTimeout(pollTimer);
+    };
+  }, [reqIdStr]);
+
+  // Fallback Simulation Scaffolding
+  useEffect(() => {
+    if (isSimulated) {
       // Step 1: Pending -> Analyzing T1
       const timer1 = setTimeout(() => {
         setSimState({
@@ -98,52 +140,75 @@ export default function CustomerStatusPage() {
         clearTimeout(timer3);
       };
     }
-  }, [baseUrl, request_id, amount]);
+  }, [isSimulated, reqIdStr, amount]);
 
-  // Read active state (either real SSE stream or preview simulation)
-  const activeStatus = isSimulated ? simState.status : streamResult.status;
-  const activeTrajectory = isSimulated ? simState.trajectory : streamResult.trajectory;
-  const activeError = isSimulated ? simState.error : streamResult.error;
+  // Read active state (either real polling or preview simulation fallback)
+  const activeStatus = isSimulated ? simState.status : status;
+  const activeTrajectory = isSimulated ? simState.trajectory : trajectory;
+  const activeError = isSimulated ? simState.error : error;
 
   return (
     <div
       style={{
-        maxWidth: '900px',
+        maxWidth: '960px',
         margin: '0 auto',
-        padding: '2rem',
-        fontFamily: 'Inter, system-ui, sans-serif',
-        backgroundColor: '#FAFAFA',
+        padding: '3rem 2rem',
         minHeight: '90vh',
+        animation: 'fadeIn 0.6s cubic-bezier(0.16, 1, 0.3, 1) forwards',
       }}
     >
-      {/* Header Info */}
+      {/* Header Info - Premium Glass Panel */}
       <div
         style={{
           display: 'flex',
           justifyContent: 'space-between',
           alignItems: 'center',
-          backgroundColor: '#FFFFFF',
-          padding: '1.5rem 2rem',
-          borderRadius: '12px',
-          border: '1px solid #E5E7EB',
-          boxShadow: '0 1px 3px rgba(0,0,0,0.05)',
-          marginBottom: '2rem',
+          backgroundColor: 'hsla(223, 47%, 12%, 0.6)',
+          backdropFilter: 'blur(16px)',
+          WebkitBackdropFilter: 'blur(16px)',
+          padding: '1.75rem 2.25rem',
+          borderRadius: '16px',
+          border: '1px solid hsla(217, 91%, 60%, 0.15)',
+          boxShadow: '0 10px 30px -10px rgba(0, 0, 0, 0.5), inset 0 1px 1px hsla(0, 0%, 100%, 0.05)',
+          marginBottom: '2.5rem',
           flexWrap: 'wrap',
-          gap: '1rem',
+          gap: '1.25rem',
         }}
       >
         <div>
-          <h1 style={{ margin: 0, fontSize: '1.5rem', fontWeight: 800, color: '#111827' }}>
+          <h1 
+            style={{ 
+              margin: 0, 
+              fontSize: '1.65rem', 
+              fontWeight: 800, 
+              color: 'hsl(210, 40%, 98%)',
+              fontFamily: "'Outfit', sans-serif",
+              letterSpacing: '-0.02em',
+            }}
+          >
             Acompanhamento da Proposta
           </h1>
-          <p style={{ margin: '0.25rem 0 0 0', fontSize: '0.875rem', color: '#6B7280' }}>
-            Solicitação: <strong style={{ color: '#374151' }}>{request_id}</strong> | CPF: {cpf} | Valor: R$ {parseFloat(amount).toLocaleString('pt-BR', { minimumFractionDigits: 2 })}
+          <p style={{ margin: '0.4rem 0 0 0', fontSize: '0.9rem', color: 'hsl(215, 20%, 75%)' }}>
+            ID Proposta: <strong style={{ color: 'hsl(217, 91%, 70%)', fontFamily: 'monospace' }}>{reqIdStr}</strong> | CPF: <span style={{ fontFamily: 'monospace' }}>{cpf}</span> | Valor: <strong style={{ color: 'hsl(210, 40%, 98%)' }}>R$ {parseFloat(amount).toLocaleString('pt-BR', { minimumFractionDigits: 2 })}</strong>
           </p>
         </div>
         <div style={{ display: 'flex', alignItems: 'center', gap: '1rem' }}>
           {isSimulated && (
-            <span style={{ fontSize: '0.75rem', color: '#6366F1', backgroundColor: '#EEF2FF', padding: '0.25rem 0.5rem', borderRadius: '4px', fontWeight: 600 }}>
-              Simulação Frontend
+            <span 
+              style={{ 
+                fontSize: '0.7rem', 
+                color: 'hsl(217, 91%, 65%)', 
+                backgroundColor: 'hsla(217, 91%, 60%, 0.12)', 
+                border: '1px solid hsla(217, 91%, 60%, 0.25)', 
+                padding: '0.3rem 0.6rem', 
+                borderRadius: '6px', 
+                fontWeight: 700,
+                textTransform: 'uppercase',
+                letterSpacing: '0.05em',
+                fontFamily: "'Outfit', sans-serif" 
+              }}
+            >
+              Simulação Fallback
             </span>
           )}
           <StatusBadge status={activeStatus as CreditAnalysisStatus} />
@@ -152,15 +217,16 @@ export default function CustomerStatusPage() {
 
       {activeError && (
         <div
+          className="glow-pulse-rose"
           style={{
-            backgroundColor: '#FEF2F2',
-            border: '1px solid #FCA5A5',
-            color: '#B91C1C',
-            padding: '1rem 1.5rem',
-            borderRadius: '8px',
-            marginBottom: '2rem',
-            fontSize: '0.875rem',
-            fontWeight: 500,
+            backgroundColor: 'hsla(346, 84%, 61%, 0.1)',
+            border: '1px solid hsla(346, 84%, 61%, 0.35)',
+            color: 'hsl(346, 84%, 70%)',
+            padding: '1.25rem 1.75rem',
+            borderRadius: '12px',
+            marginBottom: '2.5rem',
+            fontSize: '0.9rem',
+            fontWeight: 600,
           }}
         >
           ❌ {activeError}
@@ -169,11 +235,24 @@ export default function CustomerStatusPage() {
 
       {/* Trajectory Timeline section */}
       {activeTrajectory ? (
-        <div style={{ display: 'flex', flexDirection: 'column', gap: '2rem' }}>
+        <div style={{ display: 'flex', flexDirection: 'column', gap: '2.5rem' }}>
           <TraceTimeline trajectory={activeTrajectory} />
           
-          <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', backgroundColor: '#FFFFFF', padding: '1rem 2rem', borderRadius: '12px', border: '1px solid #E5E7EB' }}>
-            <span style={{ fontSize: '0.875rem', color: '#4B5563', fontWeight: 500 }}>
+          <div 
+            style={{ 
+              display: 'flex', 
+              justifyContent: 'space-between', 
+              alignItems: 'center', 
+              backgroundColor: 'hsla(223, 47%, 12%, 0.5)', 
+              padding: '1.25rem 2rem', 
+              borderRadius: '16px', 
+              border: '1px solid hsla(217, 91%, 60%, 0.12)',
+              boxShadow: '0 8px 32px 0 rgba(0, 0, 0, 0.2)',
+              flexWrap: 'wrap',
+              gap: '1rem'
+            }}
+          >
+            <span style={{ fontSize: '0.9rem', color: 'hsl(215, 20%, 85%)', fontWeight: 500, flex: 1, minWidth: '280px' }}>
               {activeStatus === 'approved' && '🎉 Parabéns! Sua proposta foi pré-aprovada com sucesso pelos agentes de crédito.'}
               {activeStatus === 'rejected' && '❌ Proposta recusada em conformidade com as políticas regulatórias atuais.'}
               {activeStatus === 'hitl_required' && '⏳ Valor acima do limite automático. Sua proposta foi encaminhada para a mesa de crédito (revisão humana).'}
@@ -189,29 +268,39 @@ export default function CustomerStatusPage() {
             flexDirection: 'column',
             alignItems: 'center',
             justifyContent: 'center',
-            padding: '4rem',
-            backgroundColor: '#FFFFFF',
-            borderRadius: '12px',
-            border: '1px solid #E5E7EB',
+            padding: '6rem 4rem',
+            backgroundColor: 'hsla(223, 47%, 12%, 0.4)',
+            borderRadius: '16px',
+            border: '1px solid hsla(217, 91%, 60%, 0.1)',
             textAlign: 'center',
+            boxShadow: '0 8px 32px 0 rgba(0, 0, 0, 0.3)',
           }}
         >
           <div
             style={{
-              width: '40px',
-              height: '40px',
-              border: '4px solid #E5E7EB',
-              borderTop: '4px solid #4F46E5',
+              width: '44px',
+              height: '44px',
+              border: '3px solid hsla(217, 91%, 60%, 0.15)',
+              borderTop: '3px solid hsl(217, 91%, 60%)',
               borderRadius: '50%',
               animation: 'spin 1s linear infinite',
-              marginBottom: '1rem',
+              marginBottom: '1.5rem',
+              boxShadow: '0 0 15px hsla(217, 91%, 60%, 0.15)',
             }}
           />
-          <h3 style={{ margin: 0, color: '#374151', fontSize: '1.125rem', fontWeight: 600 }}>
+          <h3 
+            style={{ 
+              margin: 0, 
+              color: 'hsl(210, 40%, 98%)', 
+              fontSize: '1.25rem', 
+              fontWeight: 700, 
+              fontFamily: "'Outfit', sans-serif",
+            }}
+          >
             Conectando aos Agentes...
           </h3>
-          <p style={{ margin: '0.25rem 0 0 0', color: '#6B7280', fontSize: '0.875rem' }}>
-            Aguardando sinal do orchestrator de crédito para iniciar a análise por turnos.
+          <p style={{ margin: '0.4rem 0 0 0', color: 'hsl(215, 20%, 75%)', fontSize: '0.875rem' }}>
+            Aguardando sinal do orquestrador de crédito para iniciar a análise por turnos cognitivos.
           </p>
         </div>
       )}
