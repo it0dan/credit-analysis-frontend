@@ -1,0 +1,69 @@
+/* packages/ui/tokens/tokens.css
+   Fonte canônica de design tokens — não declarar tokens de cor/tipo/forma em outro lugar */
+
+@layer base {
+  :root {
+    /* Superfícies */
+    --bg:    #0A0E1A;
+    --surf:  #111827;
+    --surf2: #1F2937;
+
+    /* Acento principal */
+    --acc:      #7C3AED;
+    --acc-glow: rgba(124, 58, 237, 0.3);
+
+    /* Semântica */
+    --ok:         #10B981;
+    --ok-glow:    rgba(16, 185, 129, 0.25);
+    --alert:      #EF4444;
+    --alert-glow: rgba(239, 68, 68, 0.25);
+    --warn:       #F59E0B;
+    --warn-glow:  rgba(245, 158, 11, 0.25);
+    --blue:       #3B82F6;
+    --blue-glow:  rgba(59, 130, 246, 0.25);
+
+    /* Texto */
+    --text:  #F9FAFB;
+    --muted: #6B7280;
+
+    /* Bordas */
+    --line:  rgba(255, 255, 255, 0.08);
+    --line2: rgba(255, 255, 255, 0.15);
+
+    /* Fontes — variáveis injetadas pelo layout.tsx via next/font */
+    --font-sans: var(--font-inter, 'Inter', system-ui, sans-serif);
+    --font-mono: var(--font-jetbrains, 'JetBrains Mono', 'Fira Code', monospace);
+
+    /* Formas */
+    --radius:     12px;
+    --radius-sm:  6px;
+    --radius-pill: 9999px;
+
+    /* Sombras */
+    --shadow:     0 4px 24px rgba(0, 0, 0, 0.4);
+    --shadow-acc: 0 0 20px var(--acc-glow);
+  }
+
+  /* Tema claro */
+  [data-theme="light"] {
+    --bg:    #F9FAFB;
+    --surf:  #FFFFFF;
+    --surf2: #F3F4F6;
+    --text:  #111827;
+    --muted: #6B7280;
+    --line:  rgba(0, 0, 0, 0.08);
+    --line2: rgba(0, 0, 0, 0.15);
+  }
+
+  /* Acessibilidade — desativa animações para usuários com preferência */
+  @media (prefers-reduced-motion: reduce) {
+    *,
+    *::before,
+    *::after {
+      animation-duration: 0.01ms !important;
+      animation-iteration-count: 1 !important;
+      transition-duration: 0.01ms !important;
+      scroll-behavior: auto !important;
+    }
+  }
+}
