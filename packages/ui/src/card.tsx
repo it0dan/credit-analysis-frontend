@@ -1,27 +1,67 @@
-import { type JSX } from "react";
+import React, { type JSX } from 'react';
+
+interface CardProps {
+  elevated?: boolean;
+  interactive?: boolean;
+  glass?: boolean;
+  as?: keyof JSX.IntrinsicElements;
+  children: React.ReactNode;
+  style?: React.CSSProperties;
+  className?: string;
+  onClick?: React.MouseEventHandler;
+}
 
 export function Card({
-  className,
-  title,
+  elevated = false,
+  interactive = false,
+  glass = true,
+  as: Tag = 'div',
   children,
-  href,
-}: {
-  className?: string;
-  title: string;
-  children: React.ReactNode;
-  href: string;
-}): JSX.Element {
+  style,
+  className,
+  onClick,
+}: CardProps) {
+  const base: React.CSSProperties = {
+    background: elevated ? 'var(--surf2)' : 'var(--surf)',
+    border: '1px solid var(--line)',
+    borderRadius: 'var(--radius)',
+    boxShadow: 'var(--shadow)',
+    backdropFilter: glass ? 'blur(12px)' : undefined,
+    WebkitBackdropFilter: glass ? 'blur(12px)' : undefined,
+    transition: interactive
+      ? 'transform 0.2s cubic-bezier(0.16,1,0.3,1), border-color 0.2s, box-shadow 0.2s'
+      : undefined,
+    cursor: interactive ? 'pointer' : undefined,
+    containerType: interactive ? 'inline-size' : undefined,
+  };
+
+  const handleMouseOver = interactive
+    ? (e: React.MouseEvent<Element>) => {
+        const el = e.currentTarget as HTMLElement;
+        el.style.transform = 'translateY(-2px)';
+        el.style.borderColor = 'var(--line2)';
+        el.style.boxShadow = 'var(--shadow-acc)';
+      }
+    : undefined;
+
+  const handleMouseOut = interactive
+    ? (e: React.MouseEvent<Element>) => {
+        const el = e.currentTarget as HTMLElement;
+        el.style.transform = '';
+        el.style.borderColor = '';
+        el.style.boxShadow = '';
+      }
+    : undefined;
+
   return (
-    <a
+    <Tag
       className={className}
-      href={`${href}?utm_source=create-turbo&utm_medium=basic&utm_campaign=create-turbo"`}
-      rel="noopener noreferrer"
-      target="_blank"
+      style={{ ...base, ...style }}
+      onMouseOver={handleMouseOver}
+      onMouseOut={handleMouseOut}
+      onClick={onClick}
     >
-      <h2>
-        {title} <span>-&gt;</span>
-      </h2>
-      <p>{children}</p>
-    </a>
+      {children}
+    </Tag>
   );
 }
