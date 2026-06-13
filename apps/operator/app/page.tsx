@@ -4,15 +4,17 @@ import React from 'react';
 import Link from 'next/link';
 import { useAuth } from '@repo/auth';
 import { CockpitLayout } from '@repo/ui/cockpit-layout';
+import { Stat } from '@repo/ui/stat';
+import { Card } from '@repo/ui/card';
 
 export default function OperatorHome() {
   const auth = useAuth();
 
-  const stats = [
-    { label: 'Em Fila de Revisão', value: '4', color: 'var(--color-secondary)', bg: 'hsla(24, 100%, 50%, 0.08)', border: 'hsla(24, 100%, 50%, 0.25)' },
-    { label: 'Aprovados Hoje', value: '18', color: 'var(--color-emerald)', bg: 'hsla(142, 76%, 45%, 0.08)', border: 'hsla(142, 76%, 45%, 0.25)' },
-    { label: 'Rejeitados Hoje', value: '7', color: 'var(--color-rose)', bg: 'hsla(346, 84%, 61%, 0.08)', border: 'hsla(346, 84%, 61%, 0.25)' },
-    { label: 'Tempo Médio Decisão', value: '4.2m', color: 'var(--color-primary)', bg: 'hsla(262, 80%, 60%, 0.08)', border: 'hsla(262, 80%, 60%, 0.25)' },
+  const stats: Array<{ label: string; value: string; color: 'warn' | 'ok' | 'alert' | 'acc' }> = [
+    { label: 'Em Fila de Revisão',     value: '4',    color: 'warn' },
+    { label: 'Aprovados Hoje',          value: '18',   color: 'ok'   },
+    { label: 'Rejeitados Hoje',         value: '7',    color: 'alert'},
+    { label: 'Tempo Médio Decisão',     value: '4.2m', color: 'acc'  },
   ];
 
   return (
@@ -22,98 +24,84 @@ export default function OperatorHome() {
           maxWidth: '1200px',
           margin: '0 auto',
           padding: '1rem 0',
-          animation: 'fadeIn 0.6s cubic-bezier(0.16, 1, 0.3, 1) forwards',
+          animation: 'fadeIn 0.5s cubic-bezier(0.16, 1, 0.3, 1) forwards',
         }}
       >
-        {/* Top Welcome Panel */}
-        <div
+        {/* Welcome Panel */}
+        <Card
+          glass
           style={{
             display: 'flex',
             justifyContent: 'space-between',
             alignItems: 'center',
-            backgroundColor: 'var(--bg-card)',
-            backdropFilter: 'blur(16px)',
-            WebkitBackdropFilter: 'blur(16px)',
             padding: '2rem 2.5rem',
-            borderRadius: '16px',
-            border: 'var(--border-glass)',
-            boxShadow: 'var(--shadow-main), inset 0 1px 1px hsla(0, 0%, 100%, 0.05)',
             marginBottom: '2.5rem',
-            transition: 'background 0.3s ease, border-color 0.3s ease',
+            flexWrap: 'wrap',
+            gap: '1.25rem',
           }}
         >
           <div>
-            <h1 
-              style={{ 
-                margin: 0, 
-                fontSize: '1.75rem', 
-                fontWeight: 800, 
-                color: 'var(--text-primary)',
-                fontFamily: "var(--font-heading)",
+            <h1
+              style={{
+                margin: 0,
+                fontSize: '1.75rem',
+                fontWeight: 800,
+                color: 'var(--text)',
+                fontFamily: 'var(--font-sans)',
                 letterSpacing: '-0.02em',
               }}
             >
               Mesa de Análise de Crédito
             </h1>
-            <p style={{ margin: '0.4rem 0 0 0', fontSize: '0.875rem', color: 'var(--text-secondary)' }}>
+            <p style={{ margin: '0.4rem 0 0 0', fontSize: '0.875rem', color: 'var(--muted)' }}>
               Central de Intervenção Humana (HITL) para propostas de crédito especiais
             </p>
           </div>
           {auth && (
             <div style={{ textAlign: 'right' }}>
-              <span style={{ fontSize: '0.9rem', color: 'var(--text-primary)', fontWeight: 700, fontFamily: "var(--font-heading)" }}>
-                👤 Operador: {auth.user_id}
+              <span style={{ fontSize: '0.9rem', color: 'var(--text)', fontWeight: 700, fontFamily: 'var(--font-sans)' }}>
+                Operador: <span style={{ fontFamily: 'var(--font-mono)', color: 'var(--acc)' }}>{auth.user_id}</span>
               </span>
-              <div style={{ fontSize: '0.75rem', color: 'var(--text-muted)', marginTop: '0.2rem', fontWeight: 600 }}>
+              <div style={{ fontSize: '0.75rem', color: 'var(--muted)', marginTop: '0.2rem', fontWeight: 600 }}>
                 Perfil: {auth.role}
               </div>
             </div>
           )}
-        </div>
+        </Card>
 
-        {/* Metric Cards Row */}
-        <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(220px, 1fr))', gap: '1.5rem', marginBottom: '3rem' }}>
+        {/* Metric Cards */}
+        <div
+          style={{
+            display: 'grid',
+            gridTemplateColumns: 'repeat(auto-fit, minmax(220px, 1fr))',
+            gap: '1.5rem',
+            marginBottom: '3rem',
+          }}
+        >
           {stats.map((stat, idx) => (
-            <div
-              key={idx}
-              style={{
-                padding: '1.5rem',
-                borderRadius: '12px',
-                backgroundColor: stat.bg,
-                border: `1px solid ${stat.border}`,
-                boxShadow: '0 4px 15px -3px rgba(0, 0, 0, 0.1)',
-                transition: 'transform 0.2s',
-              }}
-              onMouseOver={(e) => (e.currentTarget.style.transform = 'translateY(-2px)')}
-              onMouseOut={(e) => (e.currentTarget.style.transform = 'translateY(0)')}
-            >
-              <span style={{ display: 'block', fontSize: '0.8rem', color: 'var(--text-secondary)', fontWeight: 700, textTransform: 'uppercase', letterSpacing: '0.05em', fontFamily: "var(--font-heading)" }}>
-                {stat.label}
-              </span>
-              <span style={{ display: 'block', fontSize: '2.25rem', fontWeight: 900, color: stat.color, marginTop: '0.5rem', fontFamily: 'var(--font-heading)' }}>
-                {stat.value}
-              </span>
-            </div>
+            <Card key={idx} glass style={{ padding: '1.5rem' }}>
+              <Stat label={stat.label} value={stat.value} color={stat.color} />
+            </Card>
           ))}
         </div>
 
-        {/* Main Hub Actions */}
-        <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(320px, 1fr))', gap: '2rem' }}>
-          {/* Card 1: Review Queue */}
-          <div
+        {/* Main Actions */}
+        <div
+          style={{
+            display: 'grid',
+            gridTemplateColumns: 'repeat(auto-fit, minmax(320px, 1fr))',
+            gap: '2rem',
+          }}
+        >
+          {/* Fila de Análise */}
+          <Card
+            glass
             style={{
-              backgroundColor: 'var(--bg-card)',
-              backdropFilter: 'blur(16px)',
-              WebkitBackdropFilter: 'blur(16px)',
               padding: '2.5rem',
-              borderRadius: '16px',
-              border: 'var(--border-glass)',
-              boxShadow: 'var(--shadow-main)',
               display: 'flex',
               flexDirection: 'column',
               justifyContent: 'space-between',
               minHeight: '260px',
-              transition: 'background 0.3s ease, border-color 0.3s ease',
             }}
           >
             <div>
@@ -121,23 +109,39 @@ export default function OperatorHome() {
                 style={{
                   width: '44px',
                   height: '44px',
-                  borderRadius: '10px',
-                  backgroundColor: 'hsla(38, 92%, 50%, 0.12)',
-                  color: 'hsl(38, 92%, 60%)',
+                  borderRadius: 'var(--radius-sm)',
+                  backgroundColor: 'var(--warn-glow)',
+                  color: 'var(--warn)',
                   display: 'flex',
                   alignItems: 'center',
                   justifyContent: 'center',
-                  fontSize: '1.5rem',
+                  fontSize: '1.4rem',
                   marginBottom: '1.25rem',
-                  border: '1px solid hsla(38, 92%, 50%, 0.25)',
+                  border: '1px solid var(--warn)',
                 }}
               >
                 📋
               </div>
-              <h3 style={{ margin: 0, fontSize: '1.3rem', fontWeight: 800, color: 'var(--text-primary)', fontFamily: "var(--font-heading)", letterSpacing: '-0.02em' }}>
+              <h3
+                style={{
+                  margin: 0,
+                  fontSize: '1.3rem',
+                  fontWeight: 800,
+                  color: 'var(--text)',
+                  fontFamily: 'var(--font-sans)',
+                  letterSpacing: '-0.02em',
+                }}
+              >
                 Fila de Análises Pendentes
               </h3>
-              <p style={{ margin: '0.6rem 0 1.5rem 0', fontSize: '0.875rem', color: 'var(--text-secondary)', lineHeight: 1.6 }}>
+              <p
+                style={{
+                  margin: '0.6rem 0 1.5rem 0',
+                  fontSize: '0.875rem',
+                  color: 'var(--muted)',
+                  lineHeight: 1.6,
+                }}
+              >
                 Acesse a fila de solicitações que exigem intervenção manual por limite excedido ou indisponibilidade de bureau.
               </p>
             </div>
@@ -148,45 +152,38 @@ export default function OperatorHome() {
                 alignItems: 'center',
                 justifyContent: 'center',
                 padding: '0.85rem 1rem',
-                backgroundColor: 'var(--color-primary)',
+                backgroundColor: 'var(--acc)',
                 color: '#FFFFFF',
-                borderRadius: '8px',
+                borderRadius: 'var(--radius-sm)',
                 textDecoration: 'none',
-                fontWeight: 800,
+                fontWeight: 700,
                 fontSize: '0.875rem',
-                fontFamily: "var(--font-heading)",
-                boxShadow: '0 4px 10px -3px var(--color-primary-glow)',
-                transition: 'background-color 0.2s, transform 0.2s',
-                textAlign: 'center',
+                fontFamily: 'var(--font-sans)',
+                boxShadow: 'var(--shadow-acc)',
+                transition: 'filter 0.2s, transform 0.2s',
               }}
               onMouseOver={(e) => {
-                e.currentTarget.style.backgroundColor = 'hsl(262, 80%, 52%)';
+                e.currentTarget.style.filter = 'brightness(1.1)';
                 e.currentTarget.style.transform = 'translateY(-1px)';
               }}
               onMouseOut={(e) => {
-                e.currentTarget.style.backgroundColor = 'var(--color-primary)';
+                e.currentTarget.style.filter = '';
                 e.currentTarget.style.transform = 'translateY(0)';
               }}
             >
               Visualizar Fila (Revisão HITL)
             </Link>
-          </div>
+          </Card>
 
-          {/* Card 2: Performance Dashboard */}
-          <div
+          {/* Dashboard de Métricas */}
+          <Card
+            glass
             style={{
-              backgroundColor: 'var(--bg-card)',
-              backdropFilter: 'blur(16px)',
-              WebkitBackdropFilter: 'blur(16px)',
               padding: '2.5rem',
-              borderRadius: '16px',
-              border: 'var(--border-glass)',
-              boxShadow: 'var(--shadow-main)',
               display: 'flex',
               flexDirection: 'column',
               justifyContent: 'space-between',
               minHeight: '260px',
-              transition: 'background 0.3s ease, border-color 0.3s ease',
             }}
           >
             <div>
@@ -194,23 +191,39 @@ export default function OperatorHome() {
                 style={{
                   width: '44px',
                   height: '44px',
-                  borderRadius: '10px',
-                  backgroundColor: 'hsla(142, 76%, 45%, 0.12)',
-                  color: 'hsl(142, 76%, 50%)',
+                  borderRadius: 'var(--radius-sm)',
+                  backgroundColor: 'var(--ok-glow)',
+                  color: 'var(--ok)',
                   display: 'flex',
                   alignItems: 'center',
                   justifyContent: 'center',
-                  fontSize: '1.5rem',
+                  fontSize: '1.4rem',
                   marginBottom: '1.25rem',
-                  border: '1px solid hsla(142, 76%, 45%, 0.25)',
+                  border: '1px solid var(--ok)',
                 }}
               >
                 📊
               </div>
-              <h3 style={{ margin: 0, fontSize: '1.3rem', fontWeight: 800, color: 'var(--text-primary)', fontFamily: "var(--font-heading)", letterSpacing: '-0.02em' }}>
+              <h3
+                style={{
+                  margin: 0,
+                  fontSize: '1.3rem',
+                  fontWeight: 800,
+                  color: 'var(--text)',
+                  fontFamily: 'var(--font-sans)',
+                  letterSpacing: '-0.02em',
+                }}
+              >
                 Dashboard de Métricas
               </h3>
-              <p style={{ margin: '0.6rem 0 1.5rem 0', fontSize: '0.875rem', color: 'var(--text-secondary)', lineHeight: 1.6 }}>
+              <p
+                style={{
+                  margin: '0.6rem 0 1.5rem 0',
+                  fontSize: '0.875rem',
+                  color: 'var(--muted)',
+                  lineHeight: 1.6,
+                }}
+              >
                 Visualize relatórios de performance, contabilidade de tokens de FinOps do Gateway e estatísticas de rejeições regulatórias.
               </p>
             </div>
@@ -221,31 +234,30 @@ export default function OperatorHome() {
                 alignItems: 'center',
                 justifyContent: 'center',
                 padding: '0.85rem 1rem',
-                backgroundColor: 'hsla(0, 0%, 100%, 0.05)',
-                color: 'var(--text-primary)',
-                border: '1px solid var(--border-glass)',
-                borderRadius: '8px',
+                backgroundColor: 'var(--surf2)',
+                color: 'var(--text)',
+                border: '1px solid var(--line2)',
+                borderRadius: 'var(--radius-sm)',
                 textDecoration: 'none',
-                fontWeight: 800,
+                fontWeight: 700,
                 fontSize: '0.875rem',
-                fontFamily: "var(--font-heading)",
-                transition: 'all 0.2s',
-                textAlign: 'center',
+                fontFamily: 'var(--font-sans)',
+                transition: 'background 0.2s, transform 0.2s',
               }}
               onMouseOver={(e) => {
-                e.currentTarget.style.backgroundColor = 'hsla(0, 0%, 100%, 0.1)';
-                e.currentTarget.style.borderColor = 'var(--color-primary)';
+                e.currentTarget.style.backgroundColor = 'var(--acc-glow)';
+                e.currentTarget.style.borderColor = 'var(--acc)';
                 e.currentTarget.style.transform = 'translateY(-1px)';
               }}
               onMouseOut={(e) => {
-                e.currentTarget.style.backgroundColor = 'hsla(0, 0%, 100%, 0.05)';
-                e.currentTarget.style.borderColor = 'var(--border-glass)';
+                e.currentTarget.style.backgroundColor = 'var(--surf2)';
+                e.currentTarget.style.borderColor = 'var(--line2)';
                 e.currentTarget.style.transform = 'translateY(0)';
               }}
             >
               Acessar Métricas & FinOps
             </Link>
-          </div>
+          </Card>
         </div>
       </div>
     </CockpitLayout>
