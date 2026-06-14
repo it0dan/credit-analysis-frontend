@@ -5,4 +5,4 @@
 - [x] task-3-leak-cleanup: Esconder `OP-1002`, fallback badge e ID tecnico fora de debug; HUD customer conclui em estado terminal.
 - [x] task-4-types-sequence: Estender status de AgentPhase e reescrever simulacao sequencial para 5 agentes.
 - [x] task-5-renderer-states: Consolidar AgentStream com NA FILA, PROCESSANDO, CONCLUIDO, AGUARDANDO HUMANO e ERRO.
-- [ ] task-6-validation: Capturar screenshots, medir densidade, rodar grep, types e axe.
+- [x] task-6-validation: Capturar screenshots, medir densidade, rodar grep, types e axe.
