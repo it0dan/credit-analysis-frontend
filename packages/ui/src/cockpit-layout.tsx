@@ -1,4 +1,5 @@
 import React from 'react';
+import { Pulse } from './pulse';
 
 interface CockpitLayoutProps {
   children: React.ReactNode;
@@ -8,6 +9,8 @@ interface CockpitLayoutProps {
 }
 
 export function CockpitLayout({ children, activeLink, portalType, request_id }: CockpitLayoutProps) {
+  const portalLabel = portalType === 'customer' ? 'portal' : 'cockpit';
+  const portalVersion = portalType === 'customer' ? 'customer · v02' : 'operator · v02';
   const menuItems = portalType === 'customer'
     ? [
         { id: 'proposal', label: '> Solicitar Crédito', path: '/' },
@@ -89,7 +92,8 @@ export function CockpitLayout({ children, activeLink, portalType, request_id }: 
               fontFamily: 'var(--font-mono)',
             }}
           >
-            {portalType === 'customer' ? 'Customer portal' : 'Operator cockpit'}
+            {portalType === 'customer' ? 'Customer ' : 'Operator '}
+            <span style={{ color: 'var(--acc)' }}>{portalLabel}</span>
           </span>
         </div>
 
@@ -98,27 +102,23 @@ export function CockpitLayout({ children, activeLink, portalType, request_id }: 
           style={{
             display: 'flex',
             alignItems: 'center',
-            gap: '1.5rem',
-            fontSize: '0.75rem',
+            gap: '0.55rem',
+            fontSize: '0.68rem',
             color: 'var(--muted)',
             fontFamily: 'var(--font-mono)',
+            letterSpacing: 'var(--ls-label)',
+            textTransform: 'uppercase',
+            whiteSpace: 'nowrap',
           }}
         >
-          <div style={{ display: 'flex', alignItems: 'center', gap: '0.4rem' }}>
-            <span
-              style={{
-                width: '6px',
-                height: '6px',
-                borderRadius: '50%',
-                backgroundColor: 'var(--acc)',
-                animation: 'pulse-opacity 2s infinite ease-in-out',
-                flexShrink: 0,
-              }}
-            />
-            <span>AI Gateway: Online</span>
-          </div>
-          <span>Ping: 12ms</span>
-          <span>OTel SDK: Active</span>
+          <span style={{ color: 'var(--line2)' }}>[</span>
+          <Pulse color="acc" size={7} />
+          <span style={{ color: 'var(--acc)' }}>LIVE</span>
+          <span style={{ color: 'var(--line2)' }}>·</span>
+          <span><span style={{ color: 'var(--text)' }}>3</span> agents</span>
+          <span style={{ color: 'var(--line2)' }}>·</span>
+          <span>T+<span style={{ color: 'var(--text)' }}>00:00:00</span></span>
+          <span style={{ color: 'var(--line2)' }}>]</span>
         </div>
 
         {/* Right info */}
@@ -137,7 +137,7 @@ export function CockpitLayout({ children, activeLink, portalType, request_id }: 
       </header>
 
       {/* Main Container */}
-      <div style={{ display: 'flex', flex: 1, height: 'calc(100vh - 96px)', width: '100vw', overflow: 'hidden' }}>
+      <div style={{ display: 'flex', flex: 1, height: 'calc(100vh - 88px)', width: '100vw', overflow: 'hidden' }}>
         {/* Sidebar */}
         <aside
           style={{
@@ -190,6 +190,7 @@ export function CockpitLayout({ children, activeLink, portalType, request_id }: 
                       color: isActive ? 'var(--acc)' : 'var(--muted)',
                       backgroundColor: 'transparent',
                       borderLeft: isActive ? '2px solid var(--acc)' : '2px solid transparent',
+                      borderBottom: isActive ? '1px solid var(--acc)' : '1px solid transparent',
                       fontSize: '0.8rem',
                       fontFamily: 'var(--font-mono)',
                       fontWeight: isActive ? 400 : 300,
@@ -248,27 +249,30 @@ export function CockpitLayout({ children, activeLink, portalType, request_id }: 
         </main>
       </div>
 
-      {/* Footer */}
+      {/* HUD Footer */}
       <footer
         style={{
-          height: '40px',
+          height: '32px',
           backgroundColor: 'var(--bg)',
           borderTop: '1px solid var(--line)',
           display: 'flex',
           justifyContent: 'space-between',
           alignItems: 'center',
           padding: '0 2rem',
-          fontSize: '0.7rem',
+          fontSize: '10px',
           color: 'var(--muted)',
           fontFamily: 'var(--font-mono)',
+          textTransform: 'uppercase',
+          letterSpacing: 'var(--ls-label-strong)',
           zIndex: 10,
         }}
       >
-        <span>© 2026 Sensedia SA.</span>
-        <div style={{ display: 'flex', alignItems: 'center', gap: '1.5rem' }}>
-          <span>Region: sa-east-1</span>
-          <span>Environment: Production</span>
-          <span style={{ color: 'var(--acc)' }}>OTel Collector: Active</span>
+        <span><span style={{ color: 'var(--acc)' }}>{portalVersion}</span></span>
+        <div style={{ display: 'flex', alignItems: 'center', gap: '0.65rem' }}>
+          <span style={{ color: 'var(--acc)' }}>STATUS</span>
+          <span style={{ color: 'var(--line2)' }}>·</span>
+          <Pulse color="acc" size={7} />
+          <span>HEALTHY</span>
         </div>
       </footer>
     </div>

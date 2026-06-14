@@ -50,6 +50,7 @@ h3, h4, h5, h6 {
 ul.li li::before {
   content: '→';
   color: var(--acc);
+  margin-right: 8px;
   font-family: var(--font-mono);
 }
 
@@ -85,3 +86,15 @@ ul.li li::before {
 
 /* Utility classes */
 .animate-fade-in { animation: fadeIn 0.5s cubic-bezier(0.16, 1, 0.3, 1) forwards; }
+
+
+@media (prefers-reduced-motion: reduce) {
+  *,
+  *::before,
+  *::after {
+    animation-duration: 0.001ms !important;
+    animation-iteration-count: 1 !important;
+    scroll-behavior: auto !important;
+    transition-duration: 0.001ms !important;
+  }
+}

@@ -7,7 +7,8 @@ interface StatProps {
   value: string | number;
   unit?: string;
   delta?: string;
-  color?: StatColor;
+  sub?: string;
+  color?: StatColor | string;
 }
 
 const colorVar: Record<StatColor, string> = {
@@ -19,9 +20,10 @@ const colorVar: Record<StatColor, string> = {
   text:  'var(--text)',
 };
 
-export function Stat({ label, value, unit, delta, color = 'text' }: StatProps) {
+export function Stat({ label, value, unit, delta, sub, color = 'var(--acc)' }: StatProps) {
   const isPositiveDelta = delta?.startsWith('+');
   const isNegativeDelta = delta?.startsWith('-');
+  const resolvedColor = color in colorVar ? colorVar[color as StatColor] : color;
 
   return (
     <div
@@ -29,27 +31,30 @@ export function Stat({ label, value, unit, delta, color = 'text' }: StatProps) {
         display: 'flex',
         flexDirection: 'column',
         gap: '0.35rem',
+        borderLeft: `2px solid ${resolvedColor}`,
+        paddingLeft: '16px',
       }}
     >
       <span
         style={{
-          fontSize: '0.7rem',
-          fontWeight: 700,
+          fontSize: '12px',
+          fontWeight: 400,
           color: 'var(--muted)',
-          textTransform: 'uppercase',
-          letterSpacing: '0.08em',
-          fontFamily: 'var(--font-sans)',
+          maxWidth: '190px',
+          lineHeight: 1.4,
         }}
       >
         {label}
       </span>
       <span
         style={{
-          fontSize: '2rem',
-          fontWeight: 800,
+          fontSize: '36px',
+          fontWeight: 200,
           fontFamily: 'var(--font-mono)',
-          color: colorVar[color],
+          color: resolvedColor,
           lineHeight: 1,
+          order: -1,
+          marginBottom: '5px',
         }}
       >
         {value}
@@ -59,6 +64,11 @@ export function Stat({ label, value, unit, delta, color = 'text' }: StatProps) {
           </span>
         )}
       </span>
+      {sub && (
+        <span style={{ fontSize: '10px', color: 'var(--line2)', marginTop: '5px', fontFamily: 'var(--font-mono)' }}>
+          {sub}
+        </span>
+      )}
       {delta && (
         <span
           style={{
