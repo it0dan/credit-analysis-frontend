@@ -1,6 +1,7 @@
 import type { Metadata } from 'next';
 import { Inter, JetBrains_Mono } from 'next/font/google';
 import './globals.css';
+import { DebugProvider } from '@repo/ui/debug-context';
 
 const inter = Inter({
   subsets: ['latin'],
@@ -29,7 +30,7 @@ export default function RootLayout({
   return (
     <html lang="pt-BR">
       <body className={`${inter.variable} ${jetbrainsMono.variable}`}>
-        {children}
+        <DebugProvider defaultEnabled={true}>{children}</DebugProvider>
       </body>
     </html>
   );
