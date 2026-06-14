@@ -1,6 +1,6 @@
 # AGENTS.md — credit-analysis-frontend
 
-Este repositório contém a interface de usuário do sistema de análise de crédito multiagente, estruturada como um monorepo gerenciado via **Turborepo** e construído com a stack moderna **React, TypeScript, Next.js (App Router) e AG-UI Protocol**.
+Este repositório contém a interface de usuário do sistema de análise de crédito multiagente, estruturada como um monorepo gerenciado via **Turborepo** e construído com **React, TypeScript, Next.js (App Router)** e identidade visual **terminal-brutalism**.
 
 ---
 
@@ -10,98 +10,90 @@ O monorepo está dividido em duas aplicações principais (`apps/`) e quatro pac
 
 ### 🏢 Aplicações (`apps/`)
 
-*   **`apps/customer/`**: Portal voltado ao cliente final (solicitante do crédito). Possui a tela de solicitação de crédito (onde se fornece o CPF e valor solicitado) e a tela de acompanhamento em tempo real (`/status/[request_id]`) acoplada ao hook do protocolo AG-UI SSE.
-*   **`apps/operator/`**: Portal voltado ao operador humano (mesa de crédito). Contém a fila de propostas pendentes de revisão (`/queue`), a visualização de telemetria e o painel de decisão de intervenção (`/queue/[request_id]`) com botões para aprovar, recusar ou escalar a proposta, além do dashboard de métricas e FinOps (`/dashboard`).
+*   **`apps/customer/`**: Portal voltado ao cliente final (solicitante do crédito). Possui a tela de solicitação de crédito (onde se fornece o CPF e valor solicitado) e a tela de acompanhamento humanizado (`/status/[request_id]`) com estados sequenciais visuais (`NA FILA` → `PROCESSANDO` → `CONCLUÍDO` / `AGUARDANDO HUMANO` / `ERRO`). O HUD para em estado terminal e para de mostrar `AO VIVO`. Possui **debug mode** para expor IDs técnicos, fallback badges e métricas internas.
+*   **`apps/operator/`**: Cockpit técnico do operador humano (mesa de crédito). Contém a fila de propostas pendentes (`/queue`), o painel de decisão de intervenção (`/queue/[request_id]`) com botões para aprovar, recusar ou escalar, e o dashboard de métricas e FinOps (`/dashboard`). Preserva estatísticas de throughput não presentes no customer.
 
 ### 📦 Pacotes (`packages/`)
 
-*   **`packages/types/`**: Definições de tipos comuns e interfaces contratuais estritas (`CreditAnalysisStatus`, `HITLRequest`, `OperatorDecision`, `AgentCall`, `AgentTrajectory`).
-*   **`packages/ag-ui-client/`**: Cliente oficial de integração com o protocolo AG-UI SSE, implementando o hook `useAgentStream` com suporte nativo a reconexão automática e backoff exponencial.
-*   **`packages/ui/`**: Design system compartilhado, fornecendo componentes com tipagem estrita e visual premium (`StatusBadge`, `AgentCard`, `TraceTimeline`, `CostDisplay`, `HITLPanel`).
-*   **`packages/auth/`**: Scaffolding e contratos de autenticação baseados em JWT, expondo o hook de contexto `useAuth`.
+*   **`packages/types/`**: Definições de tipos comuns e interfaces contratuais (`CreditAnalysisStatus`, `HITLRequest`, `OperatorDecision`, `AgentCall`, `AgentTrajectory`).
+*   **`packages/ag-ui-client/`**: Cliente de integração AG-UI SSE, implementando o hook `useAgentStream` com reconexão automática e backoff exponencial.
+*   **`packages/ui/`**: Design system compartilhado com componentes tipados (`StatusBadge`, `AgentCard`, `TraceTimeline`, `CostDisplay`, `HITLPanel`). Paleta terminal-brutalism definida em `packages/ui/tokens/tokens.css`.
+*   **`packages/auth/`**: Contratos de autenticação JWT com hook `useAuth`.
 
 ---
 
-## 2. Protocolo de Integração AG-UI
+## 2. Fluxo de Status do Customer (Humanizado)
 
-O loop agêntico do orchestrator expõe os eventos em tempo real em formato de Server-Sent Events (SSE). A conexão é estabelecida de forma unidirecional e em tempo real pelo hook `useAgentStream(endpoint)`.
+A tela de acompanhamento do customer não expõe mais eventos brutos do AG-UI. Em vez disso, a interface traduz a trajetória dos agentes em estados sequenciais visuais:
 
-### Mapeamento de Eventos (EventSource)
+| Estado | Descrição |
+|--------|-----------|
+| `NA FILA` | Análise enfileirada, aguardando processamento |
+| `PROCESSANDO` | Agentes em execução |
+| `CONCLUÍDO` | Todos os agentes finalizados |
+| `AGUARDANDO HUMANO` | Intervenção necessária (HITL) |
+| `ERRO` | Falha técnica na análise |
 
-```mermaid
-sequenceDiagram
-    participant WebBrowser as Browser (AG-UI Client)
-    participant Orchestrator as Orchestrator (Python SSE)
-    
-    WebBrowser->>Orchestrator: GET /v1/analysis/{id}/stream
-    Note over WebBrowser,Orchestrator: Estabelece canal SSE
-    Orchestrator-->>WebBrowser: event: message (data: { type: "AGENT_UPDATE", ... })
-    Note over WebBrowser: useAgentStream: atualiza trajetória (T1/T2)
-    Orchestrator-->>WebBrowser: event: message (data: { type: "HITL_REQUIRED", ... })
-    Note over WebBrowser: useAgentStream: status="hitl_required", exibe HITLPanel
-    Orchestrator-->>WebBrowser: event: message (data: { type: "ANALYSIS_COMPLETE", ... })
-    Note over WebBrowser: useAgentStream: status="approved" | "rejected"
-```
-
-Os eventos contêm um campo `type` indicando a ação do orquestrador e um campo `data` (ou propriedades achatadas) que atualiza o estado da interface:
-*   **`AGENT_UPDATE`**: Atualiza a trajetória (`AgentTrajectory`) exibindo quais agentes foram acionados, sua latência e ID do Span do OpenTelemetry.
-*   **`HITL_REQUIRED`**: Atualiza o status para `hitl_required` e popula a estrutura do painel do operador (`HITLRequest`), exibindo os dados de T1 e T2 consolidados para revisão humana.
-*   **`ANALYSIS_COMPLETE`**: Atualiza o status final da proposta (`approved` ou `rejected`).
-*   **`ERROR`**: Exibe o log e status de erro técnico no rastreamento.
+O HUD customer detecta estados terminais e para de mostrar `AO VIVO`. O debug mode (habilitável) revela IDs técnicos, fallback badges e informações internas.
 
 ---
 
-## 3. Variáveis de Ambiente Obrigatórias
+## 3. Design Tokens (paleta canônica)
 
-Configure as variáveis abaixo em arquivos `.env` específicos de cada aplicação ou nas variáveis globais do shell:
+Definidos em `packages/ui/tokens/tokens.css`. **Não alterar sem ADR.**
+
+| Token     | Valor      | Uso                        |
+|-----------|------------|----------------------------|
+| `--bg`    | `#0A0E14`  | Fundo global               |
+| `--surf`  | `#0F141B`  | Superfície de card/painel  |
+| `--acc`   | `#7FFFD4`  | Acento principal (aquamarine) |
+| `--alert` | `#FF4655`  | Erro / rejeição            |
+| `--warn`  | `#FFB84D`  | Alerta / pendência         |
+| `--blue`  | `#7EB8F7`  | Info / análise             |
+| `--purple`| `#C9A8F5`  | Uso secundário             |
+| `--text`  | `#E6EDF3`  | Texto principal            |
+| `--muted` | `#6B7785`  | Texto secundário           |
+| `--line`  | `#1E2530`  | Borda sutil                |
+| `--line2` | `#2A3340`  | Borda de destaque          |
+
+Proibidos sem ADR: `border-radius > 2px`, `box-shadow` com blur, halos glow, gradientes, `[data-theme="light"]`.
+
+---
+
+## 4. OpenSpec
+
+Mudanças de design e comportamento são documentadas em `openspec/changes/`:
+
+*   **`accent-density-pass/`** — Ajuste de densidade da cor aquamarine nos screens do customer
+*   **`streaming-and-cleanup/`** — Estados sequenciais visuais, HUD terminal, limpeza de streaming
+*   **`humanize-customer-experience/`** — Experiência humanizada do customer, debug mode, gate de operation leaks
+*   **`refresh-frontend-visual-identity/`** — Identidade visual terminal-brutalism
+
+---
+
+## 5. Validações
+
+*   `npm run check-types` — Verificação TypeScript estática
+*   `npx @axe-core/cli` — Validação de acessibilidade (baseline: 0 violations)
+*   Densidade aquamarine medida em screenshots (customer home: ~6.79%, status mid: ~4.25%, status end: ~5.66%)
+
+---
+
+## 6. Variáveis de Ambiente
 
 ```bash
-# URL de endpoint base do Orchestrator Python que expõe o SSE e o /resume
 NEXT_PUBLIC_ORCHESTRATOR_URL="http://localhost:8000"
-
-# Tipo de aplicação ativa no ambiente (usado pelo contexto mock de autenticação)
-# apps/customer: 'customer' | apps/operator: 'operator'
-NEXT_PUBLIC_APP_TYPE="customer"
-
-# Segredo de codificação JWT para validações de sessão
+NEXT_PUBLIC_APP_TYPE="customer"       # 'customer' | 'operator'
 AUTH_SECRET="secret-jwt-token-gateway-validation-key"
 ```
 
 ---
 
-## 4. Guia de Inicialização e Desenvolvimento (Turbo)
-
-Para iniciar o monorepo localmente, certifique-se de ter as dependências instaladas na raiz do projeto e use o motor do **Turborepo** para orquestrar todas as compilações e servidores concorrentemente:
-
-### Executando em Desenvolvimento
-
-Roda o portal do cliente (`apps/customer` na porta `3000`) e o painel do operador (`apps/operator` na porta `3001`):
+## 7. Comandos
 
 ```bash
-npm run dev
-```
-
-### Compilando para Produção
-
-Gera os pacotes otimizados e estáticos de distribuição:
-
-```bash
-npm run build
-```
-
-### Análise Estática & Linting
-
-Verifica conformidade estática de estilo em todas as aplicações e dependências:
-
-```bash
-npm run lint
-```
-
-### Checagem de Tipos TypeScript
-
-Valida a integridade estrita das assinaturas e contratos de código:
-
-```bash
-# Executa tsc --noEmit em todas as pastas gerenciadas pelo Turbo
-npm run check-types
+npm run dev        # customer :3000, operator :3001
+npm run build      # produção
+npm run lint       # linting
+npm run check-types # TypeScript
 ```
