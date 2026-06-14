@@ -13,7 +13,7 @@ export function Brand({ variant = 'full' }: BrandProps) {
   if (variant === 'footer') {
     return (
       <span style={{ color: 'var(--text)', fontFamily: 'var(--font-mono)' }}>
-        crédito·a2a · demo
+        análise de crédito agêntica · demo
       </span>
     );
   }
@@ -21,7 +21,7 @@ export function Brand({ variant = 'full' }: BrandProps) {
   const content = (
     <>
       <span style={{ color: 'var(--acc)', fontSize: variant === 'glyph' ? '1.1rem' : '1.1rem', lineHeight: 1 }}>◇</span>
-      {variant === 'full' && <span>CRÉDITO·A2A</span>}
+      {variant === 'full' && <span>ANÁLISE AGÊNTICA</span>}
     </>
   );
 

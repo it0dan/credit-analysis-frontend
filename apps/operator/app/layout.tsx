@@ -18,7 +18,7 @@ const jetbrainsMono = JetBrains_Mono({
 });
 
 export const metadata: Metadata = {
-  title: 'Crédito A2A — Cockpit Operacional',
+  title: 'Análise de Crédito Agêntica — Cockpit Operacional',
   description: 'Central técnica para análise de crédito multiagente',
 };
 

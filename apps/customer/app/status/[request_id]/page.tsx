@@ -8,11 +8,16 @@ import { CostDisplay } from '@repo/ui/cost-display';
 import { CockpitLayout } from '@repo/ui/cockpit-layout';
 import { Tag } from '@repo/ui/tag';
 import { Pulse } from '@repo/ui/pulse';
-import { AgentStream, type AgentStreamPhase } from '@repo/ui/agent-stream';
+import { ReasoningStream } from '@repo/ui/reasoning-stream';
 import { DebugOnly, HumanLabel } from '@repo/ui/debug-context';
-import type { AgentTrajectory, CreditAnalysisStatus } from '@repo/types';
+import { getAnalysis, updateAnalysis } from '@repo/ui/analysis-history';
+import type { AgentCall, AgentTrajectory, CreditAnalysisStatus, ReasoningChunk } from '@repo/types';
 
-type StreamTrajectory = Omit<AgentTrajectory, 'phases'> & { phases: AgentStreamPhase[] };
+type FinalVerdict = 'approved' | 'rejected' | 'hitl_required';
+type StreamTrajectory = AgentTrajectory;
+type AgentName = 'bureau' | 'documents' | 'risk' | 'compliance' | 'decision';
+
+const AGENTS: AgentName[] = ['bureau', 'documents', 'risk', 'compliance', 'decision'];
 
 const finalMessage: Record<string, string> = {
   approved: 'Aprovado · seu crédito está pronto',
@@ -24,25 +29,97 @@ const finalMessage: Record<string, string> = {
   expired: 'Prazo expirado · inicie uma nova solicitação',
 };
 
+const baseReasoning: Record<Exclude<AgentName, 'decision'>, Omit<ReasoningChunk, 'timestamp_ms'>[]> = {
+  bureau: [
+    { kind: 'thought', text_human: 'Consultando seu CPF no bureau de crédito', text_debug: 'tool=bureau_get_score input=cpf_masked request_id' },
+    { kind: 'tool_call', text_human: 'Score recuperado · histórico de 24 meses analisado', text_debug: 'result.score=780 restrictions=[] latency_budget=1500ms' },
+    { kind: 'conclusion', text_human: 'Histórico de crédito confirmado', text_debug: 'bureau.status=ok span=bureau' },
+  ],
+  documents: [
+    { kind: 'thought', text_human: 'Validando documentos enviados', text_debug: 'tool=documents_validate inputs=document_urls applicant_name' },
+    { kind: 'tool_call', text_human: 'Cruzando dados com base federal', text_debug: 'identity_valid=true income_confirmed=true' },
+    { kind: 'conclusion', text_human: 'Documentos confirmados', text_debug: 'documents.status=ok income_source=ocr' },
+  ],
+  risk: [
+    { kind: 'thought', text_human: 'Calculando seu perfil de risco', text_debug: 'tool=risk_evaluate inputs=bureau_score income_value requested_amount' },
+    { kind: 'tool_call', text_human: 'Considerando histórico, perfil e valor solicitado', text_debug: 'default_probability=0.04 risk_tier=low' },
+    { kind: 'conclusion', text_human: 'Avaliação concluída', text_debug: 'risk.status=ok internal_score=82' },
+  ],
+  compliance: [
+    { kind: 'thought', text_human: 'Conferindo conformidade regulatória', text_debug: 'tool=compliance_check inputs=cpf_masked request_id' },
+    { kind: 'tool_call', text_human: 'Verificações KYC e PLD em curso', text_debug: 'kyc=true pld=true lgpd=true' },
+    { kind: 'conclusion', text_human: 'Conformidade aprovada', text_debug: 'compliance.status=ok tools=verify_kyc,check_pld,verify_lgpd_consent' },
+  ],
+};
+
+function decisionReasoning(finalStatus: FinalVerdict): Omit<ReasoningChunk, 'timestamp_ms'>[] {
+  const conclusion = finalStatus === 'approved'
+    ? { text_human: 'Decisão favorável', text_debug: 'final.status=approved approved_amount=requested_amount' }
+    : finalStatus === 'rejected'
+      ? { text_human: 'Não aprovada', text_debug: 'final.status=rejected approved_amount=0' }
+      : { text_human: 'Encaminhada para análise humana', text_debug: 'final.status=hitl_required reason=threshold_exceeded' };
+  return [
+    { kind: 'thought', text_human: 'Sintetizando a decisão final', text_debug: 'tool=decision_synthesize inputs=t1,t2,requested_amount' },
+    { kind: 'tool_call', text_human: 'Cruzando todos os sinais', text_debug: 'decision_model=explainable_synthesis' },
+    { kind: 'conclusion', ...conclusion },
+  ];
+}
+
+function chunksFor(agent: AgentName, finalStatus: FinalVerdict): ReasoningChunk[] {
+  const chunks = agent === 'decision' ? decisionReasoning(finalStatus) : baseReasoning[agent];
+  return chunks.map((chunk, index) => ({ ...chunk, timestamp_ms: [300, 900, 1500][index] ?? 1500 }));
+}
+
+function phaseFor(agent: AgentName): AgentCall['phase'] {
+  if (agent === 'compliance') return 'T2';
+  if (agent === 'decision') return 'T3';
+  return 'T1';
+}
+
+function inferFinalStatus(cpf: string, amount: string): FinalVerdict {
+  if (cpf.includes('111') || cpf.includes('222')) return 'rejected';
+  return parseFloat(amount) <= 50000 ? 'approved' : 'hitl_required';
+}
+
 function toStreamTrajectory(trajectory: AgentTrajectory | StreamTrajectory | null): StreamTrajectory | null {
   if (!trajectory) return null;
   return {
     ...trajectory,
-    phases: trajectory.phases.map((phase) => ({ ...phase, status: phase.status as AgentStreamPhase['status'] })),
+    phases: trajectory.phases.map((phase) => ({ ...phase, reasoning: phase.reasoning ?? [] })),
   };
 }
 
-function toDebugTrajectory(trajectory: StreamTrajectory): AgentTrajectory {
+function addOrReplacePhase(trajectory: StreamTrajectory, phase: AgentCall, cost: number): StreamTrajectory {
+  const phases = [...trajectory.phases.filter((item) => item.agent !== phase.agent), phase].sort(
+    (a, b) => AGENTS.indexOf(a.agent as AgentName) - AGENTS.indexOf(b.agent as AgentName),
+  );
+  return { ...trajectory, phases, finops: { estimated_cost_brl: cost } };
+}
+
+function appendReasoning(trajectory: StreamTrajectory, agent: AgentName, chunk: ReasoningChunk, cost: number): StreamTrajectory {
   return {
     ...trajectory,
-    phases: trajectory.phases
-      .map((phase) => ({
-        agent: phase.agent,
-        phase: phase.phase,
-        status: phase.status as AgentTrajectory['phases'][number]['status'],
-        latency_ms: phase.latency_ms ?? 0,
-        span_id: phase.span_id,
-      })),
+    phases: trajectory.phases.map((phase) => phase.agent === agent
+      ? { ...phase, reasoning: [...(phase.reasoning ?? []), chunk] }
+      : phase),
+    finops: { estimated_cost_brl: cost },
+  };
+}
+
+function completedTrajectory(request_id: string, finalStatus: FinalVerdict, amount: string): StreamTrajectory {
+  const cost = finalStatus === 'approved' ? 0.121 : finalStatus === 'rejected' ? 0.104 : 0.132;
+  return {
+    request_id,
+    trace_id: 'tr-local-history',
+    finops: { estimated_cost_brl: cost },
+    phases: AGENTS.map((agent, index) => ({
+      agent,
+      phase: phaseFor(agent),
+      status: agent === 'decision' && finalStatus === 'hitl_required' ? 'awaiting_human' : 'success',
+      latency_ms: 1200 + index * 180,
+      span_id: `span-${agent}-retro`,
+      reasoning: chunksFor(agent, finalStatus),
+    })),
   };
 }
 
@@ -51,13 +128,15 @@ export default function CustomerStatusPage() {
   const searchParams = useSearchParams();
   const cpf = searchParams.get('cpf') || 'XXX.XXX.XXX-XX';
   const amount = searchParams.get('amount') || '50000';
-
   const reqIdStr = (Array.isArray(request_id) ? request_id[0] : request_id) || 'req-xyz';
+  const amountValue = Number.isFinite(parseFloat(amount)) ? parseFloat(amount) : 0;
+  const amountLabel = amountValue.toLocaleString('pt-BR', { style: 'currency', currency: 'BRL' });
 
   const [status, setStatus] = useState<CreditAnalysisStatus>('pending');
   const [trajectory, setTrajectory] = useState<StreamTrajectory | null>(null);
   const [error, setError] = useState<string | null>(null);
   const [isSimulated, setIsSimulated] = useState(false);
+  const [instantFinal, setInstantFinal] = useState<FinalVerdict | null>(null);
 
   const [simState, setSimState] = useState({
     status: 'pending' as CreditAnalysisStatus,
@@ -70,16 +149,28 @@ export default function CustomerStatusPage() {
     let pollTimer: NodeJS.Timeout;
     let failureCount = 0;
 
-    if (reqIdStr.startsWith('test-')) {
+    if (reqIdStr.startsWith('test-') || reqIdStr.startsWith('polish-')) {
       setStatus('analyzing');
       setTrajectory(null);
       setError(null);
+      setInstantFinal(null);
       setIsSimulated(true);
       return () => {
         active = false;
         clearTimeout(pollTimer);
       };
     }
+
+    const hydrateFromLocalFinal = () => {
+      const stored = getAnalysis(reqIdStr);
+      if (stored?.final_verdict) {
+        setInstantFinal(stored.final_verdict);
+        setIsSimulated(true);
+        setError(null);
+        return true;
+      }
+      return false;
+    };
 
     const poll = () => {
       fetch(`http://localhost:8086/analysis/${reqIdStr}/status`)
@@ -94,6 +185,10 @@ export default function CustomerStatusPage() {
           setTrajectory(toStreamTrajectory(data.trajectory));
           setError(null);
           setIsSimulated(false);
+          updateAnalysis(reqIdStr, {
+            last_status: data.status,
+            ...(['approved', 'rejected', 'hitl_required'].includes(data.status) ? { final_verdict: data.status } : {}),
+          });
           if (data.status === 'pending' || data.status === 'analyzing') {
             pollTimer = setTimeout(poll, 2000);
           }
@@ -101,6 +196,7 @@ export default function CustomerStatusPage() {
         .catch((err) => {
           if (!active) return;
           console.warn('[Status] Polling failed, retrying...', err);
+          if (hydrateFromLocalFinal()) return;
           failureCount++;
           if (failureCount >= 3) {
             setIsSimulated(true);
@@ -121,36 +217,34 @@ export default function CustomerStatusPage() {
   useEffect(() => {
     if (!isSimulated) return;
 
-    const approved = parseFloat(amount) <= 50000;
+    const finalStatus = instantFinal ?? inferFinalStatus(cpf, amount);
+    const finalCost = finalStatus === 'approved' ? 0.121 : finalStatus === 'rejected' ? 0.104 : 0.132;
     const base: StreamTrajectory = {
       request_id: reqIdStr,
-      trace_id: 'tr-mock-1002931',
+      trace_id: instantFinal ? 'tr-local-history' : 'tr-mock-1002931',
       phases: [],
       finops: { estimated_cost_brl: 0 },
     };
-    const sequence = ['bureau', 'documents', 'risk', 'compliance', 'decision'] as const;
-    const timings: Record<(typeof sequence)[number], { start: number; duration: number; cost: number }> = {
-      bureau: { start: 0, duration: 1400, cost: 0.012 },
-      documents: { start: 1500, duration: 1200, cost: 0.018 },
-      risk: { start: 2800, duration: 1600, cost: 0.045 },
-      compliance: { start: 4500, duration: 2000, cost: 0.089 },
-      decision: { start: 6600, duration: 1100, cost: approved ? 0.121 : 0.104 },
+
+    if (instantFinal) {
+      setSimState({ status: instantFinal, error: null, trajectory: completedTrajectory(reqIdStr, instantFinal, amount) });
+      return;
+    }
+
+    const timings: Record<AgentName, { start: number; cost: number }> = {
+      bureau: { start: 0, cost: 0.012 },
+      documents: { start: 1800, cost: 0.030 },
+      risk: { start: 3600, cost: 0.058 },
+      compliance: { start: 5400, cost: 0.089 },
+      decision: { start: 7200, cost: finalCost },
     };
-    const phaseFor = (index: number): AgentStreamPhase['phase'] => (index < 3 ? 'T1' : index === 3 ? 'T2' : 'T3');
-    const addOrReplacePhase = (trajectory: StreamTrajectory, phase: AgentStreamPhase, cost: number): StreamTrajectory => ({
-      ...trajectory,
-      phases: [...trajectory.phases.filter((item) => item.agent !== phase.agent), phase],
-      finops: { estimated_cost_brl: cost },
-    });
 
     setSimState({ status: 'analyzing', error: null, trajectory: base });
 
     const timers: number[] = [];
-    sequence.forEach((agent, index) => {
+    AGENTS.forEach((agent, index) => {
       const timing = timings[agent];
-      const phase = phaseFor(index);
       const spanId = `span-${agent}-${index}`;
-
       timers.push(window.setTimeout(() => {
         setSimState((prev) => {
           const current = prev.trajectory ?? base;
@@ -159,62 +253,72 @@ export default function CustomerStatusPage() {
             error: null,
             trajectory: addOrReplacePhase(current, {
               agent,
-              phase,
+              phase: phaseFor(agent),
               status: 'in_progress',
               latency_ms: 0,
               span_id: spanId,
-              cost_brl: timing.cost,
+              reasoning: [],
             }, timing.cost),
           };
         });
       }, timing.start));
 
+      chunksFor(agent, finalStatus).forEach((chunk) => {
+        timers.push(window.setTimeout(() => {
+          setSimState((prev) => {
+            const current = prev.trajectory ?? base;
+            return {
+              status: 'analyzing',
+              error: null,
+              trajectory: appendReasoning(current, agent, chunk, timing.cost),
+            };
+          });
+        }, timing.start + chunk.timestamp_ms));
+      });
+
       timers.push(window.setTimeout(() => {
         setSimState((prev) => {
           const current = prev.trajectory ?? base;
+          const nextStatus = agent === 'decision' && finalStatus === 'hitl_required' ? 'awaiting_human' : 'success';
           return {
             status: 'analyzing',
             error: null,
             trajectory: addOrReplacePhase(current, {
               agent,
-              phase,
-              status: 'success',
-              latency_ms: timing.duration,
+              phase: phaseFor(agent),
+              status: nextStatus,
+              latency_ms: 1700,
               span_id: spanId,
-              cost_brl: timing.cost,
+              reasoning: current.phases.find((phase) => phase.agent === agent)?.reasoning ?? chunksFor(agent, finalStatus),
             }, timing.cost),
           };
         });
-      }, timing.start + timing.duration));
+      }, timing.start + 1700));
     });
 
     timers.push(window.setTimeout(() => {
-      setSimState((prev) => {
-        const current = prev.trajectory ?? base;
-        const finalTrajectory = approved ? current : addOrReplacePhase(current, {
-          agent: 'decision',
-          phase: 'T3',
-          status: 'awaiting_human',
-          latency_ms: timings.decision.duration,
-          span_id: 'span-decision-4',
-          cost_brl: timings.decision.cost,
-        }, timings.decision.cost);
-        return {
-          status: approved ? 'approved' : 'hitl_required',
-          error: null,
-          trajectory: finalTrajectory,
-        };
-      });
-    }, 8000));
+      setSimState((prev) => ({
+        status: finalStatus,
+        error: null,
+        trajectory: prev.trajectory ?? completedTrajectory(reqIdStr, finalStatus, amount),
+      }));
+    }, 9500));
 
     return () => timers.forEach((timer) => window.clearTimeout(timer));
-  }, [isSimulated, reqIdStr, amount]);
+  }, [isSimulated, reqIdStr, amount, cpf, instantFinal]);
 
   const activeStatus = isSimulated ? simState.status : status;
   const activeTrajectory = isSimulated ? simState.trajectory : trajectory;
   const activeError = isSimulated ? simState.error : error;
   const isTerminal = !['pending', 'analyzing'].includes(activeStatus);
-  const debugTrajectory = useMemo(() => activeTrajectory ? toDebugTrajectory(activeTrajectory) : null, [activeTrajectory]);
+  const debugTrajectory = useMemo(() => activeTrajectory ? activeTrajectory : null, [activeTrajectory]);
+
+  useEffect(() => {
+    updateAnalysis(reqIdStr, {
+      last_status: activeStatus,
+      ...(['approved', 'rejected', 'hitl_required'].includes(activeStatus) ? { final_verdict: activeStatus as FinalVerdict } : {}),
+    });
+  }, [activeStatus, reqIdStr]);
 
   return (
     <CockpitLayout activeLink="status" portalType="customer" request_id={reqIdStr} liveState={isTerminal ? 'concluded' : 'live'}>
@@ -249,15 +353,14 @@ export default function CustomerStatusPage() {
                 fontWeight: 200,
                 color: 'var(--text)',
                 fontFamily: 'var(--font-mono)',
-                letterSpacing: '-0.02em',
               }}
             >
               Análise em <span style={{ color: 'var(--acc)' }}>tempo real</span>
             </h1>
             <p style={{ margin: '0.4rem 0 0 0', fontSize: '0.85rem', color: 'var(--text)', fontFamily: 'var(--font-mono)' }}>
               <HumanLabel
-                human={<span>CPF: {cpf} · Valor solicitado confirmado</span>}
-                debug={<span>ID: <strong style={{ color: 'var(--blue)' }}>{reqIdStr}</strong>{' | '}CPF: {cpf}{' | '}Valor: <strong style={{ color: 'var(--text)' }}>R$ {parseFloat(amount).toLocaleString('pt-BR', { minimumFractionDigits: 2 })}</strong></span>}
+                human={<span>CPF: {cpf} · Valor: {amountLabel}</span>}
+                debug={<span>ID: <strong style={{ color: 'var(--blue)' }}>{reqIdStr}</strong>{' | '}CPF: {cpf}{' | '}Valor: <strong style={{ color: 'var(--text)' }}>{amountLabel}</strong></span>}
               />
             </p>
           </div>
@@ -304,7 +407,7 @@ export default function CustomerStatusPage() {
 
         {activeTrajectory ? (
           <div style={{ display: 'flex', flexDirection: 'column', gap: '2rem' }}>
-            <AgentStream phases={activeTrajectory.phases} status={activeStatus as CreditAnalysisStatus} mode="customer" isLive={activeStatus === 'analyzing'} />
+            <ReasoningStream phases={activeTrajectory.phases} analysisStatus={activeStatus as CreditAnalysisStatus} isLive={activeStatus === 'analyzing'} />
 
             <DebugOnly>
               {debugTrajectory && <TraceTimeline trajectory={debugTrajectory} />}

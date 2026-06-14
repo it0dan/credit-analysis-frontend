@@ -51,7 +51,7 @@ export default function OperatorQueue() {
   }, []);
 
   return (
-    <CockpitLayout activeLink="queue" portalType="operator">
+    <CockpitLayout activeLink="queue" portalType="operator" liveState="idle">
       <div
         style={{
           maxWidth: '1200px',

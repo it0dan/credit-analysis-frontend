@@ -7,10 +7,10 @@ import { DebugOnly, useDebug } from './debug-context';
 
 interface CockpitLayoutProps {
   children: React.ReactNode;
-  activeLink: 'home' | 'proposal' | 'status' | 'queue' | 'review' | 'analytics' | 'settings';
+  activeLink: 'home' | 'proposal' | 'status' | 'history' | 'queue' | 'review' | 'analytics' | 'settings';
   portalType: 'customer' | 'operator';
   request_id?: string;
-  liveState?: 'live' | 'concluded';
+  liveState?: 'live' | 'concluded' | 'idle';
 }
 
 export function CockpitLayout({ children, activeLink, portalType, request_id, liveState = 'live' }: CockpitLayoutProps) {
@@ -29,6 +29,7 @@ export function CockpitLayout({ children, activeLink, portalType, request_id, li
     ? [
         { id: 'proposal', label: '> Solicitar Crédito', path: '/' },
         { id: 'status', label: '> Acompanhamento', path: request_id ? `/status/${request_id}` : '/status/draft', disabled: !request_id },
+        { id: 'history', label: '> Histórico', path: '/historico' },
         { id: 'settings', label: '> Configurações', path: '#', disabled: true },
       ]
     : [
@@ -98,7 +99,11 @@ export function CockpitLayout({ children, activeLink, portalType, request_id, li
           }}
         >
           <span style={{ color: 'var(--line2)' }}>[</span>
-          {showTechnicalHud ? (
+          {liveState === 'idle' ? (
+            <>
+              <span style={{ color: 'var(--text)' }}>◇ ATIVO</span>
+            </>
+          ) : showTechnicalHud ? (
             <>
               <Pulse color="acc" size={7} />
               <span style={{ color: 'var(--acc)' }}>LIVE</span>
@@ -275,7 +280,11 @@ export function CockpitLayout({ children, activeLink, portalType, request_id, li
       >
         <Brand variant="footer" />
         <div style={{ display: 'flex', alignItems: 'center', gap: '0.65rem' }}>
-          {showTechnicalHud ? (
+          {liveState === 'idle' ? (
+            <>
+              <span style={{ color: 'var(--text)' }}>ativo</span>
+            </>
+          ) : showTechnicalHud ? (
             <>
               <span style={{ color: 'var(--acc)' }}>STATUS</span>
               <span style={{ color: 'var(--line2)' }}>·</span>

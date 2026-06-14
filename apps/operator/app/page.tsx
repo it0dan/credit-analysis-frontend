@@ -19,7 +19,7 @@ export default function OperatorHome() {
   ];
 
   return (
-    <CockpitLayout activeLink="home" portalType="operator">
+    <CockpitLayout activeLink="home" portalType="operator" liveState="idle">
       <div
         style={{
           maxWidth: '1200px',

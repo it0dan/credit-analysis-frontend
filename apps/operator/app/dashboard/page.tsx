@@ -23,7 +23,7 @@ export default function OperatorDashboard() {
   const totalCost = costBreakdown.reduce((sum, item) => sum + item.costBrl, 0);
 
   return (
-    <CockpitLayout activeLink="analytics" portalType="operator">
+    <CockpitLayout activeLink="analytics" portalType="operator" liveState="idle">
       <div
         style={{
           maxWidth: '1200px',

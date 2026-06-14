@@ -18,7 +18,7 @@ const jetbrainsMono = JetBrains_Mono({
 });
 
 export const metadata: Metadata = {
-  title: 'Crédito A2A — Portal do Cliente',
+  title: 'Análise de Crédito Agêntica — Portal do Cliente',
   description: 'Solicite e acompanhe sua proposta de crédito em tempo real',
 };
 

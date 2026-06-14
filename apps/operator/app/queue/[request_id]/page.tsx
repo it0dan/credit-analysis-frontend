@@ -5,12 +5,39 @@ import { useParams, useSearchParams, useRouter } from 'next/navigation';
 import Link from 'next/link';
 import { TraceTimeline } from '@repo/ui/trace-timeline';
 import { CostDisplay } from '@repo/ui/cost-display';
-import { AgentStream } from '@repo/ui/agent-stream';
+import { ReasoningStream } from '@repo/ui/reasoning-stream';
 import { HITLPanel } from '@repo/ui/hitl-panel';
 import { CockpitLayout } from '@repo/ui/cockpit-layout';
 import { Tag } from '@repo/ui/tag';
 import { Pulse } from '@repo/ui/pulse';
-import type { HITLRequest, OperatorDecision, AgentTrajectory } from '@repo/types';
+import type { HITLRequest, OperatorDecision, AgentTrajectory, ReasoningChunk } from '@repo/types';
+
+
+function reasoning(agent: string): ReasoningChunk[] {
+  const matrix: Record<string, Omit<ReasoningChunk, 'timestamp_ms'>[]> = {
+    bureau: [
+      { kind: 'thought', text_human: 'Consultando seu CPF no bureau de crédito', text_debug: 'tool=bureau_get_score input=cpf_masked request_id' },
+      { kind: 'tool_call', text_human: 'Score recuperado · histórico de 24 meses analisado', text_debug: 'result.score=790 restrictions=[] latency_budget=1500ms' },
+      { kind: 'conclusion', text_human: 'Histórico de crédito confirmado', text_debug: 'bureau.status=ok span=bureau' },
+    ],
+    risk: [
+      { kind: 'thought', text_human: 'Calculando seu perfil de risco', text_debug: 'tool=risk_evaluate inputs=bureau_score income_value requested_amount' },
+      { kind: 'tool_call', text_human: 'Considerando histórico, perfil e valor solicitado', text_debug: 'default_probability=0.03 risk_tier=low' },
+      { kind: 'conclusion', text_human: 'Avaliação concluída', text_debug: 'risk.status=ok internal_score=88' },
+    ],
+    compliance: [
+      { kind: 'thought', text_human: 'Conferindo conformidade regulatória', text_debug: 'tool=compliance_check inputs=cpf_masked request_id' },
+      { kind: 'tool_call', text_human: 'Verificações KYC e PLD em curso', text_debug: 'kyc=true pld=true lgpd=true' },
+      { kind: 'conclusion', text_human: 'Conformidade aprovada', text_debug: 'compliance.status=ok tools=verify_kyc,check_pld,verify_lgpd_consent' },
+    ],
+    decision: [
+      { kind: 'thought', text_human: 'Sintetizando a decisão final', text_debug: 'tool=decision_synthesize inputs=t1,t2,requested_amount' },
+      { kind: 'tool_call', text_human: 'Cruzando todos os sinais', text_debug: 'decision_model=explainable_synthesis' },
+      { kind: 'conclusion', text_human: 'Encaminhada para análise humana', text_debug: 'final.status=hitl_required reason=threshold_exceeded' },
+    ],
+  };
+  return (matrix[agent] ?? []).map((chunk, index) => ({ ...chunk, timestamp_ms: [300, 900, 1500][index] ?? 1500 }));
+}
 
 export default function OperatorReviewDetailPage() {
   const { request_id } = useParams();
@@ -34,9 +61,9 @@ export default function OperatorReviewDetailPage() {
       request_id: reqIdStr,
       trace_id: 'tr-op-7718291-xyz',
       phases: [
-        { agent: 'bureau', phase: 'T1', status: 'success', latency_ms: 1100, span_id: 'span-op-bureau-1' },
-        { agent: 'risk', phase: 'T1', status: 'success', latency_ms: 1450, span_id: 'span-op-risk-1' },
-        { agent: 'compliance', phase: 'T2', status: 'success', latency_ms: 1980, span_id: 'span-op-compliance-2' },
+        { agent: 'bureau', phase: 'T1', status: 'success', latency_ms: 1100, span_id: 'span-op-bureau-1', reasoning: reasoning('bureau') },
+        { agent: 'risk', phase: 'T1', status: 'success', latency_ms: 1450, span_id: 'span-op-risk-1', reasoning: reasoning('risk') },
+        { agent: 'compliance', phase: 'T2', status: 'success', latency_ms: 1980, span_id: 'span-op-compliance-2', reasoning: reasoning('compliance') },
       ],
       finops: { estimated_cost_brl: 0.0784 },
     };
@@ -288,7 +315,7 @@ export default function OperatorReviewDetailPage() {
           <div style={{ display: 'flex', flexDirection: 'column', gap: '2rem' }}>
             {trajectory && (
               <>
-                <AgentStream phases={trajectory.phases} status="analyzing" mode="operator" isLive={false} />
+                <ReasoningStream phases={trajectory.phases} analysisStatus="hitl_required" isLive={false} />
                 <TraceTimeline trajectory={trajectory} />
                 <CostDisplay cost_brl={trajectory.finops.estimated_cost_brl} />
               </>

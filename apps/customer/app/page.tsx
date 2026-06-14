@@ -1,17 +1,27 @@
 'use client';
 
-import React, { useState } from 'react';
+import React, { useEffect, useMemo, useState } from 'react';
+import Link from 'next/link';
 import { useRouter } from 'next/navigation';
 import { CockpitLayout } from '@repo/ui/cockpit-layout';
 import { Pulse } from '@repo/ui/pulse';
 import { Tag } from '@repo/ui/tag';
+import { addAnalysis, listAnalyses, maskCpf, type StoredAnalysis } from '@repo/ui/analysis-history';
 
 export default function CustomerHome() {
   const [cpf, setCpf] = useState('');
   const [amount, setAmount] = useState('');
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
+  const [analyses, setAnalyses] = useState<StoredAnalysis[]>([]);
   const router = useRouter();
+
+  useEffect(() => {
+    setAnalyses(listAnalyses());
+  }, []);
+
+  const activeAnalyses = useMemo(() => analyses.filter((item) => !item.final_verdict), [analyses]);
+  const latestActive = activeAnalyses[0];
 
   const handleCpfChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     let value = e.target.value.replace(/\D/g, '');
@@ -51,7 +61,14 @@ export default function CustomerHome() {
         return res.json();
       })
       .then((data) => {
-        router.push(`/status/${data.request_id}?cpf=${encodeURIComponent(cpf)}&amount=${amount}`);
+        addAnalysis({
+          request_id: data.request_id,
+          cpf_masked: maskCpf(cpf),
+          amount_brl: parseFloat(amount),
+          final_verdict: null,
+          last_status: data.status === 'hitl_required' ? 'hitl_required' : data.status === 'rejected' ? 'rejected' : 'analyzing',
+        });
+        router.push(`/status/${data.request_id}?cpf=${encodeURIComponent(maskCpf(cpf))}&amount=${amount}`);
       })
       .catch((err) => {
         setError(err instanceof Error ? err.message : 'Falha na conexão com o orquestrador multiagente.');
@@ -60,7 +77,7 @@ export default function CustomerHome() {
   };
 
   return (
-    <CockpitLayout activeLink="proposal" portalType="customer">
+    <CockpitLayout activeLink="proposal" portalType="customer" liveState="idle">
       <div
         style={{
           display: 'flex',
@@ -81,7 +98,33 @@ export default function CustomerHome() {
             borderLeft: '2px solid var(--acc)',
           }}
         >
-          {/* Header */}
+          {latestActive && (
+            <Link
+              href={`/status/${latestActive.request_id}?cpf=${encodeURIComponent(latestActive.cpf_masked)}&amount=${latestActive.amount_brl}`}
+              style={{
+                display: 'flex',
+                alignItems: 'center',
+                justifyContent: 'space-between',
+                gap: '1rem',
+                border: '1px solid var(--acc)',
+                color: 'var(--acc)',
+                textDecoration: 'none',
+                padding: '0.85rem 1rem',
+                marginBottom: '1.5rem',
+                fontFamily: 'var(--font-mono)',
+                fontSize: '0.78rem',
+                textTransform: 'uppercase',
+                letterSpacing: 'var(--ls-label)',
+              }}
+            >
+              <span style={{ display: 'inline-flex', alignItems: 'center', gap: '0.55rem' }}>
+                <Pulse color="acc" size={7} />
+                {activeAnalyses.length} análise{activeAnalyses.length > 1 ? 's' : ''} em andamento
+              </span>
+              <span>continuar acompanhamento</span>
+            </Link>
+          )}
+
           <div style={{ textAlign: 'center', marginBottom: '2.5rem' }}>
             <Tag dim="step 01">solicitação</Tag>
             <div
@@ -116,7 +159,6 @@ export default function CustomerHome() {
           </div>
 
           <form onSubmit={handleSubmit} style={{ display: 'flex', flexDirection: 'column', gap: '1.5rem' }}>
-            {/* CPF */}
             <div style={{ display: 'flex', flexDirection: 'column', gap: '0.5rem' }}>
               <label htmlFor="cpf" style={{ display: 'inline-block' }}>
                 <Tag dim="cpf">titular</Tag>
@@ -146,7 +188,6 @@ export default function CustomerHome() {
               />
             </div>
 
-            {/* Valor */}
             <div style={{ display: 'flex', flexDirection: 'column', gap: '0.5rem' }}>
               <label htmlFor="amount" style={{ display: 'inline-block' }}>
                 <Tag dim="R$">valor solicitado</Tag>

@@ -3,71 +3,100 @@
 ## Estado Atual
 
 - Branch local: `main`
-- Repositório limpo no workspace
-- Commits recentes feitos localmente, mas ainda não há confirmação de push para `origin/main`
-- `git rev-list --left-right --count origin/main...HEAD` mostrou `0 16`, então a branch local está 16 commits à frente do remoto
+- Repositório frontend com mudanças prontas para commit/push
+- Backends auditados:
+  - `credit-analysis-agent`: possui alteração pré-existente em `src/episodic_memory.json`
+  - `compliance-agent`: sem alterações locais
+- Frontend rodando para teste manual em:
+  - Customer: `http://localhost:3000`
+  - Operator: `http://localhost:3001`
 
-## O Que Já Foi Feito
+## Implementado Nesta Rodada
 
-- OpenSpec criado para os dois fluxos:
-  - `openspec/changes/accent-density-pass/`
-  - `openspec/changes/streaming-and-cleanup/`
-  - `openspec/changes/humanize-customer-experience/`
-- `Brand` do header está clicável para `/`
-- Stat de marketing foi removido da home do customer e preservado no operator
-- `OP-1002`, fallback badge e IDs técnicos do customer ficaram atrás de debug
-- HUD customer conclui em estado terminal e para de mostrar `AO VIVO`
-- `AgentPhase['status']` foi ampliado com `in_progress` e `awaiting_human`
-- `AgentStream` foi refeito para a sequência visual:
-  - `NA FILA`
-  - `PROCESSANDO`
-  - `CONCLUÍDO`
-  - `AGUARDANDO HUMANO`
-  - `ERRO`
-- Screenshots de validação foram gerados em `docs/screenshots/`
+### agentic-reasoning-and-memory
 
-## Validação Já Rodada
+- Rebrand frontend para **Análise de Crédito Agêntica**
+- Wordmark `◇ ANÁLISE AGÊNTICA`
+- `ReasoningChunk` e `AgentCall.reasoning?` em `packages/types`
+- `ReasoningStream` em `packages/ui/src/reasoning-stream.tsx`
+- Customer `/status/[request_id]` com chunks por agente e typing animation
+- Operator `/queue/[request_id]` usando o mesmo stream em debug técnico
+- Persistência local em `packages/ui/src/analysis-history.ts`
+- Customer `/historico`
+- Banner de análise ativa na home
+- Fallback local para status final quando backend não encontra o request
 
-- `npm run check-types` passou
-- `npx @axe-core/cli http://localhost:3000 http://localhost:3001` passou com `0 violations found`
-- Densidade aquamarine medida nos screenshots:
-  - customer home: `6.79%`
-  - customer status mid: `4.25%`
-  - customer status end: `5.66%`
-- Validação temporal do status customer:
-  - aos 3s, aparece `PROCESSANDO`
-  - aos 9s, aparecem os 5 agentes concluídos e não aparece `AO VIVO`
+### polish-pass-customer
 
-## Commits Locais
+- `CockpitLayout.liveState` estendido com `idle`
+- `liveState="idle"` aplicado em páginas sem análise em curso
+- `/historico` voltou ao padrão visual com acento lateral, sem barra aquamarine maciça
+- Labels finais do reasoning stream localizados para pt-BR (`APROVADO`, `NÃO APROVADA`, etc.)
+- Removido max-height/scroll interno que clipava o primeiro chunk do bureau em debug
 
-- `304cdf2` `docs: add streaming cleanup openspec`
-- `de77108` `fix(ui): link cockpit brand home`
-- `9c713f5` `fix(ui): remove customer marketing stat`
-- `e9d88ac` `fix(ui): gate customer operation leaks`
-- `4e1567d` `fix(ui): stream sequential processing states`
-- `a7f0ca4` `fix(ui): preserve throughput stat in operator`
-- `87eed24` `test(ui): capture streaming cleanup evidence`
+## OpenSpec Atualizado
 
-## Pendências De Documentação
+- `openspec/changes/agentic-reasoning-and-memory/`
+  - `proposal.md`
+  - `design.md`
+  - `spec.md`
+  - `tasks.md`
+  - `prompt.md`
+  - `backend-debts.md`
+- `openspec/changes/polish-pass-customer/`
+  - `proposal.md`
+  - `tasks.md`
+  - `prompt.md`
 
-- `AGENTS.md` ainda descreve o fluxo antigo com SSE/AG-UI como se fosse a fonte atual do customer
-- `README.md` ainda contém material de template do `create-turbo`/`create-next-app`
-- `apps/customer/README.md` e `apps/operator/README.md` também continuam como template padrão
-- Se a documentação raiz for considerada parte do fechamento, ela precisa ser atualizada para refletir:
-  - customer humanizado
-  - debug mode
-  - operator como tela técnica
-  - OpenSpec como fonte das mudanças recentes
+## Documentação Atualizada
 
-## Observações De Sincronização
+- `README.md`
+- `AGENTS.md`
+- `HANDOFF.md`
+- `apps/customer/README.md`
+- `apps/operator/README.md`
 
-- O remoto está configurado como `origin` em `git@github.com:it0dan/credit-analysis-frontend.git`
-- A branch local ainda não foi confirmada como pushada após os commits desta sessão
-- Antes de retomar, vale checar `git status`, `git log --oneline origin/main..HEAD` e fazer o push final se necessário
+## Validação Rodada
 
-## Próximo Passo Recomendado
+- `npm run check-types`: passou
+- `npx @axe-core/cli http://localhost:3000 http://localhost:3001`: 0 violations
+- Rebrand grep frontend: zero ocorrências antigas
+- Contradição `valor solicitado confirmado`: zero ocorrências
+- HUD audit:
+  - `/`: `AO VIVO` = 0
+  - `/historico`: `AO VIVO` = 0
+- DOM reasoning:
+  - primeiro chunk bureau visível em debug
+  - `APROVADO` em pt-BR no estado final
+  - sem `APPROVED`/`approved` cru no badge
+- Densidade aquamarine polish:
+  - home: `13.65%`
+  - histórico: `8.88%`
+  - status mid: `7.27%`
+  - status end: `8.84%`
+  - status debug: `6.91%`
 
-1. Atualizar `AGENTS.md`
-2. Limpar `README.md`
-3. Revisar os READMEs dos apps
-4. Confirmar push de `main` para `origin`
+## Screenshots Gerados
+
+- `docs/screenshots/customer-home-rebrand.png`
+- `docs/screenshots/customer-status-reasoning-mid.png`
+- `docs/screenshots/customer-status-reasoning-end.png`
+- `docs/screenshots/customer-status-reasoning-debug.png`
+- `docs/screenshots/customer-historico.png`
+- `docs/screenshots/polish-customer-home.png`
+- `docs/screenshots/polish-customer-historico.png`
+- `docs/screenshots/polish-customer-status-mid.png`
+- `docs/screenshots/polish-customer-status-end.png`
+- `docs/screenshots/polish-customer-status-debug.png`
+
+## Débitos Registrados
+
+Ver `openspec/changes/agentic-reasoning-and-memory/backend-debts.md`:
+
+- Persistência durável real no `credit-analysis-agent`
+- SSE real de reasoning chunks pelo backend
+- Inventário de rebrand backend
+
+## Próximo Passo
+
+Commitar e fazer push do frontend para `origin/main`. Para `credit-analysis-agent`, decidir explicitamente se `src/episodic_memory.json` deve ser versionado ou tratado como estado runtime local.
