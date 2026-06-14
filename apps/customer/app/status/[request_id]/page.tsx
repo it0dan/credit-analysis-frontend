@@ -167,10 +167,11 @@ export default function CustomerStatusPage() {
   const activeStatus = isSimulated ? simState.status : status;
   const activeTrajectory = isSimulated ? simState.trajectory : trajectory;
   const activeError = isSimulated ? simState.error : error;
+  const isTerminal = !['pending', 'analyzing'].includes(activeStatus);
   const debugTrajectory = useMemo(() => activeTrajectory ? toDebugTrajectory(activeTrajectory) : null, [activeTrajectory]);
 
   return (
-    <CockpitLayout activeLink="status" portalType="customer" request_id={reqIdStr}>
+    <CockpitLayout activeLink="status" portalType="customer" request_id={reqIdStr} liveState={isTerminal ? 'concluded' : 'live'}>
       <div
         style={{
           maxWidth: '1000px',
