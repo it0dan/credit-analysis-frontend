@@ -1,69 +1,58 @@
 /* packages/ui/tokens/tokens.css
-   Fonte canônica de design tokens — não declarar tokens de cor/tipo/forma em outro lugar */
+   Fonte canônica de design tokens — espelha 1:1 o :root do deck
+   harness-engineering-nodebr.html. NÃO ALTERAR valores hex sem ADR.
+   Estética: terminal-brutalism. Sem radius grande, sem shadow blur, sem glow. */
 
-@layer base {
-  :root {
-    /* Superfícies */
-    --bg:    #0A0E1A;
-    --surf:  #111827;
-    --surf2: #1F2937;
+:root {
+  color-scheme: dark;
 
-    /* Acento principal */
-    --acc:      #7C3AED;
-    --acc-glow: rgba(124, 58, 237, 0.3);
+  /* ── Superfícies ── */
+  --bg:     #0A0E14;
+  --surf:   #0F141B;
 
-    /* Semântica */
-    --ok:         #10B981;
-    --ok-glow:    rgba(16, 185, 129, 0.25);
-    --alert:      #EF4444;
-    --alert-glow: rgba(239, 68, 68, 0.25);
-    --warn:       #F59E0B;
-    --warn-glow:  rgba(245, 158, 11, 0.25);
-    --blue:       #3B82F6;
-    --blue-glow:  rgba(59, 130, 246, 0.25);
+  /* ── Acento principal (signature) ── */
+  --acc:    #7FFFD4;   /* aquamarine */
 
-    /* Texto */
-    --text:  #F9FAFB;
-    --muted: #6B7280;
+  /* ── Semântica ── */
+  --alert:  #FF4655;
+  --warn:   #FFB84D;
+  --purple: #C9A8F5;
+  --blue:   #7EB8F7;
 
-    /* Bordas */
-    --line:  rgba(255, 255, 255, 0.08);
-    --line2: rgba(255, 255, 255, 0.15);
+  /* ── Texto ── */
+  --text:   #E6EDF3;
+  --muted:  #6B7785;
 
-    /* Fontes — variáveis injetadas pelo layout.tsx via next/font */
-    --font-sans: var(--font-inter, 'Inter', system-ui, sans-serif);
-    --font-mono: var(--font-jetbrains, 'JetBrains Mono', 'Fira Code', monospace);
+  /* ── Linhas ── */
+  --line:   #1E2530;
+  --line2:  #2A3340;
 
-    /* Formas */
-    --radius:     12px;
-    --radius-sm:  6px;
-    --radius-pill: 9999px;
+  /* ── Fontes (injetadas pelo next/font no layout.tsx) ── */
+  --font-mono: var(--font-jetbrains, 'JetBrains Mono', ui-monospace, monospace);
+  --font-sans: var(--font-inter, 'Inter', system-ui, sans-serif);
 
-    /* Sombras */
-    --shadow:     0 4px 24px rgba(0, 0, 0, 0.4);
-    --shadow-acc: 0 0 20px var(--acc-glow);
-  }
+  /* ── Letter-spacing canônico (identidade da marca) ── */
+  --ls-label:         0.2em;
+  --ls-label-strong:  0.3em;
 
-  /* Tema claro */
-  [data-theme="light"] {
-    --bg:    #F9FAFB;
-    --surf:  #FFFFFF;
-    --surf2: #F3F4F6;
-    --text:  #111827;
-    --muted: #6B7280;
-    --line:  rgba(0, 0, 0, 0.08);
-    --line2: rgba(0, 0, 0, 0.15);
-  }
+  /* ── Espaços ── */
+  --space-1: 4px;  --space-2: 8px;  --space-3: 12px;
+  --space-4: 16px; --space-5: 24px; --space-6: 32px;
+  --space-7: 48px; --space-8: 68px;
 
-  /* Acessibilidade — desativa animações para usuários com preferência */
-  @media (prefers-reduced-motion: reduce) {
-    *,
-    *::before,
-    *::after {
-      animation-duration: 0.01ms !important;
-      animation-iteration-count: 1 !important;
-      transition-duration: 0.01ms !important;
-      scroll-behavior: auto !important;
-    }
+  /* ── Forma (brutalismo: zero por padrão) ── */
+  --radius-0: 0;
+  --radius-1: 2px;   /* uso excepcional, justificado em ADR */
+}
+
+/* Sem tema claro. Sem shadow. Sem glow. Sem radius grande.
+   Se você está prestes a adicionar qualquer um desses, pare e abra um ADR. */
+
+@media (prefers-reduced-motion: reduce) {
+  *, *::before, *::after {
+    animation-duration: 0.001ms !important;
+    animation-iteration-count: 1 !important;
+    transition-duration: 0.001ms !important;
+    scroll-behavior: auto !important;
   }
 }

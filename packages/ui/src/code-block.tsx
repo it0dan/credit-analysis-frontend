@@ -23,7 +23,7 @@ export function CodeBlock({ code, language, copyable = true, maxHeight = '320px'
     <div
       style={{
         position: 'relative',
-        borderRadius: 'var(--radius)',
+        borderRadius: 0,
         border: '1px solid var(--line)',
         overflow: 'hidden',
         background: 'var(--bg)',
@@ -58,10 +58,10 @@ export function CodeBlock({ code, language, copyable = true, maxHeight = '320px'
               fontWeight: 700,
               fontFamily: 'var(--font-sans)',
               padding: '0.2rem 0.6rem',
-              borderRadius: 'var(--radius-sm)',
+              borderRadius: 0,
               border: '1px solid var(--line2)',
-              background: copied ? 'var(--ok-glow)' : 'transparent',
-              color: copied ? 'var(--ok)' : 'var(--muted)',
+              background: copied ? 'rgba(127,255,212,0.08)' : 'transparent',
+              color: copied ? 'var(--acc)' : 'var(--muted)',
               cursor: 'pointer',
               transition: 'color 0.15s, background 0.15s',
             }}

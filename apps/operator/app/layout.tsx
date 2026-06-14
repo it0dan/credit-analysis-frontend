@@ -5,12 +5,14 @@ import './globals.css';
 const inter = Inter({
   subsets: ['latin'],
   display: 'swap',
+  weight: ['300', '400', '500'],
   variable: '--font-inter',
 });
 
 const jetbrainsMono = JetBrains_Mono({
   subsets: ['latin'],
   display: 'swap',
+  weight: ['200', '300', '400', '500'],
   variable: '--font-jetbrains',
 });
 

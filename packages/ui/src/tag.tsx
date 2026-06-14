@@ -9,33 +9,32 @@ interface TagProps {
   children: React.ReactNode;
 }
 
-const variantMap: Record<TagVariant, { color: string; bg: string; border: string; glowClass: string }> = {
-  ok:    { color: 'var(--ok)',    bg: 'var(--ok-glow)',    border: 'var(--ok)',    glowClass: 'glow-pulse-emerald' },
-  warn:  { color: 'var(--warn)',  bg: 'var(--warn-glow)',  border: 'var(--warn)',  glowClass: 'glow-pulse-amber'   },
-  alert: { color: 'var(--alert)', bg: 'var(--alert-glow)', border: 'var(--alert)', glowClass: 'glow-pulse-rose'    },
-  blue:  { color: 'var(--blue)',  bg: 'var(--blue-glow)',  border: 'var(--blue)',  glowClass: ''                   },
-  acc:   { color: 'var(--acc)',   bg: 'var(--acc-glow)',   border: 'var(--acc)',   glowClass: 'glow-pulse-primary' },
-  muted: { color: 'var(--muted)', bg: 'rgba(107,114,128,0.15)', border: 'var(--muted)', glowClass: '' },
+const variantMap: Record<TagVariant, { color: string; border: string }> = {
+  ok:    { color: 'var(--blue)',  border: 'var(--blue)'  },
+  warn:  { color: 'var(--warn)',  border: 'var(--warn)'  },
+  alert: { color: 'var(--alert)', border: 'var(--alert)' },
+  blue:  { color: 'var(--blue)',  border: 'var(--blue)'  },
+  acc:   { color: 'var(--acc)',   border: 'var(--acc)'   },
+  muted: { color: 'var(--muted)', border: 'var(--line2)' },
 };
 
-export function Tag({ variant = 'acc', size = 'sm', pulse = false, children }: TagProps) {
+export function Tag({ variant = 'acc', size = 'sm', children }: TagProps) {
   const v = variantMap[variant];
 
   return (
     <span
-      className={pulse ? v.glowClass : undefined}
       style={{
         display: 'inline-flex',
         alignItems: 'center',
         padding: size === 'sm' ? '0.2rem 0.55rem' : '0.35rem 0.85rem',
-        borderRadius: 'var(--radius-pill)',
+        borderRadius: 0,
         fontSize: size === 'sm' ? '0.7rem' : '0.8rem',
-        fontWeight: 700,
+        fontWeight: 500,
         fontFamily: 'var(--font-mono)',
-        letterSpacing: '0.05em',
+        letterSpacing: 'var(--ls-label)',
         textTransform: 'uppercase',
         color: v.color,
-        background: v.bg,
+        background: 'transparent',
         border: `1px solid ${v.border}`,
         whiteSpace: 'nowrap',
       }}

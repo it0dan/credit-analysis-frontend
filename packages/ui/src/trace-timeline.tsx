@@ -7,12 +7,9 @@ interface TraceTimelineProps {
 }
 
 export function TraceTimeline({ trajectory }: TraceTimelineProps) {
-  // Group calls by phase
   const phasesOrder: ('T1' | 'T2' | 'T3')[] = ['T1', 'T2', 'T3'];
   const groupedCalls = trajectory.phases.reduce((acc, call) => {
-    if (!acc[call.phase]) {
-      acc[call.phase] = [];
-    }
+    if (!acc[call.phase]) acc[call.phase] = [];
     acc[call.phase].push(call);
     return acc;
   }, {} as Record<'T1' | 'T2' | 'T3', AgentCall[]>);
@@ -29,68 +26,73 @@ export function TraceTimeline({ trajectory }: TraceTimelineProps) {
         display: 'flex',
         flexDirection: 'column',
         gap: '2rem',
-        padding: '2rem',
-        backgroundColor: 'hsla(223, 47%, 12%, 0.6)',
-        backdropFilter: 'blur(16px)',
-        WebkitBackdropFilter: 'blur(16px)',
-        borderRadius: '16px',
-        border: '1px solid hsla(217, 91%, 60%, 0.15)',
-        boxShadow: '0 8px 32px 0 rgba(0, 0, 0, 0.4), inset 0 1px 1px hsla(0, 0%, 100%, 0.05)',
-        fontFamily: "'Plus Jakarta Sans', system-ui, sans-serif",
-        color: 'hsl(210, 40%, 98%)',
-        animation: 'fadeIn 0.6s ease-out',
+        padding: '1.75rem',
+        backgroundColor: 'var(--surf)',
+        border: '1px solid var(--line)',
+        borderLeft: '2px solid var(--blue)',
+        fontFamily: 'var(--font-sans)',
+        color: 'var(--text)',
+        animation: 'fadeIn 0.4s ease-out',
       }}
     >
-      <div 
-        style={{ 
-          display: 'flex', 
-          justifyContent: 'space-between', 
-          alignItems: 'center', 
-          borderBottom: '1px solid hsla(217, 91%, 60%, 0.1)', 
-          paddingBottom: '1.25rem' 
+      <div
+        style={{
+          display: 'flex',
+          justifyContent: 'space-between',
+          alignItems: 'center',
+          borderBottom: '1px solid var(--line)',
+          paddingBottom: '1rem',
         }}
       >
         <div>
-          <h3 
-            style={{ 
-              margin: 0, 
-              fontSize: '1.25rem', 
-              fontWeight: 800, 
-              color: 'hsl(210, 40%, 98%)',
-              fontFamily: "'Outfit', sans-serif",
-              letterSpacing: '-0.02em'
+          <h3
+            style={{
+              margin: 0,
+              fontSize: '1rem',
+              fontWeight: 200,
+              color: 'var(--text)',
+              fontFamily: 'var(--font-mono)',
+              letterSpacing: '-0.01em',
             }}
           >
             Trajetória Executiva A2A
           </h3>
-          <p style={{ margin: '0.25rem 0 0 0', fontSize: '0.875rem', color: 'hsl(215, 20%, 75%)' }}>
+          <p style={{ margin: '0.25rem 0 0 0', fontSize: '0.825rem', color: 'var(--muted)' }}>
             Análise de spans e performance por turnos cognitivos
           </p>
         </div>
         <div style={{ textAlign: 'right' }}>
-          <span style={{ fontSize: '0.75rem', color: 'hsl(215, 16%, 50%)', fontFamily: 'monospace', background: 'hsla(223, 47%, 8%, 0.5)', padding: '0.25rem 0.5rem', borderRadius: '4px', border: '1px solid hsla(217, 91%, 60%, 0.08)' }}>
-            Trace ID: {trajectory.trace_id}
+          <span
+            style={{
+              fontSize: '0.7rem',
+              color: 'var(--muted)',
+              fontFamily: 'var(--font-mono)',
+              background: 'var(--bg)',
+              padding: '0.2rem 0.5rem',
+              border: '1px solid var(--line)',
+            }}
+          >
+            Trace: {trajectory.trace_id}
           </span>
           {trajectory.finops && (
-            <div style={{ marginTop: '0.5rem', fontSize: '0.9rem', fontWeight: 700, color: 'hsl(142, 76%, 45%)', textShadow: '0 0 10px hsla(142, 76%, 45%, 0.2)' }}>
-              Custo: R$ {trajectory.finops.estimated_cost_brl.toFixed(4)}
+            <div style={{ marginTop: '0.4rem', fontSize: '0.85rem', color: 'var(--acc)', fontFamily: 'var(--font-mono)' }}>
+              R$ {trajectory.finops.estimated_cost_brl.toFixed(4)}
             </div>
           )}
         </div>
       </div>
 
-      <div style={{ position: 'relative', display: 'flex', flexDirection: 'column', gap: '2.5rem' }}>
-        {/* Vertical timeline connector line with a glowing gradient */}
+      <div style={{ position: 'relative', display: 'flex', flexDirection: 'column', gap: '2rem' }}>
+        {/* Vertical connector */}
         <div
           style={{
             position: 'absolute',
-            left: '21px',
+            left: '17px',
             top: '20px',
             bottom: '20px',
-            width: '2px',
-            background: 'linear-gradient(to bottom, hsl(217, 91%, 60%) 30%, hsla(217, 91%, 60%, 0.2))',
+            width: '1px',
+            background: 'var(--line2)',
             zIndex: 0,
-            opacity: 0.8
           }}
         />
 
@@ -99,44 +101,40 @@ export function TraceTimeline({ trajectory }: TraceTimelineProps) {
           if (calls.length === 0) return null;
 
           return (
-            <div key={phase} style={{ display: 'flex', gap: '1.75rem', position: 'relative', zIndex: 1 }}>
-              {/* Timeline circle icon with a premium glowing border */}
+            <div key={phase} style={{ display: 'flex', gap: '1.5rem', position: 'relative', zIndex: 1 }}>
+              {/* Phase marker */}
               <div
                 style={{
-                  width: '44px',
-                  height: '44px',
-                  borderRadius: '50%',
-                  backgroundColor: 'hsl(223, 47%, 8%)',
-                  border: '2px solid hsl(217, 91%, 60%)',
+                  width: '36px',
+                  height: '36px',
+                  backgroundColor: 'var(--bg)',
+                  border: '1px solid var(--acc)',
                   display: 'flex',
                   alignItems: 'center',
                   justifyContent: 'center',
-                  fontWeight: 800,
-                  color: 'hsl(217, 91%, 60%)',
-                  boxShadow: '0 0 15px hsla(217, 91%, 60%, 0.4)',
-                  fontFamily: "'Outfit', sans-serif",
+                  fontWeight: 400,
+                  color: 'var(--acc)',
+                  fontFamily: 'var(--font-mono)',
+                  fontSize: '0.75rem',
                   flexShrink: 0,
                 }}
               >
                 {phase}
               </div>
 
-              {/* Phase content */}
               <div style={{ flex: 1 }}>
-                <h4 
-                  style={{ 
-                    margin: '0.6rem 0 1.25rem 0', 
-                    fontSize: '1.05rem', 
-                    fontWeight: 700, 
-                    color: 'hsl(210, 40%, 98%)',
-                    fontFamily: "'Outfit', sans-serif",
+                <h4
+                  style={{
+                    margin: '0.5rem 0 1rem 0',
+                    fontSize: '0.85rem',
+                    fontWeight: 300,
+                    color: 'var(--text)',
+                    fontFamily: 'var(--font-mono)',
                   }}
                 >
                   {phaseNames[phase]}
                 </h4>
-                
-                {/* Horizontal row of AgentCards */}
-                <div style={{ display: 'flex', gap: '1.25rem', flexWrap: 'wrap' }}>
+                <div style={{ display: 'flex', gap: '1rem', flexWrap: 'wrap' }}>
                   {calls.map((call, idx) => (
                     <AgentCard key={`${call.agent}-${idx}`} agent={call} />
                   ))}

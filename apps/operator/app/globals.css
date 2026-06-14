@@ -1,34 +1,6 @@
 /* Tokens canônicos — fonte única de verdade */
 @import '../../../packages/ui/tokens/tokens.css';
 
-/* Compat shim — mantém componentes existentes sem reescrita */
-:root {
-  --bg-app:             var(--bg);
-  --bg-card:            var(--surf);
-  --bg-card-hover:      var(--surf2);
-  --bg-sidebar:         var(--surf);
-  --bg-navbar:          var(--surf);
-  --bg-footer:          var(--bg);
-  --border-glass:       1px solid var(--line);
-  --border-glass-hover: 1px solid var(--line2);
-  --color-primary:      var(--acc);
-  --color-primary-glow: var(--acc-glow);
-  --color-secondary:    var(--warn);
-  --color-secondary-glow: var(--warn-glow);
-  --color-emerald:      var(--ok);
-  --color-emerald-glow: var(--ok-glow);
-  --color-rose:         var(--alert);
-  --color-rose-glow:    var(--alert-glow);
-  --color-amber:        var(--warn);
-  --color-amber-glow:   var(--warn-glow);
-  --text-primary:       var(--text);
-  --text-secondary:     color-mix(in srgb, var(--text) 65%, transparent);
-  --text-muted:         var(--muted);
-  --shadow-main:        var(--shadow);
-  --font-primary:       var(--font-sans);
-  --font-heading:       var(--font-sans);
-}
-
 /* Resets */
 *,
 *::before,
@@ -50,15 +22,41 @@ body {
   -moz-osx-font-smoothing: grayscale;
 }
 
-h1, h2, h3, h4, h5, h6 {
-  font-family: var(--font-sans);
+h1 {
+  font-family: var(--font-mono);
+  font-weight: 200;
   letter-spacing: -0.02em;
+  font-size: clamp(36px, 5vw, 70px);
+}
+
+h2 {
+  font-family: var(--font-mono);
+  font-weight: 300;
+  letter-spacing: -0.01em;
+  font-size: clamp(26px, 3.4vw, 48px);
+}
+
+h3, h4, h5, h6 {
+  font-family: var(--font-mono);
+  letter-spacing: -0.01em;
+}
+
+.tag, .hud, code, pre, kbd, .label {
+  font-family: var(--font-mono);
+  text-transform: uppercase;
+  letter-spacing: var(--ls-label);
+}
+
+ul.li li::before {
+  content: '→';
+  color: var(--acc);
+  font-family: var(--font-mono);
 }
 
 /* Scrollbar */
 ::-webkit-scrollbar { width: 6px; height: 6px; }
 ::-webkit-scrollbar-track { background: transparent; }
-::-webkit-scrollbar-thumb { background: var(--line2); border-radius: 4px; }
+::-webkit-scrollbar-thumb { background: var(--line2); }
 ::-webkit-scrollbar-thumb:hover { background: var(--acc); }
 
 /* Keyframes */
@@ -71,9 +69,14 @@ h1, h2, h3, h4, h5, h6 {
   to   { opacity: 1; transform: translateY(0); }
 }
 
-@keyframes pulse-glow {
-  0%, 100% { box-shadow: 0 0 5px var(--pulse-color, var(--acc-glow)); }
-  50%       { box-shadow: 0 0 18px var(--pulse-color, var(--acc-glow)); }
+@keyframes blink {
+  0%, 100% { opacity: 1; }
+  50%       { opacity: 0; }
+}
+
+@keyframes pulse-opacity {
+  0%, 100% { opacity: 1; }
+  50%       { opacity: 0.3; }
 }
 
 @keyframes drawPath {
@@ -81,8 +84,4 @@ h1, h2, h3, h4, h5, h6 {
 }
 
 /* Utility classes */
-.animate-fade-in    { animation: fadeIn 0.5s cubic-bezier(0.16, 1, 0.3, 1) forwards; }
-.glow-pulse-primary { --pulse-color: var(--acc-glow);   animation: pulse-glow 2s infinite ease-in-out; }
-.glow-pulse-emerald { --pulse-color: var(--ok-glow);    animation: pulse-glow 2s infinite ease-in-out; }
-.glow-pulse-rose    { --pulse-color: var(--alert-glow); animation: pulse-glow 2s infinite ease-in-out; }
-.glow-pulse-amber   { --pulse-color: var(--warn-glow);  animation: pulse-glow 2s infinite ease-in-out; }
+.animate-fade-in { animation: fadeIn 0.5s cubic-bezier(0.16, 1, 0.3, 1) forwards; }

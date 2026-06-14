@@ -75,12 +75,9 @@ export default function CustomerHome() {
             width: '100%',
             maxWidth: '520px',
             backgroundColor: 'var(--surf)',
-            backdropFilter: 'blur(12px)',
-            WebkitBackdropFilter: 'blur(12px)',
-            padding: '3rem',
-            borderRadius: 'var(--radius)',
+            padding: '2.5rem',
             border: '1px solid var(--line)',
-            boxShadow: 'var(--shadow)',
+            borderLeft: '2px solid var(--acc)',
           }}
         >
           {/* Header */}
@@ -90,12 +87,11 @@ export default function CustomerHome() {
                 display: 'inline-flex',
                 alignItems: 'center',
                 justifyContent: 'center',
-                width: '56px',
-                height: '56px',
-                borderRadius: 'var(--radius)',
-                backgroundColor: 'var(--acc-glow)',
-                marginBottom: '1.25rem',
-                border: '1px solid var(--line)',
+                width: '48px',
+                height: '48px',
+                backgroundColor: 'transparent',
+                marginBottom: '1rem',
+                border: '1px solid var(--acc)',
               }}
             >
               <Pulse color="acc" size={14} />
@@ -103,10 +99,10 @@ export default function CustomerHome() {
             <h1
               style={{
                 margin: 0,
-                fontSize: '1.75rem',
-                fontWeight: 800,
+                fontSize: '1.5rem',
+                fontWeight: 200,
                 color: 'var(--text)',
-                fontFamily: 'var(--font-sans)',
+                fontFamily: 'var(--font-mono)',
                 letterSpacing: '-0.02em',
               }}
             >
@@ -117,17 +113,18 @@ export default function CustomerHome() {
             </p>
           </div>
 
-          <form onSubmit={handleSubmit} style={{ display: 'flex', flexDirection: 'column', gap: '1.75rem' }}>
+          <form onSubmit={handleSubmit} style={{ display: 'flex', flexDirection: 'column', gap: '1.5rem' }}>
             {/* CPF */}
             <div style={{ display: 'flex', flexDirection: 'column', gap: '0.5rem' }}>
               <label
                 htmlFor="cpf"
                 style={{
                   fontSize: '0.7rem',
-                  fontWeight: 700,
+                  fontWeight: 400,
                   color: 'var(--muted)',
                   textTransform: 'uppercase',
-                  letterSpacing: '0.08em',
+                  letterSpacing: 'var(--ls-label)',
+                  fontFamily: 'var(--font-mono)',
                 }}
               >
                 CPF do Titular
@@ -140,8 +137,7 @@ export default function CustomerHome() {
                 onChange={handleCpfChange}
                 disabled={loading}
                 style={{
-                  padding: '0.9rem 1.1rem',
-                  borderRadius: 'var(--radius-sm)',
+                  padding: '0.85rem 1rem',
                   backgroundColor: 'var(--bg)',
                   border: '1px solid var(--line)',
                   color: 'var(--text)',
@@ -149,18 +145,11 @@ export default function CustomerHome() {
                   fontFamily: 'var(--font-mono)',
                   letterSpacing: '0.05em',
                   outline: 'none',
-                  transition: 'border-color 0.2s, box-shadow 0.2s',
                   width: '100%',
                   boxSizing: 'border-box',
                 }}
-                onFocus={(e) => {
-                  e.currentTarget.style.borderColor = 'var(--acc)';
-                  e.currentTarget.style.boxShadow = '0 0 0 3px var(--acc-glow)';
-                }}
-                onBlur={(e) => {
-                  e.currentTarget.style.borderColor = 'var(--line)';
-                  e.currentTarget.style.boxShadow = 'none';
-                }}
+                onFocus={(e) => { e.currentTarget.style.borderColor = 'var(--acc)'; }}
+                onBlur={(e) => { e.currentTarget.style.borderColor = 'var(--line)'; }}
               />
             </div>
 
@@ -170,10 +159,11 @@ export default function CustomerHome() {
                 htmlFor="amount"
                 style={{
                   fontSize: '0.7rem',
-                  fontWeight: 700,
+                  fontWeight: 400,
                   color: 'var(--muted)',
                   textTransform: 'uppercase',
-                  letterSpacing: '0.08em',
+                  letterSpacing: 'var(--ls-label)',
+                  fontFamily: 'var(--font-mono)',
                 }}
               >
                 Valor Solicitado (R$)
@@ -186,32 +176,24 @@ export default function CustomerHome() {
                 onChange={(e) => { setAmount(e.target.value); setError(null); }}
                 disabled={loading}
                 style={{
-                  padding: '0.9rem 1.1rem',
-                  borderRadius: 'var(--radius-sm)',
+                  padding: '0.85rem 1rem',
                   backgroundColor: 'var(--bg)',
                   border: '1px solid var(--line)',
                   color: 'var(--text)',
                   fontSize: '1rem',
                   fontFamily: 'var(--font-sans)',
                   outline: 'none',
-                  transition: 'border-color 0.2s, box-shadow 0.2s',
                   width: '100%',
                   boxSizing: 'border-box',
                 }}
-                onFocus={(e) => {
-                  e.currentTarget.style.borderColor = 'var(--acc)';
-                  e.currentTarget.style.boxShadow = '0 0 0 3px var(--acc-glow)';
-                }}
-                onBlur={(e) => {
-                  e.currentTarget.style.borderColor = 'var(--line)';
-                  e.currentTarget.style.boxShadow = 'none';
-                }}
+                onFocus={(e) => { e.currentTarget.style.borderColor = 'var(--acc)'; }}
+                onBlur={(e) => { e.currentTarget.style.borderColor = 'var(--line)'; }}
               />
             </div>
 
             {error && (
-              <div style={{ fontSize: '0.825rem', color: 'var(--alert)', fontWeight: 600, display: 'flex', gap: '0.4rem', alignItems: 'center' }}>
-                <Pulse color="alert" size={7} />
+              <div style={{ fontSize: '0.825rem', color: 'var(--alert)', display: 'flex', gap: '0.4rem', alignItems: 'center', fontFamily: 'var(--font-mono)' }}>
+                <Pulse color="alert" size={6} />
                 {error}
               </div>
             )}
@@ -220,42 +202,35 @@ export default function CustomerHome() {
               type="submit"
               disabled={loading}
               style={{
-                padding: '1rem',
-                backgroundColor: loading ? 'var(--surf2)' : 'var(--acc)',
-                color: '#FFFFFF',
-                border: 'none',
-                borderRadius: 'var(--radius-sm)',
-                fontWeight: 700,
-                fontSize: '0.95rem',
-                fontFamily: 'var(--font-sans)',
+                padding: '0.9rem',
+                backgroundColor: 'transparent',
+                color: loading ? 'var(--muted)' : 'var(--acc)',
+                border: `1px solid ${loading ? 'var(--line2)' : 'var(--acc)'}`,
+                fontWeight: 400,
+                fontSize: '0.85rem',
+                fontFamily: 'var(--font-mono)',
+                textTransform: 'uppercase',
+                letterSpacing: 'var(--ls-label)',
                 cursor: loading ? 'not-allowed' : 'pointer',
-                transition: 'background-color 0.2s, transform 0.2s, box-shadow 0.2s',
-                boxShadow: loading ? 'none' : 'var(--shadow-acc)',
                 display: 'flex',
                 alignItems: 'center',
                 justifyContent: 'center',
                 gap: '0.5rem',
               }}
               onMouseOver={(e) => {
-                if (!loading) {
-                  e.currentTarget.style.filter = 'brightness(1.1)';
-                  e.currentTarget.style.transform = 'translateY(-1px)';
-                }
+                if (!loading) e.currentTarget.style.backgroundColor = 'rgba(127,255,212,0.05)';
               }}
               onMouseOut={(e) => {
-                if (!loading) {
-                  e.currentTarget.style.filter = '';
-                  e.currentTarget.style.transform = 'translateY(0)';
-                }
+                if (!loading) e.currentTarget.style.backgroundColor = 'transparent';
               }}
             >
               {loading && (
                 <span
                   style={{
-                    width: '16px',
-                    height: '16px',
-                    border: '2px solid rgba(255,255,255,0.2)',
-                    borderTop: '2px solid #FFFFFF',
+                    width: '14px',
+                    height: '14px',
+                    border: '1px solid var(--line2)',
+                    borderTop: '1px solid var(--acc)',
                     borderRadius: '50%',
                     animation: 'spin 0.8s linear infinite',
                     display: 'inline-block',

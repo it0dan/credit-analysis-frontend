@@ -22,10 +22,10 @@ const statusColor: Record<FlowStatus, string> = {
 };
 
 const statusBg: Record<FlowStatus, string> = {
-  done:    'var(--ok-glow)',
-  active:  'var(--acc-glow)',
-  pending: 'rgba(107,114,128,0.15)',
-  error:   'var(--alert-glow)',
+  done:    'transparent',
+  active:  'transparent',
+  pending: 'transparent',
+  error:   'transparent',
 };
 
 const statusLabel: Record<FlowStatus, string> = {
@@ -59,7 +59,7 @@ function StepNode({ step }: { step: FlowStep }) {
           fontSize: '1rem',
           color: statusColor[step.status],
           fontWeight: 800,
-          boxShadow: step.status === 'active' ? 'var(--shadow-acc)' : undefined,
+          outline: step.status === 'active' ? '2px solid var(--acc)' : undefined,
         }}
       >
         {statusLabel[step.status]}
@@ -76,13 +76,13 @@ function StepNode({ step }: { step: FlowStep }) {
   );
 }
 
-function Connector({ color }: { color: string }) {
+function Connector({ color: _color }: { color: string }) {
   return (
     <div
       style={{
         flex: 1,
         height: '2px',
-        background: `linear-gradient(to right, ${color}, rgba(107,114,128,0.3))`,
+        background: 'var(--line2)',
         minWidth: '24px',
         alignSelf: 'center',
         marginBottom: '28px',
