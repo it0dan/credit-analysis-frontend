@@ -44,7 +44,7 @@ export function Tag({ variant = 'acc', size = 'sm', dim, alert, children }: TagP
       }}
     >
       {children}
-      {dim && <span style={{ color: 'var(--muted)' }}> · {dim}</span>}
+      {dim && <span style={{ color: 'var(--text)' }}> · {dim}</span>}
     </span>
   );
 }

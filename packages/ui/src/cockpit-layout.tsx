@@ -69,7 +69,7 @@ export function CockpitLayout({ children, activeLink, portalType, request_id }: 
               style={{
                 fontSize: '0.65rem',
                 fontWeight: 400,
-                color: 'var(--muted)',
+                color: 'var(--text)',
                 marginLeft: '8px',
                 padding: '0.15rem 0.4rem',
                 border: '1px solid var(--line2)',
@@ -86,7 +86,7 @@ export function CockpitLayout({ children, activeLink, portalType, request_id }: 
             style={{
               fontSize: '0.7rem',
               fontWeight: 400,
-              color: 'var(--muted)',
+              color: 'var(--text)',
               textTransform: 'uppercase',
               letterSpacing: 'var(--ls-label)',
               fontFamily: 'var(--font-mono)',
@@ -104,7 +104,7 @@ export function CockpitLayout({ children, activeLink, portalType, request_id }: 
             alignItems: 'center',
             gap: '0.55rem',
             fontSize: '0.68rem',
-            color: 'var(--muted)',
+            color: 'var(--text)',
             fontFamily: 'var(--font-mono)',
             letterSpacing: 'var(--ls-label)',
             textTransform: 'uppercase',
@@ -125,7 +125,7 @@ export function CockpitLayout({ children, activeLink, portalType, request_id }: 
         <div
           style={{
             fontSize: '0.75rem',
-            color: 'var(--muted)',
+            color: 'var(--text)',
             fontWeight: 400,
             borderLeft: '1px solid var(--line)',
             paddingLeft: '1rem',
@@ -156,7 +156,7 @@ export function CockpitLayout({ children, activeLink, portalType, request_id }: 
               style={{
                 fontSize: '0.65rem',
                 fontWeight: 400,
-                color: 'var(--muted)',
+                color: 'var(--text)',
                 textTransform: 'uppercase',
                 letterSpacing: 'var(--ls-label-strong)',
                 fontFamily: 'var(--font-mono)',
@@ -172,10 +172,9 @@ export function CockpitLayout({ children, activeLink, portalType, request_id }: 
                     key={item.id}
                     style={{
                       padding: '0.6rem 0.75rem',
-                      color: 'var(--muted)',
+                      color: 'var(--text)',
                       fontSize: '0.8rem',
                       fontFamily: 'var(--font-mono)',
-                      opacity: 0.4,
                       cursor: 'not-allowed',
                     }}
                   >
@@ -187,7 +186,7 @@ export function CockpitLayout({ children, activeLink, portalType, request_id }: 
                     href={item.path}
                     style={{
                       padding: '0.6rem 0.75rem',
-                      color: isActive ? 'var(--acc)' : 'var(--muted)',
+                      color: isActive ? 'var(--acc)' : 'var(--text)',
                       backgroundColor: 'transparent',
                       borderLeft: isActive ? '2px solid var(--acc)' : '2px solid transparent',
                       borderBottom: isActive ? '1px solid var(--acc)' : '1px solid transparent',
@@ -202,7 +201,7 @@ export function CockpitLayout({ children, activeLink, portalType, request_id }: 
                       if (!isActive) e.currentTarget.style.color = 'var(--text)';
                     }}
                     onMouseOut={(e) => {
-                      if (!isActive) e.currentTarget.style.color = 'var(--muted)';
+                      if (!isActive) e.currentTarget.style.color = 'var(--text)';
                     }}
                   >
                     {item.label}
@@ -223,10 +222,10 @@ export function CockpitLayout({ children, activeLink, portalType, request_id }: 
               gap: '0.4rem',
             }}
           >
-            <span style={{ fontSize: '0.6rem', fontWeight: 400, color: 'var(--muted)', textTransform: 'uppercase', letterSpacing: 'var(--ls-label)', fontFamily: 'var(--font-mono)' }}>
+            <span style={{ fontSize: '0.6rem', fontWeight: 400, color: 'var(--text)', textTransform: 'uppercase', letterSpacing: 'var(--ls-label)', fontFamily: 'var(--font-mono)' }}>
               Trace Conector
             </span>
-            <span style={{ fontSize: '0.7rem', color: 'var(--muted)', fontFamily: 'var(--font-mono)' }}>
+            <span style={{ fontSize: '0.7rem', color: 'var(--text)', fontFamily: 'var(--font-mono)' }}>
               W3C Propagator
             </span>
             <span style={{ fontSize: '0.6rem', color: 'var(--acc)', wordBreak: 'break-all', fontFamily: 'var(--font-mono)' }}>
@@ -272,7 +271,7 @@ export function CockpitLayout({ children, activeLink, portalType, request_id }: 
           <span style={{ color: 'var(--acc)' }}>STATUS</span>
           <span style={{ color: 'var(--line2)' }}>·</span>
           <Pulse color="acc" size={7} />
-          <span>HEALTHY</span>
+          <span style={{ color: 'var(--text)' }}>HEALTHY</span>
         </div>
       </footer>
     </div>

@@ -54,16 +54,16 @@ export default function OperatorHome() {
             >
               Cockpit de <span style={{ color: 'var(--acc)' }}>operações</span>
             </h1>
-            <p style={{ margin: '0.4rem 0 0 0', fontSize: '0.875rem', color: 'var(--muted)' }}>
+            <p style={{ margin: '0.4rem 0 0 0', fontSize: '0.875rem', color: 'var(--text)' }}>
               Central de Intervenção Humana (HITL) para propostas de crédito especiais
             </p>
           </div>
           {auth && (
             <div style={{ textAlign: 'right' }}>
-              <span style={{ fontSize: '0.85rem', color: 'var(--muted)', fontFamily: 'var(--font-mono)' }}>
+              <span style={{ fontSize: '0.85rem', color: 'var(--text)', fontFamily: 'var(--font-mono)' }}>
                 Operador: <span style={{ color: 'var(--acc)' }}>{auth.user_id}</span>
               </span>
-              <div style={{ fontSize: '0.7rem', color: 'var(--muted)', marginTop: '0.2rem', fontFamily: 'var(--font-mono)' }}>
+              <div style={{ fontSize: '0.7rem', color: 'var(--text)', marginTop: '0.2rem', fontFamily: 'var(--font-mono)' }}>
                 Perfil: {auth.role}
               </div>
             </div>
@@ -122,7 +122,7 @@ export default function OperatorHome() {
               >
                 ≡
               </div>
-              <h3
+              <h2
                 style={{
                   margin: 0,
                   fontSize: '1rem',
@@ -133,8 +133,8 @@ export default function OperatorHome() {
                 }}
               >
                 Fila de Análises Pendentes
-              </h3>
-              <p style={{ margin: '0.6rem 0 1.5rem 0', fontSize: '0.875rem', color: 'var(--muted)', lineHeight: 1.6 }}>
+              </h2>
+              <p style={{ margin: '0.6rem 0 1.5rem 0', fontSize: '0.875rem', color: 'var(--text)', lineHeight: 1.6 }}>
                 Solicitações que exigem intervenção manual por limite excedido ou indisponibilidade de bureau.
               </p>
             </div>
@@ -190,7 +190,7 @@ export default function OperatorHome() {
               >
                 ◈
               </div>
-              <h3
+              <h2
                 style={{
                   margin: 0,
                   fontSize: '1rem',
@@ -201,8 +201,8 @@ export default function OperatorHome() {
                 }}
               >
                 Dashboard de Métricas
-              </h3>
-              <p style={{ margin: '0.6rem 0 1.5rem 0', fontSize: '0.875rem', color: 'var(--muted)', lineHeight: 1.6 }}>
+              </h2>
+              <p style={{ margin: '0.6rem 0 1.5rem 0', fontSize: '0.875rem', color: 'var(--text)', lineHeight: 1.6 }}>
                 Relatórios de performance, FinOps do Gateway e estatísticas de rejeições regulatórias.
               </p>
             </div>
