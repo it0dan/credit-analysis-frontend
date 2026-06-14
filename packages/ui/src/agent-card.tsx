@@ -7,9 +7,12 @@ interface AgentCardProps {
 }
 
 const statusColors: Record<string, { dot: string; border: string; text: string }> = {
-  success: { dot: 'var(--acc)',   border: 'var(--acc)',   text: 'var(--acc)'   },
-  fail:    { dot: 'var(--alert)', border: 'var(--alert)', text: 'var(--alert)' },
-  timeout: { dot: 'var(--warn)',  border: 'var(--warn)',  text: 'var(--warn)'  },
+  success: { dot: 'var(--acc)', border: 'var(--acc)', text: 'var(--acc)' },
+  in_progress: { dot: 'var(--acc)', border: 'var(--acc)', text: 'var(--acc)' },
+  awaiting_human: { dot: 'var(--warn)', border: 'var(--warn)', text: 'var(--warn)' },
+  fail: { dot: 'var(--alert)', border: 'var(--alert)', text: 'var(--alert)' },
+  timeout: { dot: 'var(--warn)', border: 'var(--warn)', text: 'var(--warn)' },
+  error: { dot: 'var(--alert)', border: 'var(--alert)', text: 'var(--alert)' },
 };
 
 const DEFAULT_COLORS = { dot: 'var(--acc)', border: 'var(--acc)', text: 'var(--acc)' };
@@ -53,7 +56,7 @@ export function AgentCard({ agent }: AgentCardProps) {
       </div>
 
       <div style={{ display: 'flex', alignItems: 'center', gap: '0.5rem', marginBottom: '0.5rem' }}>
-        {agent.status === 'success' ? <Pulse color="acc" size={6} /> : (
+        {agent.status === 'success' || agent.status === 'in_progress' ? <Pulse color="acc" size={6} /> : (
           <span
             style={{
               width: '6px',

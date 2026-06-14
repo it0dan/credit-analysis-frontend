@@ -14,13 +14,6 @@ import type { AgentTrajectory, CreditAnalysisStatus } from '@repo/types';
 
 type StreamTrajectory = Omit<AgentTrajectory, 'phases'> & { phases: AgentStreamPhase[] };
 
-type SimEvent = {
-  at: number;
-  status: CreditAnalysisStatus;
-  phase?: AgentStreamPhase;
-  cost: number;
-};
-
 const finalMessage: Record<string, string> = {
   approved: 'Aprovado · seu crédito está pronto',
   rejected: 'Não foi possível aprovar agora',
@@ -43,11 +36,10 @@ function toDebugTrajectory(trajectory: StreamTrajectory): AgentTrajectory {
   return {
     ...trajectory,
     phases: trajectory.phases
-      .filter((phase) => phase.status === 'success' || phase.status === 'fail' || phase.status === 'timeout')
       .map((phase) => ({
         agent: phase.agent,
         phase: phase.phase,
-        status: phase.status as 'success' | 'fail' | 'timeout',
+        status: phase.status as AgentTrajectory['phases'][number]['status'],
         latency_ms: phase.latency_ms ?? 0,
         span_id: phase.span_id,
       })),
@@ -77,6 +69,17 @@ export default function CustomerStatusPage() {
     let active = true;
     let pollTimer: NodeJS.Timeout;
     let failureCount = 0;
+
+    if (reqIdStr.startsWith('test-')) {
+      setStatus('analyzing');
+      setTrajectory(null);
+      setError(null);
+      setIsSimulated(true);
+      return () => {
+        active = false;
+        clearTimeout(pollTimer);
+      };
+    }
 
     const poll = () => {
       fetch(`http://localhost:8086/analysis/${reqIdStr}/status`)
@@ -125,41 +128,84 @@ export default function CustomerStatusPage() {
       phases: [],
       finops: { estimated_cost_brl: 0 },
     };
+    const sequence = ['bureau', 'documents', 'risk', 'compliance', 'decision'] as const;
+    const timings: Record<(typeof sequence)[number], { start: number; duration: number; cost: number }> = {
+      bureau: { start: 0, duration: 1400, cost: 0.012 },
+      documents: { start: 1500, duration: 1200, cost: 0.018 },
+      risk: { start: 2800, duration: 1600, cost: 0.045 },
+      compliance: { start: 4500, duration: 2000, cost: 0.089 },
+      decision: { start: 6600, duration: 1100, cost: approved ? 0.121 : 0.104 },
+    };
+    const phaseFor = (index: number): AgentStreamPhase['phase'] => (index < 3 ? 'T1' : index === 3 ? 'T2' : 'T3');
+    const addOrReplacePhase = (trajectory: StreamTrajectory, phase: AgentStreamPhase, cost: number): StreamTrajectory => ({
+      ...trajectory,
+      phases: [...trajectory.phases.filter((item) => item.agent !== phase.agent), phase],
+      finops: { estimated_cost_brl: cost },
+    });
 
-    setSimState({ status: 'pending', error: null, trajectory: base });
+    setSimState({ status: 'analyzing', error: null, trajectory: base });
 
-    const events: SimEvent[] = [
-      { at: 0, status: 'analyzing', cost: 0.004, phase: { agent: 'bureau', phase: 'T1', status: 'thinking', latency_ms: 0, span_id: 'span-bureau-start', cost_brl: 0.004 } },
-      { at: 800, status: 'analyzing', cost: 0.008, phase: { agent: 'bureau', phase: 'T1', status: 'tool_call', latency_ms: 620, span_id: 'span-bureau-tool', cost_brl: 0.008 } },
-      { at: 1600, status: 'analyzing', cost: 0.012, phase: { agent: 'bureau', phase: 'T1', status: 'success', latency_ms: 1200, span_id: 'span-bureau-1', cost_brl: 0.012 } },
-      { at: 1800, status: 'analyzing', cost: 0.014, phase: { agent: 'documents', phase: 'T1', status: 'thinking', latency_ms: 0, span_id: 'span-docs-start', cost_brl: 0.014 } },
-      { at: 2400, status: 'analyzing', cost: 0.016, phase: { agent: 'documents', phase: 'T1', status: 'tool_call', latency_ms: 510, span_id: 'span-docs-tool', cost_brl: 0.016 } },
-      { at: 2900, status: 'analyzing', cost: 0.018, phase: { agent: 'documents', phase: 'T1', status: 'success', latency_ms: 930, span_id: 'span-documents-1', cost_brl: 0.018 } },
-      { at: 3200, status: 'analyzing', cost: 0.028, phase: { agent: 'risk', phase: 'T1', status: 'thinking', latency_ms: 0, span_id: 'span-risk-start', cost_brl: 0.028 } },
-      { at: 4100, status: 'analyzing', cost: 0.036, phase: { agent: 'risk', phase: 'T1', status: 'tool_call', latency_ms: 860, span_id: 'span-risk-tool', cost_brl: 0.036 } },
-      { at: 4800, status: 'analyzing', cost: 0.045, phase: { agent: 'risk', phase: 'T1', status: 'success', latency_ms: 1540, span_id: 'span-risk-1', cost_brl: 0.045 } },
-      { at: 5000, status: 'analyzing', cost: 0.061, phase: { agent: 'compliance', phase: 'T2', status: 'thinking', latency_ms: 0, span_id: 'span-compliance-start', cost_brl: 0.061 } },
-      { at: 6100, status: 'analyzing', cost: 0.073, phase: { agent: 'compliance', phase: 'T2', status: 'tool_call', latency_ms: 1180, span_id: 'span-compliance-a2a', cost_brl: 0.073 } },
-      { at: 7000, status: 'analyzing', cost: 0.089, phase: { agent: 'compliance', phase: 'T2', status: 'success', latency_ms: 2200, span_id: 'span-compliance-2', cost_brl: 0.089 } },
-      { at: 7300, status: 'analyzing', cost: 0.102, phase: { agent: 'decision', phase: 'T3', status: 'thinking', latency_ms: 0, span_id: 'span-decision-start', cost_brl: 0.102 } },
-      { at: 8500, status: approved ? 'approved' : 'hitl_required', cost: approved ? 0.121 : 0.104, phase: approved ? { agent: 'decision', phase: 'T3', status: 'success', latency_ms: 850, span_id: 'span-decision-3', cost_brl: 0.121 } : undefined },
-    ];
+    const timers: number[] = [];
+    sequence.forEach((agent, index) => {
+      const timing = timings[agent];
+      const phase = phaseFor(index);
+      const spanId = `span-${agent}-${index}`;
 
-    const timers = events.map((event) => window.setTimeout(() => {
+      timers.push(window.setTimeout(() => {
+        setSimState((prev) => {
+          const current = prev.trajectory ?? base;
+          return {
+            status: 'analyzing',
+            error: null,
+            trajectory: addOrReplacePhase(current, {
+              agent,
+              phase,
+              status: 'in_progress',
+              latency_ms: 0,
+              span_id: spanId,
+              cost_brl: timing.cost,
+            }, timing.cost),
+          };
+        });
+      }, timing.start));
+
+      timers.push(window.setTimeout(() => {
+        setSimState((prev) => {
+          const current = prev.trajectory ?? base;
+          return {
+            status: 'analyzing',
+            error: null,
+            trajectory: addOrReplacePhase(current, {
+              agent,
+              phase,
+              status: 'success',
+              latency_ms: timing.duration,
+              span_id: spanId,
+              cost_brl: timing.cost,
+            }, timing.cost),
+          };
+        });
+      }, timing.start + timing.duration));
+    });
+
+    timers.push(window.setTimeout(() => {
       setSimState((prev) => {
         const current = prev.trajectory ?? base;
-        const phases = event.phase ? [...current.phases.filter((phase) => phase.agent !== event.phase?.agent), event.phase] : current.phases;
+        const finalTrajectory = approved ? current : addOrReplacePhase(current, {
+          agent: 'decision',
+          phase: 'T3',
+          status: 'awaiting_human',
+          latency_ms: timings.decision.duration,
+          span_id: 'span-decision-4',
+          cost_brl: timings.decision.cost,
+        }, timings.decision.cost);
         return {
-          status: event.status,
+          status: approved ? 'approved' : 'hitl_required',
           error: null,
-          trajectory: {
-            ...current,
-            phases,
-            finops: { estimated_cost_brl: event.cost },
-          },
+          trajectory: finalTrajectory,
         };
       });
-    }, event.at));
+    }, 8000));
 
     return () => timers.forEach((timer) => window.clearTimeout(timer));
   }, [isSimulated, reqIdStr, amount]);

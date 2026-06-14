@@ -1,11 +1,22 @@
 'use client';
 
-import React, { useEffect, useMemo, useState } from 'react';
+import React, { useMemo } from 'react';
 import type { CreditAnalysisStatus } from '@repo/types';
 import { Pulse } from './pulse';
 import { useDebug } from './debug-context';
 
-export type AgentStreamStatus = 'queued' | 'thinking' | 'tool_call' | 'result' | 'success' | 'done' | 'fail' | 'timeout' | 'error';
+export type AgentStreamStatus =
+  | 'queued'
+  | 'in_progress'
+  | 'thinking'
+  | 'tool_call'
+  | 'result'
+  | 'success'
+  | 'done'
+  | 'awaiting_human'
+  | 'fail'
+  | 'timeout'
+  | 'error';
 
 export interface AgentStreamPhase {
   agent: string;
@@ -24,6 +35,8 @@ interface AgentStreamProps {
   isLive: boolean;
 }
 
+type VisualStatus = 'queued' | 'in_progress' | 'success' | 'awaiting_human' | 'error';
+
 const AGENTS = ['bureau', 'documents', 'risk', 'compliance', 'decision'];
 
 const humanLabels: Record<string, string> = {
@@ -34,68 +47,67 @@ const humanLabels: Record<string, string> = {
   decision: 'Concluindo análise',
 };
 
-const statusText: Record<string, string> = {
-  queued: 'na fila',
-  thinking: 'analisando',
-  tool_call: 'consultando dados',
-  result: 'resultado recebido',
-  success: 'concluído',
-  done: 'concluído',
-  fail: 'atenção',
-  timeout: 'tempo excedido',
-  error: 'erro',
+const badgeText: Record<VisualStatus, string> = {
+  queued: 'NA FILA',
+  in_progress: 'PROCESSANDO',
+  success: 'CONCLUÍDO',
+  awaiting_human: 'AGUARDANDO HUMANO',
+  error: 'ERRO',
 };
 
-function normalizeStatus(status: AgentStreamStatus, isNewest: boolean, isLive: boolean): AgentStreamStatus {
-  if (isLive && isNewest && (status === 'success' || status === 'done')) return 'thinking';
-  if (status === 'success') return 'done';
-  if (status === 'fail' || status === 'timeout') return 'error';
-  return status;
+function normalizeStatus(status: AgentStreamStatus): VisualStatus {
+  if (status === 'in_progress' || status === 'thinking' || status === 'tool_call' || status === 'result') return 'in_progress';
+  if (status === 'success' || status === 'done') return 'success';
+  if (status === 'awaiting_human') return 'awaiting_human';
+  if (status === 'fail' || status === 'timeout' || status === 'error') return 'error';
+  return 'queued';
 }
 
-function iconFor(status: AgentStreamStatus) {
-  if (status === 'done') return <span style={{ color: 'var(--acc)' }}>✓</span>;
-  if (status === 'error') return <span style={{ color: 'var(--alert)' }}>×</span>;
-  if (status === 'thinking' || status === 'tool_call') return <Pulse color={status === 'tool_call' ? 'blue' : 'acc'} size={7} />;
-  if (status === 'result') return <span style={{ color: 'var(--acc)' }}>→</span>;
-  return <span style={{ color: 'var(--line2)' }}>·</span>;
-}
-
-function colorFor(status: AgentStreamStatus) {
-  if (status === 'done' || status === 'result') return 'var(--acc)';
-  if (status === 'tool_call') return 'var(--blue)';
+function colorFor(status: VisualStatus) {
+  if (status === 'success' || status === 'in_progress') return 'var(--acc)';
+  if (status === 'awaiting_human') return 'var(--warn)';
   if (status === 'error') return 'var(--alert)';
-  if (status === 'thinking') return 'var(--text)';
   return 'var(--muted)';
 }
 
-export function AgentStream({ phases, status, mode, isLive }: AgentStreamProps) {
-  const { enabled } = useDebug();
-  const [tick, setTick] = useState(0);
-  const showTechnical = mode === 'operator' || enabled;
+function iconFor(status: VisualStatus) {
+  if (status === 'success') return <span style={{ color: 'var(--acc)' }}>✓</span>;
+  if (status === 'awaiting_human') return <span style={{ color: 'var(--warn)' }}>~</span>;
+  if (status === 'error') return <span style={{ color: 'var(--alert)' }}>×</span>;
+  if (status === 'in_progress') return <Pulse color="acc" size={7} />;
+  return <span style={{ color: 'var(--muted)' }}>·</span>;
+}
 
-  useEffect(() => {
-    if (!isLive) return;
-    const id = window.setInterval(() => setTick((value) => value + 1), 1500);
-    return () => window.clearInterval(id);
-  }, [isLive]);
+function TypingCursor() {
+  return (
+    <span
+      aria-hidden="true"
+      style={{
+        display: 'inline-block',
+        width: '2px',
+        height: '10px',
+        marginLeft: '8px',
+        background: 'var(--acc)',
+        animation: 'blink 700ms steps(2, start) infinite',
+        verticalAlign: '-1px',
+      }}
+    />
+  );
+}
+
+export function AgentStream({ phases, mode }: AgentStreamProps) {
+  const { enabled } = useDebug();
+  const showTechnical = mode === 'operator' || enabled;
 
   const rows = useMemo(() => {
     const latestByAgent = new Map<string, AgentStreamPhase>();
     phases.forEach((phase) => latestByAgent.set(phase.agent, phase));
-    const newest = phases[phases.length - 1];
-    const completed = AGENTS.filter((agent) => latestByAgent.has(agent)).length;
-    const optimisticAgent = isLive ? AGENTS[Math.min(completed, AGENTS.length - 1)] : undefined;
 
     return AGENTS.map((agent) => {
       const phase = latestByAgent.get(agent);
-      const isNewest = Boolean(newest && newest.agent === agent);
-      const optimistic = !phase && optimisticAgent === agent && tick > 0;
-      const rawStatus = optimistic ? 'thinking' : phase?.status ?? 'queued';
-      const normalized = normalizeStatus(rawStatus, isNewest, isLive);
-      return { agent, phase, status: normalized };
+      return { agent, phase, status: normalizeStatus(phase?.status ?? 'queued') };
     });
-  }, [phases, isLive, tick]);
+  }, [phases]);
 
   return (
     <div
@@ -111,12 +123,13 @@ export function AgentStream({ phases, status, mode, isLive }: AgentStreamProps) 
     >
       {rows.map(({ agent, phase, status: rowStatus }) => {
         const lineColor = colorFor(rowStatus);
+        const labelColor = rowStatus === 'queued' ? 'var(--muted)' : 'var(--text)';
         return (
           <div
             key={agent}
             style={{
               display: 'grid',
-              gridTemplateColumns: showTechnical ? '24px 120px 56px 72px 1fr 80px' : '24px minmax(0, 1fr) 140px',
+              gridTemplateColumns: showTechnical ? '24px 120px 56px 72px 1fr 96px' : '24px minmax(0, 1fr) 156px',
               gap: '0.75rem',
               alignItems: 'center',
               padding: '0.7rem 0.85rem',
@@ -131,37 +144,24 @@ export function AgentStream({ phases, status, mode, isLive }: AgentStreamProps) 
             <span style={{ display: 'inline-flex', alignItems: 'center', justifyContent: 'center' }}>{iconFor(rowStatus)}</span>
             {showTechnical ? (
               <>
-                <span style={{ color: 'var(--text)' }}>{agent}</span>
+                <span style={{ color: labelColor }}>{agent}</span>
                 <span style={{ color: phase ? 'var(--acc)' : 'var(--line2)' }}>{phase?.phase ?? '--'}</span>
                 <span style={{ color: phase?.latency_ms ? 'var(--text)' : 'var(--line2)' }}>{phase?.latency_ms ? `${phase.latency_ms}ms` : '--'}</span>
                 <span style={{ color: phase?.span_id ? 'var(--muted)' : 'var(--line2)', overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>
                   {phase?.span_id ?? 'span: pending'}
                 </span>
                 <span style={{ color: phase?.cost_brl ? 'var(--acc)' : 'var(--line2)' }}>
-                  {phase?.cost_brl ? `R$ ${phase.cost_brl.toFixed(3)}` : '--'}
+                  {phase?.cost_brl ? `R$ ${phase.cost_brl.toFixed(3)}` : badgeText[rowStatus]}
                 </span>
               </>
             ) : (
               <>
-                <span style={{ color: rowStatus === 'queued' ? 'var(--muted)' : 'var(--text)', overflow: 'hidden', textOverflow: 'ellipsis' }}>
+                <span style={{ color: labelColor, overflow: 'hidden', textOverflow: 'ellipsis' }}>
                   {humanLabels[agent] ?? agent}
-                  {(rowStatus === 'thinking' || rowStatus === 'tool_call') && (
-                    <span
-                      aria-hidden="true"
-                      style={{
-                        display: 'inline-block',
-                        width: '2px',
-                        height: '11px',
-                        marginLeft: '8px',
-                        background: 'var(--acc)',
-                        animation: 'blink 700ms steps(2, start) infinite',
-                        verticalAlign: '-1px',
-                      }}
-                    />
-                  )}
                 </span>
-                <span style={{ color: lineColor, textTransform: 'uppercase', letterSpacing: 'var(--ls-label)', fontSize: '10px', textAlign: 'right' }}>
-                  {statusText[rowStatus] ?? rowStatus}
+                <span style={{ color: lineColor, textTransform: 'uppercase', letterSpacing: 'var(--ls-label)', fontSize: '10px', textAlign: 'right', whiteSpace: 'nowrap' }}>
+                  {badgeText[rowStatus]}
+                  {rowStatus === 'in_progress' && <TypingCursor />}
                 </span>
               </>
             )}
