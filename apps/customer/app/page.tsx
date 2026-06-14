@@ -5,7 +5,6 @@ import { useRouter } from 'next/navigation';
 import { CockpitLayout } from '@repo/ui/cockpit-layout';
 import { Pulse } from '@repo/ui/pulse';
 import { Tag } from '@repo/ui/tag';
-import { Stat } from '@repo/ui/stat';
 
 export default function CustomerHome() {
   const [cpf, setCpf] = useState('');
@@ -226,9 +225,6 @@ export default function CustomerHome() {
               {loading ? 'Inicializando Agentes...' : 'Iniciar Análise de Crédito'}
             </button>
           </form>
-          <div style={{ marginTop: '2rem', borderTop: '1px solid var(--line)', paddingTop: '1.25rem' }}>
-            <Stat value="+2.847" label="análises concluídas hoje" sub="gateway telemetry" />
-          </div>
         </div>
       </div>
     </CockpitLayout>
