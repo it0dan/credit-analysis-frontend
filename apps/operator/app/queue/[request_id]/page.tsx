@@ -4,6 +4,8 @@ import React, { useEffect, useState } from 'react';
 import { useParams, useSearchParams, useRouter } from 'next/navigation';
 import Link from 'next/link';
 import { TraceTimeline } from '@repo/ui/trace-timeline';
+import { CostDisplay } from '@repo/ui/cost-display';
+import { AgentStream } from '@repo/ui/agent-stream';
 import { HITLPanel } from '@repo/ui/hitl-panel';
 import { CockpitLayout } from '@repo/ui/cockpit-layout';
 import { Tag } from '@repo/ui/tag';
@@ -284,7 +286,13 @@ export default function OperatorReviewDetailPage() {
           </div>
         ) : (
           <div style={{ display: 'flex', flexDirection: 'column', gap: '2rem' }}>
-            {trajectory && <TraceTimeline trajectory={trajectory} />}
+            {trajectory && (
+              <>
+                <AgentStream phases={trajectory.phases} status="analyzing" mode="operator" isLive={false} />
+                <TraceTimeline trajectory={trajectory} />
+                <CostDisplay cost_brl={trajectory.finops.estimated_cost_brl} />
+              </>
+            )}
             {hitlRequest && (
               <div style={{ display: 'flex', justifyContent: 'center' }}>
                 <HITLPanel request={hitlRequest} onDecide={handleDecide} />

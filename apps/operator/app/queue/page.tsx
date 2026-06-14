@@ -14,6 +14,10 @@ interface QueueItem {
   amount: number;
   date: string;
   status: string;
+  trace_id?: string;
+  current_phase?: 'T1' | 'T2' | 'T3';
+  latency_ms?: number;
+  cost_brl?: number;
 }
 
 export default function OperatorQueue() {
@@ -37,9 +41,9 @@ export default function OperatorQueue() {
       .catch((err) => {
         console.warn('[OperatorQueue] Could not reach backend queue, loading mock simulation.', err);
         setPendingRequests([
-          { request_id: 'be70725f', cpf_masked: '***.723.109-**', reason: 'Valor Solicitado Excede Limite Automático', amount: 80000, date: new Date(Date.now() - 3600 * 1000).toISOString(), status: 'pending_human_review' },
-          { request_id: '3e49e394', cpf_masked: '***.990.221-**', reason: 'Indisponibilidade Técnica do Bureau', amount: 10000, date: new Date(Date.now() - 1800 * 1000).toISOString(), status: 'pending_human_review' },
-          { request_id: '7acf5b19', cpf_masked: '***.103.882-**', reason: 'Valor Solicitado Excede Limite Automático', amount: 120000, date: new Date(Date.now() - 900 * 1000).toISOString(), status: 'pending_human_review' },
+          { request_id: 'be70725f', cpf_masked: '***.723.109-**', reason: 'Valor Solicitado Excede Limite Automático', amount: 80000, date: new Date(Date.now() - 3600 * 1000).toISOString(), status: 'pending_human_review', trace_id: 'tr-op-7718291-xyz', current_phase: 'T2', latency_ms: 1980, cost_brl: 0.078 },
+          { request_id: '3e49e394', cpf_masked: '***.990.221-**', reason: 'Indisponibilidade Técnica do Bureau', amount: 10000, date: new Date(Date.now() - 1800 * 1000).toISOString(), status: 'pending_human_review', trace_id: 'tr-op-8831002-abc', current_phase: 'T1', latency_ms: 1450, cost_brl: 0.044 },
+          { request_id: '7acf5b19', cpf_masked: '***.103.882-**', reason: 'Valor Solicitado Excede Limite Automático', amount: 120000, date: new Date(Date.now() - 900 * 1000).toISOString(), status: 'pending_human_review', trace_id: 'tr-op-9917742-def', current_phase: 'T3', latency_ms: 2410, cost_brl: 0.096 },
         ]);
         setError('Servidor offline. Exibindo propostas em cache de simulação.');
         setLoading(false);
@@ -171,10 +175,10 @@ export default function OperatorQueue() {
             }}
           >
             <div style={{ overflowX: 'auto' }}>
-              <table style={{ width: '100%', borderCollapse: 'collapse', textAlign: 'left', minWidth: '800px' }}>
+              <table style={{ width: '100%', borderCollapse: 'collapse', textAlign: 'left', minWidth: '1040px' }}>
                 <thead>
                   <tr style={{ backgroundColor: 'var(--bg)', borderBottom: '1px solid var(--line2)' }}>
-                    {['ID Proposta', 'CPF Mascarado', 'Gatilho / Razão', 'Valor Solicitado', 'Entrada', 'Ações'].map((h, i) => (
+                    {['ID Proposta', 'Trace', 'Fase', 'Latência', 'Custo', 'Gatilho / Razão', 'Valor Solicitado', 'Ações'].map((h, i) => (
                       <th
                         key={h}
                         style={{
@@ -185,7 +189,7 @@ export default function OperatorQueue() {
                           textTransform: 'uppercase',
                           letterSpacing: 'var(--ls-label)',
                           fontFamily: 'var(--font-mono)',
-                          textAlign: i === 5 ? 'right' : 'left',
+                          textAlign: i === 7 ? 'right' : 'left',
                         }}
                       >
                         {h}
@@ -207,17 +211,23 @@ export default function OperatorQueue() {
                           {item.request_id}
                         </span>
                       </td>
+                      <td style={{ padding: '1rem 1.5rem', fontSize: '0.75rem', color: 'var(--muted)', fontFamily: 'var(--font-mono)' }}>
+                        {(item.trace_id || 'tr-pending').slice(0, 14)}
+                      </td>
+                      <td style={{ padding: '1rem 1.5rem', fontSize: '0.875rem', color: 'var(--acc)', fontFamily: 'var(--font-mono)' }}>
+                        {item.current_phase || 'T1'}
+                      </td>
                       <td style={{ padding: '1rem 1.5rem', fontSize: '0.875rem', color: 'var(--text)', fontFamily: 'var(--font-mono)' }}>
-                        {item.cpf_masked}
+                        {item.latency_ms ?? 0}ms
+                      </td>
+                      <td style={{ padding: '1rem 1.5rem', fontSize: '0.875rem', color: 'var(--acc)', fontFamily: 'var(--font-mono)' }}>
+                        R$ {(item.cost_brl ?? 0).toFixed(3)}
                       </td>
                       <td style={{ padding: '1rem 1.5rem', fontSize: '0.875rem', color: 'var(--warn)' }}>
                         {item.reason}
                       </td>
                       <td style={{ padding: '1rem 1.5rem', fontSize: '0.875rem', color: 'var(--text)', fontFamily: 'var(--font-mono)' }}>
                         R$ {item.amount.toLocaleString('pt-BR')}
-                      </td>
-                      <td style={{ padding: '1rem 1.5rem', fontSize: '0.8rem', color: 'var(--muted)', fontFamily: 'var(--font-mono)' }}>
-                        {new Date(item.date).toLocaleString('pt-BR')}
                       </td>
                       <td style={{ padding: '1rem 1.5rem', fontSize: '0.875rem', textAlign: 'right' }}>
                         <Link

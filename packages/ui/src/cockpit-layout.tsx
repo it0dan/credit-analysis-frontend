@@ -1,6 +1,9 @@
-import React from 'react';
+'use client';
+
+import React, { useEffect, useState } from 'react';
 import { Pulse } from './pulse';
 import { Brand } from './brand';
+import { useDebug } from './debug-context';
 
 interface CockpitLayoutProps {
   children: React.ReactNode;
@@ -10,6 +13,16 @@ interface CockpitLayoutProps {
 }
 
 export function CockpitLayout({ children, activeLink, portalType, request_id }: CockpitLayoutProps) {
+  const { enabled: debugEnabled } = useDebug();
+  const [elapsedSeconds, setElapsedSeconds] = useState(0);
+  const showTechnicalHud = portalType === 'operator' || debugEnabled;
+  const elapsed = `${String(Math.floor(elapsedSeconds / 60)).padStart(2, '0')}:${String(elapsedSeconds % 60).padStart(2, '0')}`;
+
+  useEffect(() => {
+    const id = window.setInterval(() => setElapsedSeconds((value) => value + 1), 1000);
+    return () => window.clearInterval(id);
+  }, []);
+
   const portalLabel = portalType === 'customer' ? 'portal' : 'cockpit';
   const menuItems = portalType === 'customer'
     ? [
@@ -85,11 +98,23 @@ export function CockpitLayout({ children, activeLink, portalType, request_id }: 
         >
           <span style={{ color: 'var(--line2)' }}>[</span>
           <Pulse color="acc" size={7} />
-          <span style={{ color: 'var(--acc)' }}>LIVE</span>
-          <span style={{ color: 'var(--line2)' }}>·</span>
-          <span><span style={{ color: 'var(--text)' }}>3</span> agents</span>
-          <span style={{ color: 'var(--line2)' }}>·</span>
-          <span>T+<span style={{ color: 'var(--text)' }}>00:00:00</span></span>
+          {showTechnicalHud ? (
+            <>
+              <span style={{ color: 'var(--acc)' }}>LIVE</span>
+              <span style={{ color: 'var(--line2)' }}>·</span>
+              <span><span style={{ color: 'var(--text)' }}>3</span> agents</span>
+              <span style={{ color: 'var(--line2)' }}>·</span>
+              <span>T+<span style={{ color: 'var(--text)' }}>{elapsed}</span></span>
+            </>
+          ) : (
+            <>
+              <span style={{ color: 'var(--acc)' }}>AO VIVO</span>
+              <span style={{ color: 'var(--line2)' }}>·</span>
+              <span>Análise em andamento</span>
+              <span style={{ color: 'var(--line2)' }}>·</span>
+              <span style={{ color: 'var(--text)' }}>{elapsed}</span>
+            </>
+          )}
           <span style={{ color: 'var(--line2)' }}>]</span>
         </div>
 
@@ -195,13 +220,13 @@ export function CockpitLayout({ children, activeLink, portalType, request_id }: 
             }}
           >
             <span style={{ fontSize: '0.6rem', fontWeight: 400, color: 'var(--text)', textTransform: 'uppercase', letterSpacing: 'var(--ls-label)', fontFamily: 'var(--font-mono)' }}>
-              Trace Conector
+              {showTechnicalHud ? 'Trace Conector' : 'Atendimento digital'}
             </span>
             <span style={{ fontSize: '0.7rem', color: 'var(--text)', fontFamily: 'var(--font-mono)' }}>
-              W3C Propagator
+              {showTechnicalHud ? 'W3C Propagator' : 'Acompanhamento seguro'}
             </span>
             <span style={{ fontSize: '0.6rem', color: 'var(--acc)', wordBreak: 'break-all', fontFamily: 'var(--font-mono)' }}>
-              env: reference-v2
+              {showTechnicalHud ? 'env: reference-v2' : 'crédito em análise'}
             </span>
           </div>
         </aside>
@@ -240,10 +265,21 @@ export function CockpitLayout({ children, activeLink, portalType, request_id }: 
       >
         <Brand variant="footer" />
         <div style={{ display: 'flex', alignItems: 'center', gap: '0.65rem' }}>
-          <span style={{ color: 'var(--acc)' }}>STATUS</span>
-          <span style={{ color: 'var(--line2)' }}>·</span>
-          <Pulse color="acc" size={7} />
-          <span style={{ color: 'var(--text)' }}>HEALTHY</span>
+          {showTechnicalHud ? (
+            <>
+              <span style={{ color: 'var(--acc)' }}>STATUS</span>
+              <span style={{ color: 'var(--line2)' }}>·</span>
+              <Pulse color="acc" size={7} />
+              <span style={{ color: 'var(--text)' }}>HEALTHY</span>
+            </>
+          ) : (
+            <>
+              <Pulse color="acc" size={7} />
+              <span style={{ color: 'var(--acc)' }}>analisando</span>
+              <span style={{ color: 'var(--line2)' }}>·</span>
+              <span style={{ color: 'var(--text)' }}>{elapsed}</span>
+            </>
+          )}
         </div>
       </footer>
     </div>
