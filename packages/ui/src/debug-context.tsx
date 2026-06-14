@@ -69,7 +69,8 @@ export function DebugProvider({ defaultEnabled, children }: { defaultEnabled: bo
     <DebugContext.Provider value={value}>
       {children}
       {enabled && (
-        <div
+        <aside
+          aria-label="Debug mode"
           title="Debug ativo. Use Ctrl+Shift+D para alternar."
           style={{
             position: 'fixed',
@@ -88,7 +89,7 @@ export function DebugProvider({ defaultEnabled, children }: { defaultEnabled: bo
           }}
         >
           [DEBUG·ON]
-        </div>
+        </aside>
       )}
     </DebugContext.Provider>
   );

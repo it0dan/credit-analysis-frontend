@@ -8,5 +8,5 @@
 - [x] task-5-agent-stream: Criar AgentStream e substituir visualizacao de trajetoria no customer.
 - [x] task-6-sim-fallback: Expandir fallback simulado para cerca de 12 sub-eventos em 9s.
 - [x] task-7-operator-telemetry: Garantir operator com telemetria completa em detalhe e fila.
-- [ ] task-8-validation: Validar grep de marca, screenshots, densidade, axe e types.
-- [ ] task-9-screenshots: Commitar customer-default, customer-debug e operator-debug.
+- [x] task-8-validation: Validar grep de marca, screenshots, densidade, axe e types.
+- [x] task-9-screenshots: Commitar customer-default, customer-debug e operator-debug.
