@@ -15,6 +15,7 @@ export default function OperatorHome() {
     { label: 'casos na fila', value: '12', sub: 'queue depth' },
     { label: 'custo médio por análise', value: 'R$ 0.04', sub: 'finops' },
     { label: 'latência mediana', value: '63s', sub: 'p50 runtime' },
+    { label: 'análises concluídas hoje', value: '+2.847', sub: 'throughput' },
   ];
 
   return (
