@@ -1,5 +1,6 @@
 import React from 'react';
 import { Pulse } from './pulse';
+import { Brand } from './brand';
 
 interface CockpitLayoutProps {
   children: React.ReactNode;
@@ -10,7 +11,6 @@ interface CockpitLayoutProps {
 
 export function CockpitLayout({ children, activeLink, portalType, request_id }: CockpitLayoutProps) {
   const portalLabel = portalType === 'customer' ? 'portal' : 'cockpit';
-  const portalVersion = portalType === 'customer' ? 'customer · v02' : 'operator · v02';
   const menuItems = portalType === 'customer'
     ? [
         { id: 'proposal', label: '> Solicitar Crédito', path: '/' },
@@ -52,35 +52,7 @@ export function CockpitLayout({ children, activeLink, portalType, request_id }: 
       >
         {/* Branding */}
         <div style={{ display: 'flex', alignItems: 'center', gap: '1rem' }}>
-          <div
-            style={{
-              fontWeight: 200,
-              fontSize: '1.1rem',
-              letterSpacing: '-0.02em',
-              fontFamily: 'var(--font-mono)',
-              display: 'flex',
-              alignItems: 'center',
-              gap: '2px',
-            }}
-          >
-            <span style={{ color: 'var(--acc)' }}>sense</span>
-            <span style={{ color: 'var(--warn)' }}>dia</span>
-            <span
-              style={{
-                fontSize: '0.65rem',
-                fontWeight: 400,
-                color: 'var(--text)',
-                marginLeft: '8px',
-                padding: '0.15rem 0.4rem',
-                border: '1px solid var(--line2)',
-                fontFamily: 'var(--font-mono)',
-                textTransform: 'uppercase',
-                letterSpacing: 'var(--ls-label)',
-              }}
-            >
-              AI
-            </span>
-          </div>
+          <Brand variant="full" />
           <div style={{ width: '1px', height: '20px', backgroundColor: 'var(--line2)' }} />
           <span
             style={{
@@ -266,7 +238,7 @@ export function CockpitLayout({ children, activeLink, portalType, request_id }: 
           zIndex: 10,
         }}
       >
-        <span><span style={{ color: 'var(--acc)' }}>{portalVersion}</span></span>
+        <Brand variant="footer" />
         <div style={{ display: 'flex', alignItems: 'center', gap: '0.65rem' }}>
           <span style={{ color: 'var(--acc)' }}>STATUS</span>
           <span style={{ color: 'var(--line2)' }}>·</span>

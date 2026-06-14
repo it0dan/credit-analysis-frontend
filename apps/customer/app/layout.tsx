@@ -17,8 +17,8 @@ const jetbrainsMono = JetBrains_Mono({
 });
 
 export const metadata: Metadata = {
-  title: 'Crédito A2A — Customer',
-  description: 'Solicite e acompanhe sua proposta de crédito com aprovação multiagente',
+  title: 'Crédito A2A — Portal do Cliente',
+  description: 'Solicite e acompanhe sua proposta de crédito em tempo real',
 };
 
 export default function RootLayout({

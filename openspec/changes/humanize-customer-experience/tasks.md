@@ -2,7 +2,7 @@
 
 - [x] task-0-recon: Registrar reconhecimento de marca, telemetria e polling.
 - [x] task-1-openspec: Criar OpenSpec com proposal, design, spec, tasks e prompt.
-- [ ] task-2-debrand: Criar Brand e remover marca dos layouts, cockpit, footer e README.
+- [x] task-2-debrand: Criar Brand e remover marca dos layouts, cockpit, footer e README.
 - [ ] task-3-debug-infra: Criar DebugProvider, useDebug, DebugOnly e HumanLabel; envolver customer/operator.
 - [ ] task-4-customer-gating: Esconder telemetria tecnica do customer default e ajustar HUDs.
 - [ ] task-5-agent-stream: Criar AgentStream e substituir visualizacao de trajetoria no customer.

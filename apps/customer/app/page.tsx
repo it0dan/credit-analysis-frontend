@@ -112,7 +112,7 @@ export default function CustomerHome() {
               Solicite seu <span style={{ color: 'var(--acc)' }}>crédito</span>
             </h1>
             <p style={{ margin: '0.6rem 0 0 0', fontSize: '0.875rem', color: 'var(--text)' }}>
-              Aprovação multiagente em segundos via Sensedia AI Gateway
+              Aprovação multiagente em segundos, com acompanhamento em tempo real
             </p>
           </div>
 

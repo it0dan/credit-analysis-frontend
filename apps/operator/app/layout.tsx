@@ -17,8 +17,8 @@ const jetbrainsMono = JetBrains_Mono({
 });
 
 export const metadata: Metadata = {
-  title: 'Crédito A2A — Operator Cockpit',
-  description: 'Central de Intervenção Humana (HITL) para análise de crédito multiagente',
+  title: 'Crédito A2A — Cockpit Operacional',
+  description: 'Central técnica para análise de crédito multiagente',
 };
 
 export default function RootLayout({
