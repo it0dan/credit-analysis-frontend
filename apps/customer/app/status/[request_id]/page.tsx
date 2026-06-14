@@ -6,6 +6,8 @@ import { StatusBadge } from '@repo/ui/status-badge';
 import { TraceTimeline } from '@repo/ui/trace-timeline';
 import { CostDisplay } from '@repo/ui/cost-display';
 import { CockpitLayout } from '@repo/ui/cockpit-layout';
+import { Tag } from '@repo/ui/tag';
+import { Pulse } from '@repo/ui/pulse';
 import type { AgentTrajectory, CreditAnalysisStatus } from '@repo/types';
 
 export default function CustomerStatusPage() {
@@ -160,6 +162,7 @@ export default function CustomerStatusPage() {
           }}
         >
           <div>
+            <Tag dim="live">análise em curso</Tag>
             <h1
               style={{
                 margin: 0,
@@ -170,7 +173,7 @@ export default function CustomerStatusPage() {
                 letterSpacing: '-0.02em',
               }}
             >
-              Acompanhamento da Proposta
+              Análise em <span style={{ color: 'var(--acc)' }}>tempo real</span>
             </h1>
             <p style={{ margin: '0.4rem 0 0 0', fontSize: '0.85rem', color: 'var(--muted)', fontFamily: 'var(--font-mono)' }}>
               ID: <strong style={{ color: 'var(--blue)' }}>{reqIdStr}</strong>
@@ -179,6 +182,7 @@ export default function CustomerStatusPage() {
             </p>
           </div>
           <div style={{ display: 'flex', alignItems: 'center', gap: '0.75rem' }}>
+            {(activeStatus === 'pending' || activeStatus === 'analyzing') && <Pulse color="acc" size={7} label="processando" />}
             {isSimulated && (
               <span
                 style={{
@@ -229,6 +233,7 @@ export default function CustomerStatusPage() {
                 backgroundColor: 'var(--surf)',
                 padding: '1.25rem 1.75rem',
                 border: '1px solid var(--line)',
+                borderLeft: '2px solid var(--acc)',
                 flexWrap: 'wrap',
                 gap: '1rem',
               }}
@@ -237,7 +242,7 @@ export default function CustomerStatusPage() {
                 {activeStatus === 'approved' && '→ Proposta pré-aprovada com sucesso pelos agentes de crédito.'}
                 {activeStatus === 'rejected' && '! Proposta recusada em conformidade com as políticas regulatórias.'}
                 {activeStatus === 'hitl_required' && '~ Valor acima do limite automático. Encaminhado para revisão humana.'}
-                {(activeStatus === 'pending' || activeStatus === 'analyzing') && '~ Processando nos turnos multiagentes em tempo real...'}
+                {(activeStatus === 'pending' || activeStatus === 'analyzing') && <><span style={{ color: 'var(--acc)', fontFamily: 'var(--font-mono)' }}>→</span> Processando nos turnos multiagentes em tempo real...</>}
               </span>
               <CostDisplay cost_brl={activeTrajectory.finops.estimated_cost_brl} />
             </div>
@@ -252,6 +257,7 @@ export default function CustomerStatusPage() {
               padding: '6rem 4rem',
               backgroundColor: 'var(--surf)',
               border: '1px solid var(--line)',
+              borderLeft: '2px solid var(--acc)',
               textAlign: 'center',
             }}
           >

@@ -6,6 +6,8 @@ import Link from 'next/link';
 import { TraceTimeline } from '@repo/ui/trace-timeline';
 import { HITLPanel } from '@repo/ui/hitl-panel';
 import { CockpitLayout } from '@repo/ui/cockpit-layout';
+import { Tag } from '@repo/ui/tag';
+import { Pulse } from '@repo/ui/pulse';
 import type { HITLRequest, OperatorDecision, AgentTrajectory } from '@repo/types';
 
 export default function OperatorReviewDetailPage() {
@@ -134,6 +136,7 @@ export default function OperatorReviewDetailPage() {
             <span>/</span>
             <span>{reqIdStr}</span>
           </div>
+          <Tag dim="caso em análise">decisão pendente</Tag>
           <h1
             style={{
               margin: 0,
@@ -144,7 +147,7 @@ export default function OperatorReviewDetailPage() {
               letterSpacing: '-0.02em',
             }}
           >
-            Análise Técnica — {reqIdStr}
+            Análise de <span style={{ color: 'var(--acc)' }}>caso</span> — {reqIdStr}
           </h1>
         </div>
 
@@ -174,7 +177,8 @@ export default function OperatorReviewDetailPage() {
         ) : submitting ? (
           <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'center', justifyContent: 'center', padding: '8rem', backgroundColor: 'var(--surf)', border: '1px solid var(--line)', textAlign: 'center' }}>
             {spinnerEl}
-            <h3 style={{ margin: 0, color: 'var(--text)', fontSize: '0.9rem', fontWeight: 200, fontFamily: 'var(--font-mono)' }}>
+            <h3 style={{ margin: 0, color: 'var(--text)', fontSize: '0.9rem', fontWeight: 200, fontFamily: 'var(--font-mono)', display: 'flex', alignItems: 'center', gap: '0.5rem' }}>
+              <Pulse color="acc" size={7} />
               Processando Decisão...
             </h3>
             <p style={{ margin: '0.4rem 0 0 0', color: 'var(--muted)', fontSize: '0.85rem' }}>

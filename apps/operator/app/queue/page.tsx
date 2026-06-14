@@ -4,6 +4,8 @@ import React, { useEffect, useState } from 'react';
 import Link from 'next/link';
 import { useAuth } from '@repo/auth';
 import { CockpitLayout } from '@repo/ui/cockpit-layout';
+import { Tag } from '@repo/ui/tag';
+import { Pulse } from '@repo/ui/pulse';
 
 interface QueueItem {
   request_id: string;
@@ -62,6 +64,7 @@ export default function OperatorQueue() {
               <span>/</span>
               <span>Fila de Revisão</span>
             </div>
+            <Tag dim={pendingRequests.length + ' casos'}>fila</Tag>
             <h1
               style={{
                 margin: 0,
@@ -72,7 +75,7 @@ export default function OperatorQueue() {
                 letterSpacing: '-0.02em',
               }}
             >
-              Fila de Solicitações Pendentes
+              Fila de <span style={{ color: 'var(--acc)' }}>análise</span>
             </h1>
             <p style={{ margin: '0.4rem 0 0 0', fontSize: '0.875rem', color: 'var(--muted)' }}>
               Selecione uma proposta para analisar spans e processar a decisão de retomada.
@@ -133,7 +136,8 @@ export default function OperatorQueue() {
                 marginBottom: '1rem',
               }}
             />
-            <h3 style={{ margin: 0, color: 'var(--text)', fontSize: '0.9rem', fontWeight: 200, fontFamily: 'var(--font-mono)' }}>
+            <h3 style={{ margin: 0, color: 'var(--text)', fontSize: '0.9rem', fontWeight: 200, fontFamily: 'var(--font-mono)', display: 'flex', alignItems: 'center', gap: '0.5rem' }}>
+              <Pulse color="acc" size={7} />
               Carregando propostas pendentes...
             </h3>
           </div>
@@ -162,6 +166,7 @@ export default function OperatorQueue() {
             style={{
               backgroundColor: 'var(--surf)',
               border: '1px solid var(--line)',
+              borderLeft: '1px solid var(--acc)',
               overflow: 'hidden',
             }}
           >
@@ -192,12 +197,15 @@ export default function OperatorQueue() {
                   {pendingRequests.map((item) => (
                     <tr
                       key={item.request_id}
-                      style={{ borderBottom: '1px solid var(--line)' }}
-                      onMouseOver={(e) => (e.currentTarget.style.borderColor = 'var(--acc)')}
-                      onMouseOut={(e) => (e.currentTarget.style.borderColor = 'var(--line)')}
+                      style={{ borderBottom: '1px solid var(--line)', borderLeft: '1px solid var(--line2)' }}
+                      onMouseOver={(e) => { e.currentTarget.style.borderColor = 'var(--acc)'; e.currentTarget.style.borderLeftColor = 'var(--acc)'; }}
+                      onMouseOut={(e) => { e.currentTarget.style.borderColor = 'var(--line)'; e.currentTarget.style.borderLeftColor = 'var(--line2)'; }}
                     >
                       <td style={{ padding: '1rem 1.5rem', fontSize: '0.875rem', color: 'var(--acc)', fontFamily: 'var(--font-mono)' }}>
-                        {item.request_id}
+                        <span style={{ display: 'inline-flex', alignItems: 'center', gap: '0.5rem' }}>
+                          <Pulse color="acc" size={6} />
+                          {item.request_id}
+                        </span>
                       </td>
                       <td style={{ padding: '1rem 1.5rem', fontSize: '0.875rem', color: 'var(--text)', fontFamily: 'var(--font-mono)' }}>
                         {item.cpf_masked}

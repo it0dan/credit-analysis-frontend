@@ -6,15 +6,15 @@ import { useAuth } from '@repo/auth';
 import { CockpitLayout } from '@repo/ui/cockpit-layout';
 import { Stat } from '@repo/ui/stat';
 import { Card } from '@repo/ui/card';
+import { Tag } from '@repo/ui/tag';
 
 export default function OperatorHome() {
   const auth = useAuth();
 
-  const stats: Array<{ label: string; value: string; color: 'warn' | 'ok' | 'alert' | 'acc' }> = [
-    { label: 'Em Fila de Revisão',  value: '4',    color: 'warn'  },
-    { label: 'Aprovados Hoje',       value: '18',   color: 'ok'    },
-    { label: 'Rejeitados Hoje',      value: '7',    color: 'alert' },
-    { label: 'Tempo Médio Decisão',  value: '4.2m', color: 'acc'   },
+  const stats: Array<{ label: string; value: string; sub: string }> = [
+    { label: 'casos na fila', value: '12', sub: 'queue depth' },
+    { label: 'custo médio por análise', value: 'R$ 0.04', sub: 'finops' },
+    { label: 'latência mediana', value: '63s', sub: 'p50 runtime' },
   ];
 
   return (
@@ -41,6 +41,7 @@ export default function OperatorHome() {
           }}
         >
           <div>
+            <Tag dim="overview">cockpit</Tag>
             <h1
               style={{
                 margin: 0,
@@ -51,7 +52,7 @@ export default function OperatorHome() {
                 letterSpacing: '-0.02em',
               }}
             >
-              Mesa de Análise de Crédito
+              Cockpit de <span style={{ color: 'var(--acc)' }}>operações</span>
             </h1>
             <p style={{ margin: '0.4rem 0 0 0', fontSize: '0.875rem', color: 'var(--muted)' }}>
               Central de Intervenção Humana (HITL) para propostas de crédito especiais
@@ -73,14 +74,14 @@ export default function OperatorHome() {
         <div
           style={{
             display: 'grid',
-            gridTemplateColumns: 'repeat(auto-fit, minmax(200px, 1fr))',
+            gridTemplateColumns: 'repeat(auto-fit, minmax(220px, 1fr))',
             gap: '1rem',
             marginBottom: '2.5rem',
           }}
         >
           {stats.map((stat, idx) => (
-            <Card key={idx} style={{ padding: '1.25rem' }}>
-              <Stat label={stat.label} value={stat.value} color={stat.color} />
+            <Card key={idx} style={{ padding: '1.25rem', borderLeft: '1px solid var(--acc)' }}>
+              <Stat label={stat.label} value={stat.value} sub={stat.sub} />
             </Card>
           ))}
         </div>
@@ -101,6 +102,7 @@ export default function OperatorHome() {
               flexDirection: 'column',
               justifyContent: 'space-between',
               minHeight: '240px',
+              borderLeft: '1px solid var(--acc)',
             }}
           >
             <div>
@@ -168,6 +170,7 @@ export default function OperatorHome() {
               flexDirection: 'column',
               justifyContent: 'space-between',
               minHeight: '240px',
+              borderLeft: '1px solid var(--line2)',
             }}
           >
             <div>

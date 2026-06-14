@@ -1,5 +1,6 @@
 import React from 'react';
 import type { AgentCall } from '@repo/types';
+import { Pulse } from './pulse';
 
 interface AgentCardProps {
   agent: AgentCall;
@@ -52,16 +53,18 @@ export function AgentCard({ agent }: AgentCardProps) {
       </div>
 
       <div style={{ display: 'flex', alignItems: 'center', gap: '0.5rem', marginBottom: '0.5rem' }}>
-        <span
-          style={{
-            width: '6px',
-            height: '6px',
-            borderRadius: '50%',
-            backgroundColor: colors.dot,
-            display: 'inline-block',
-            flexShrink: 0,
-          }}
-        />
+        {agent.status === 'success' ? <Pulse color="acc" size={6} /> : (
+          <span
+            style={{
+              width: '6px',
+              height: '6px',
+              borderRadius: '50%',
+              backgroundColor: colors.dot,
+              display: 'inline-block',
+              flexShrink: 0,
+            }}
+          />
+        )}
         <span style={{ fontSize: '0.75rem', textTransform: 'uppercase', color: colors.text, letterSpacing: 'var(--ls-label)' }}>
           {agent.status}
         </span>

@@ -4,6 +4,8 @@ import React, { useState } from 'react';
 import { useRouter } from 'next/navigation';
 import { CockpitLayout } from '@repo/ui/cockpit-layout';
 import { Pulse } from '@repo/ui/pulse';
+import { Tag } from '@repo/ui/tag';
+import { Stat } from '@repo/ui/stat';
 
 export default function CustomerHome() {
   const [cpf, setCpf] = useState('');
@@ -82,6 +84,7 @@ export default function CustomerHome() {
         >
           {/* Header */}
           <div style={{ textAlign: 'center', marginBottom: '2.5rem' }}>
+            <Tag dim="step 01">solicitação</Tag>
             <div
               style={{
                 display: 'inline-flex',
@@ -106,7 +109,7 @@ export default function CustomerHome() {
                 letterSpacing: '-0.02em',
               }}
             >
-              Crédito A2A Inteligente
+              Solicite seu <span style={{ color: 'var(--acc)' }}>crédito</span>
             </h1>
             <p style={{ margin: '0.6rem 0 0 0', fontSize: '0.875rem', color: 'var(--muted)' }}>
               Aprovação multiagente em segundos via Sensedia AI Gateway
@@ -116,18 +119,8 @@ export default function CustomerHome() {
           <form onSubmit={handleSubmit} style={{ display: 'flex', flexDirection: 'column', gap: '1.5rem' }}>
             {/* CPF */}
             <div style={{ display: 'flex', flexDirection: 'column', gap: '0.5rem' }}>
-              <label
-                htmlFor="cpf"
-                style={{
-                  fontSize: '0.7rem',
-                  fontWeight: 400,
-                  color: 'var(--muted)',
-                  textTransform: 'uppercase',
-                  letterSpacing: 'var(--ls-label)',
-                  fontFamily: 'var(--font-mono)',
-                }}
-              >
-                CPF do Titular
+              <label htmlFor="cpf" style={{ display: 'inline-block' }}>
+                <Tag dim="cpf">titular</Tag>
               </label>
               <input
                 id="cpf"
@@ -138,35 +131,26 @@ export default function CustomerHome() {
                 disabled={loading}
                 style={{
                   padding: '0.85rem 1rem',
-                  backgroundColor: 'var(--bg)',
-                  border: '1px solid var(--line)',
+                  backgroundColor: 'transparent',
+                  border: '1px solid var(--line2)',
                   color: 'var(--text)',
                   fontSize: '1rem',
                   fontFamily: 'var(--font-mono)',
                   letterSpacing: '0.05em',
+                  caretColor: 'var(--acc)',
                   outline: 'none',
                   width: '100%',
                   boxSizing: 'border-box',
                 }}
                 onFocus={(e) => { e.currentTarget.style.borderColor = 'var(--acc)'; }}
-                onBlur={(e) => { e.currentTarget.style.borderColor = 'var(--line)'; }}
+                onBlur={(e) => { e.currentTarget.style.borderColor = 'var(--line2)'; }}
               />
             </div>
 
             {/* Valor */}
             <div style={{ display: 'flex', flexDirection: 'column', gap: '0.5rem' }}>
-              <label
-                htmlFor="amount"
-                style={{
-                  fontSize: '0.7rem',
-                  fontWeight: 400,
-                  color: 'var(--muted)',
-                  textTransform: 'uppercase',
-                  letterSpacing: 'var(--ls-label)',
-                  fontFamily: 'var(--font-mono)',
-                }}
-              >
-                Valor Solicitado (R$)
+              <label htmlFor="amount" style={{ display: 'inline-block' }}>
+                <Tag dim="R$">valor solicitado</Tag>
               </label>
               <input
                 id="amount"
@@ -177,17 +161,18 @@ export default function CustomerHome() {
                 disabled={loading}
                 style={{
                   padding: '0.85rem 1rem',
-                  backgroundColor: 'var(--bg)',
-                  border: '1px solid var(--line)',
+                  backgroundColor: 'transparent',
+                  border: '1px solid var(--line2)',
                   color: 'var(--text)',
                   fontSize: '1rem',
-                  fontFamily: 'var(--font-sans)',
+                  fontFamily: 'var(--font-mono)',
                   outline: 'none',
+                  caretColor: 'var(--acc)',
                   width: '100%',
                   boxSizing: 'border-box',
                 }}
                 onFocus={(e) => { e.currentTarget.style.borderColor = 'var(--acc)'; }}
-                onBlur={(e) => { e.currentTarget.style.borderColor = 'var(--line)'; }}
+                onBlur={(e) => { e.currentTarget.style.borderColor = 'var(--line2)'; }}
               />
             </div>
 
@@ -241,6 +226,9 @@ export default function CustomerHome() {
               {loading ? 'Inicializando Agentes...' : 'Iniciar Análise de Crédito'}
             </button>
           </form>
+          <div style={{ marginTop: '2rem', borderTop: '1px solid var(--line)', paddingTop: '1.25rem' }}>
+            <Stat value="+2.847" label="análises concluídas hoje" sub="gateway telemetry" />
+          </div>
         </div>
       </div>
     </CockpitLayout>
