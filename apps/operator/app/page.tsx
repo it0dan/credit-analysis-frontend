@@ -40,7 +40,7 @@ export default function OperatorHome() {
   const auth = useAuth();
 
   return (
-    <CockpitLayout activeLink="home" portalType="operator" liveState="idle">
+    <CockpitLayout activeLink="home" portalType="operator" liveState="idle" onSignOut={() => { window.location.href = 'http://localhost:3000/logout'; }}>
       <div
         style={{
           maxWidth: '1200px',

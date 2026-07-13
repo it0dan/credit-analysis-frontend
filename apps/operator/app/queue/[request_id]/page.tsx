@@ -157,7 +157,7 @@ export default function OperatorReviewDetailPage() {
   );
 
   return (
-    <CockpitLayout activeLink="queue" portalType="operator">
+    <CockpitLayout activeLink="queue" portalType="operator" onSignOut={() => { window.location.href = 'http://localhost:3000/logout'; }}>
       <div
         style={{
           maxWidth: '1200px',

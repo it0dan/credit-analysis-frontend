@@ -4,7 +4,7 @@ import { auth } from './auth';
 export default auth((request) => {
   const { pathname } = request.nextUrl;
 
-  if (pathname === '/login' || pathname.startsWith('/api/auth')) {
+  if (pathname === '/login' || pathname === '/logout' || pathname.startsWith('/api/auth')) {
     return NextResponse.next();
   }
 

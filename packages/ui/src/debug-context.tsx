@@ -77,6 +77,7 @@ export function DebugProvider({ defaultEnabled, children }: { defaultEnabled: bo
             top: '8px',
             right: '16px',
             zIndex: 1000,
+            pointerEvents: 'none',
             padding: '4px 8px',
             background: 'var(--bg)',
             border: '1px solid var(--line)',
