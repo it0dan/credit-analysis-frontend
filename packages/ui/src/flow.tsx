@@ -76,7 +76,7 @@ function StepNode({ step }: { step: FlowStep }) {
   );
 }
 
-function Connector({ color: _color }: { color: string }) {
+function Connector() {
   return (
     <div
       style={{
@@ -131,7 +131,7 @@ export function Flow({ steps, orientation = 'horizontal' }: FlowProps) {
         const prevFirst = prevGroup?.[0];
         return (
         <React.Fragment key={gIdx}>
-          {gIdx > 0 && prevFirst && <Connector color={statusColor[prevFirst.status]} />}
+          {gIdx > 0 && prevFirst && <Connector />}
           {group.length === 1 && group[0] ? (
             <StepNode step={group[0]} />
           ) : (

@@ -16,7 +16,7 @@ O monorepo está dividido em duas aplicações principais (`apps/`) e quatro pac
 ### 📦 Pacotes (`packages/`)
 
 *   **`packages/types/`**: Definições de tipos comuns e interfaces contratuais (`CreditAnalysisStatus`, `HITLRequest`, `OperatorDecision`, `ReasoningChunk`, `AgentCall`, `AgentTrajectory`).
-*   **`packages/ag-ui-client/`**: Cliente de integração AG-UI SSE, implementando o hook `useAgentStream` com reconexão automática e backoff exponencial.
+*   **`packages/ag-ui-client/`**: Cliente SSE por `request_id`, implementando o hook `useAgentStream` com eventos nomeados, replay idempotente, reconexão automática e backoff exponencial.
 *   **`packages/ui/`**: Design system compartilhado com componentes tipados (`StatusBadge`, `ReasoningStream`, `TraceTimeline`, `CostDisplay`, `HITLPanel`) e helper `analysis-history`. Paleta terminal-brutalism definida em `packages/ui/tokens/tokens.css`.
 *   **`packages/auth/`**: Contratos de autenticação JWT com hook `useAuth`.
 

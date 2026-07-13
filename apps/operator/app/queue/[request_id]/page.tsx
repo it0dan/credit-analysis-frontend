@@ -10,6 +10,7 @@ import { HITLPanel } from '@repo/ui/hitl-panel';
 import { CockpitLayout } from '@repo/ui/cockpit-layout';
 import { Tag } from '@repo/ui/tag';
 import { Pulse } from '@repo/ui/pulse';
+import { useAgentStream } from '@repo/ag-ui-client';
 import type { HITLRequest, OperatorDecision, AgentTrajectory, ReasoningChunk } from '@repo/types';
 
 
@@ -48,6 +49,8 @@ export default function OperatorReviewDetailPage() {
   const cpf = searchParams.get('cpf') || '***.723.109-**';
   const amount = searchParams.get('amount') || '80000';
   const reason = searchParams.get('reason') || 'Valor Solicitado Excede Limite Automático';
+  const orchestratorUrl = process.env.NEXT_PUBLIC_ORCHESTRATOR_URL ?? 'http://localhost:8086';
+  const stream = useAgentStream(`${orchestratorUrl}/analysis/${reqIdStr}/events`);
 
   const [decisionSubmitted, setDecisionSubmitted] = useState<OperatorDecision | null>(null);
   const [submitting, setSubmitting] = useState(false);
@@ -55,6 +58,13 @@ export default function OperatorReviewDetailPage() {
   const [error, setError] = useState<string | null>(null);
   const [trajectory, setTrajectory] = useState<AgentTrajectory | null>(null);
   const [hitlRequest, setHitlRequest] = useState<HITLRequest | null>(null);
+
+  useEffect(() => {
+    if (stream.trajectory) setTrajectory(stream.trajectory);
+    if (stream.hitlRequest) {
+      setHitlRequest((current) => current ? { ...current, reason: stream.hitlRequest?.reason ?? current.reason } : stream.hitlRequest);
+    }
+  }, [stream.hitlRequest, stream.trajectory]);
 
   useEffect(() => {
     const fallbackTrajectory: AgentTrajectory = {
@@ -85,7 +95,7 @@ export default function OperatorReviewDetailPage() {
       },
     });
 
-    fetch(`http://localhost:8086/analysis/${reqIdStr}/status`)
+    fetch(`${orchestratorUrl}/analysis/${reqIdStr}/status`)
       .then((res) => {
         if (!res.ok) throw new Error('Falha ao obter dados.');
         return res.json();
@@ -102,13 +112,13 @@ export default function OperatorReviewDetailPage() {
         setError('Servidor offline. Exibindo simulador de contingência.');
         setLoading(false);
       });
-  }, [reqIdStr, cpf, amount, reason]);
+  }, [reqIdStr, cpf, amount, reason, orchestratorUrl]);
 
   const handleDecide = (decision: OperatorDecision) => {
     setSubmitting(true);
     setError(null);
 
-    fetch('http://localhost:8086/resume', {
+    fetch(`${orchestratorUrl}/resume`, {
       method: 'POST',
       headers: { 'Content-Type': 'application/json', 'Authorization': 'Bearer mock-token' },
       body: JSON.stringify({

@@ -3,7 +3,7 @@
 ## Estado Atual
 
 - Branch local: `main`
-- Repositório frontend com mudanças prontas para commit/push
+- Repositório frontend integrado ao SSE real do backend, com mudanças prontas para revisão
 - Backends auditados:
   - `credit-analysis-agent`: possui alteração pré-existente em `src/episodic_memory.json`
   - `compliance-agent`: sem alterações locais
@@ -12,6 +12,16 @@
   - Operator: `http://localhost:3001`
 
 ## Implementado Nesta Rodada
+
+### consume-sse-reasoning-stream
+
+- `useAgentStream` atualizado para consumir eventos SSE nomeados do ADR-010
+- Replay e fila ao vivo deduplicados por identidade de evento
+- Eventos do backend convertidos em `AgentTrajectory` e `ReasoningChunk`
+- Customer conectado a `GET /analysis/:request_id/events`
+- Operator conectado ao mesmo replay para trajetória técnica
+- Reconexão exponencial, fixtures visuais e fallback offline preservados
+- URL do orquestrador centralizada em `NEXT_PUBLIC_ORCHESTRATOR_URL`
 
 ### agentic-reasoning-and-memory
 
@@ -58,6 +68,11 @@
 
 ## Validação Rodada
 
+- `npm run check-types`: passou após integração SSE
+- `npm run build`: passou para customer e operator
+- `npm run lint`: passou
+- Backend `python3 -m unittest discover -s tests -v`: 5/5
+
 - `npm run check-types`: passou
 - `npx @axe-core/cli http://localhost:3000 http://localhost:3001`: 0 violations
 - Rebrand grep frontend: zero ocorrências antigas
@@ -98,5 +113,4 @@ Ver `openspec/changes/agentic-reasoning-and-memory/backend-debts.md`:
 - Inventário de rebrand backend
 
 ## Próximo Passo
-
-Commitar e fazer push do frontend para `origin/main`. Para `credit-analysis-agent`, decidir explicitamente se `src/episodic_memory.json` deve ser versionado ou tratado como estado runtime local.
+Revisar e versionar frontend e backend em commits separados. Não incluir `credit-analysis-agent/src/episodic_memory.json` no commit SSE; ele contém estado runtime gerado por execuções locais.

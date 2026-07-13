@@ -11,6 +11,7 @@ import { Pulse } from '@repo/ui/pulse';
 import { ReasoningStream } from '@repo/ui/reasoning-stream';
 import { DebugOnly, HumanLabel } from '@repo/ui/debug-context';
 import { getAnalysis, updateAnalysis } from '@repo/ui/analysis-history';
+import { useAgentStream } from '@repo/ag-ui-client';
 import type { AgentCall, AgentTrajectory, CreditAnalysisStatus, ReasoningChunk } from '@repo/types';
 
 type FinalVerdict = 'approved' | 'rejected' | 'hitl_required';
@@ -106,7 +107,7 @@ function appendReasoning(trajectory: StreamTrajectory, agent: AgentName, chunk: 
   };
 }
 
-function completedTrajectory(request_id: string, finalStatus: FinalVerdict, amount: string): StreamTrajectory {
+function completedTrajectory(request_id: string, finalStatus: FinalVerdict): StreamTrajectory {
   const cost = finalStatus === 'approved' ? 0.121 : finalStatus === 'rejected' ? 0.104 : 0.132;
   return {
     request_id,
@@ -132,9 +133,9 @@ export default function CustomerStatusPage() {
   const amountValue = Number.isFinite(parseFloat(amount)) ? parseFloat(amount) : 0;
   const amountLabel = amountValue.toLocaleString('pt-BR', { style: 'currency', currency: 'BRL' });
 
-  const [status, setStatus] = useState<CreditAnalysisStatus>('pending');
-  const [trajectory, setTrajectory] = useState<StreamTrajectory | null>(null);
-  const [error, setError] = useState<string | null>(null);
+  const isFixture = reqIdStr.startsWith('test-') || reqIdStr.startsWith('polish-');
+  const orchestratorUrl = process.env.NEXT_PUBLIC_ORCHESTRATOR_URL ?? 'http://localhost:8086';
+  const stream = useAgentStream(`${orchestratorUrl}/analysis/${reqIdStr}/events`, !isFixture);
   const [isSimulated, setIsSimulated] = useState(false);
   const [instantFinal, setInstantFinal] = useState<FinalVerdict | null>(null);
 
@@ -145,74 +146,25 @@ export default function CustomerStatusPage() {
   });
 
   useEffect(() => {
-    let active = true;
-    let pollTimer: NodeJS.Timeout;
-    let failureCount = 0;
-
-    if (reqIdStr.startsWith('test-') || reqIdStr.startsWith('polish-')) {
-      setStatus('analyzing');
-      setTrajectory(null);
-      setError(null);
+    if (isFixture) {
       setInstantFinal(null);
       setIsSimulated(true);
-      return () => {
-        active = false;
-        clearTimeout(pollTimer);
-      };
+      return;
     }
 
-    const hydrateFromLocalFinal = () => {
+    if (stream.trajectory) {
+      setIsSimulated(false);
+      return;
+    }
+
+    if (stream.error) {
       const stored = getAnalysis(reqIdStr);
       if (stored?.final_verdict) {
         setInstantFinal(stored.final_verdict);
-        setIsSimulated(true);
-        setError(null);
-        return true;
       }
-      return false;
-    };
-
-    const poll = () => {
-      fetch(`http://localhost:8086/analysis/${reqIdStr}/status`)
-        .then((res) => {
-          if (!res.ok) throw new Error('Falha ao consultar status.');
-          return res.json();
-        })
-        .then((data) => {
-          if (!active) return;
-          failureCount = 0;
-          setStatus(data.status);
-          setTrajectory(toStreamTrajectory(data.trajectory));
-          setError(null);
-          setIsSimulated(false);
-          updateAnalysis(reqIdStr, {
-            last_status: data.status,
-            ...(['approved', 'rejected', 'hitl_required'].includes(data.status) ? { final_verdict: data.status } : {}),
-          });
-          if (data.status === 'pending' || data.status === 'analyzing') {
-            pollTimer = setTimeout(poll, 2000);
-          }
-        })
-        .catch((err) => {
-          if (!active) return;
-          console.warn('[Status] Polling failed, retrying...', err);
-          if (hydrateFromLocalFinal()) return;
-          failureCount++;
-          if (failureCount >= 3) {
-            setIsSimulated(true);
-            setError(null);
-          } else {
-            pollTimer = setTimeout(poll, 2000);
-          }
-        });
-    };
-
-    poll();
-    return () => {
-      active = false;
-      clearTimeout(pollTimer);
-    };
-  }, [reqIdStr]);
+      setIsSimulated(true);
+    }
+  }, [isFixture, reqIdStr, stream.error, stream.trajectory]);
 
   useEffect(() => {
     if (!isSimulated) return;
@@ -227,7 +179,7 @@ export default function CustomerStatusPage() {
     };
 
     if (instantFinal) {
-      setSimState({ status: instantFinal, error: null, trajectory: completedTrajectory(reqIdStr, instantFinal, amount) });
+      setSimState({ status: instantFinal, error: null, trajectory: completedTrajectory(reqIdStr, instantFinal) });
       return;
     }
 
@@ -300,16 +252,16 @@ export default function CustomerStatusPage() {
       setSimState((prev) => ({
         status: finalStatus,
         error: null,
-        trajectory: prev.trajectory ?? completedTrajectory(reqIdStr, finalStatus, amount),
+        trajectory: prev.trajectory ?? completedTrajectory(reqIdStr, finalStatus),
       }));
     }, 9500));
 
     return () => timers.forEach((timer) => window.clearTimeout(timer));
   }, [isSimulated, reqIdStr, amount, cpf, instantFinal]);
 
-  const activeStatus = isSimulated ? simState.status : status;
-  const activeTrajectory = isSimulated ? simState.trajectory : trajectory;
-  const activeError = isSimulated ? simState.error : error;
+  const activeStatus = isSimulated ? simState.status : stream.status;
+  const activeTrajectory = isSimulated ? simState.trajectory : toStreamTrajectory(stream.trajectory);
+  const activeError = isSimulated ? simState.error : stream.error;
   const isTerminal = !['pending', 'analyzing'].includes(activeStatus);
   const debugTrajectory = useMemo(() => activeTrajectory ? activeTrajectory : null, [activeTrajectory]);
 

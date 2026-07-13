@@ -36,13 +36,17 @@ AGENTS.md
 src/
 ```
 
-## Real SSE reasoning stream - credit-analysis-agent
+## Real SSE reasoning stream - credit-analysis-agent — resolved
 
-Add `GET /analysis/:id/events` returning `text/event-stream`.
+Implemented as `GET /analysis/:id/events` returning `text/event-stream`, with SQLite replay and named lifecycle events.
 
-Events:
+Current events:
 
-- `event: reasoning_chunk`
-- payload matches frontend `ReasoningChunk` plus `agent` and `request_id`
+- `analysis_started`
+- `agent_started`
+- `agent_completed`
+- `analysis_done`
+- `hitl_required`
+- `analysis_error`
 
-This should replace the current frontend simulation once implemented.
+The `@repo/ag-ui-client` package converts these lifecycle events into the frontend `AgentTrajectory` and `ReasoningChunk` contracts. Simulation remains restricted to visual fixtures and offline contingency.

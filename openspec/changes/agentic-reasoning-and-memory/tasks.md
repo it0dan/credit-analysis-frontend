@@ -15,3 +15,10 @@
 - [x] T12. Add localStorage final-verdict fallback on status page.
 - [x] T13. Validate greps, screenshots, density, axe and typecheck.
 - [x] T14. Record backend debts for durable persistence, backend rebrand and real SSE reasoning.
+## Integração SSE real
+
+- [x] Consumir `GET /analysis/:request_id/events` no customer.
+- [x] Consumir replay SSE no detalhe do operator.
+- [x] Converter eventos de lifecycle do backend em `AgentTrajectory` e `ReasoningChunk`.
+- [x] Deduplicar eventos recebidos simultaneamente por replay e fila ao vivo.
+- [x] Preservar fixtures visuais e fallback offline.

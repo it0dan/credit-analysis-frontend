@@ -18,7 +18,7 @@ Monorepo Turborepo para a interface do sistema de análise de crédito multiagen
 
 - `packages/ui` — design system, `ReasoningStream`, histórico local e componentes compartilhados
 - `packages/types` — contratos TypeScript (`CreditAnalysisStatus`, `AgentTrajectory`, `ReasoningChunk`, HITL)
-- `packages/ag-ui-client` — cliente SSE legado/experimental
+- `packages/ag-ui-client` — cliente SSE real por `request_id`, com replay, deduplicação e reconexão
 - `packages/auth` — auth mock/dev para customer e operator
 
 ## Design Tokens
@@ -80,6 +80,8 @@ Serviços esperados para fluxo completo local:
 - Operator: `http://localhost:3001`
 - Orchestrator/API: `http://localhost:8086`
 - Compliance agent: `http://localhost:8085`
+
+O customer e o operator consomem `GET /analysis/:request_id/events`. Timers locais são mantidos somente para fixtures visuais e contingência quando o backend está indisponível.
 
 ## Validação
 
