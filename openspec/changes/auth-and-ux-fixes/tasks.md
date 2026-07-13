@@ -18,7 +18,7 @@
 - [x] 16. Adicionar variáveis aos `.env.example` dos dois apps.
 - [x] 17. Corrigir o input monetário do formulário customer.
 - [x] 18. Separar visualmente Tag e Pulse no step indicator.
-- [ ] 19. Implementar oito KPIs e tabela de decisões no operator dashboard.
+- [x] 19. Implementar oito KPIs e tabela de decisões no operator dashboard.
 - [ ] 20. Executar `npm run check-types`, lint e build; corrigir erros.
 - [ ] 21. Subir Keycloak e realizar smoke tests HTTP.
 - [ ] 22. Validar manualmente no navegador os fluxos demo cliente e operador.
