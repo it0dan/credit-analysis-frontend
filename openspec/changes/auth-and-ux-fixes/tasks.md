@@ -16,8 +16,8 @@
 - [x] 14. Atualizar o layout customer com `SessionProvider`.
 - [x] 15. Atualizar o layout operator com `SessionProvider`.
 - [x] 16. Adicionar variáveis aos `.env.example` dos dois apps.
-- [ ] 17. Corrigir o input monetário do formulário customer.
-- [ ] 18. Separar visualmente Tag e Pulse no step indicator.
+- [x] 17. Corrigir o input monetário do formulário customer.
+- [x] 18. Separar visualmente Tag e Pulse no step indicator.
 - [ ] 19. Implementar oito KPIs e tabela de decisões no operator dashboard.
 - [ ] 20. Executar `npm run check-types`, lint e build; corrigir erros.
 - [ ] 21. Subir Keycloak e realizar smoke tests HTTP.

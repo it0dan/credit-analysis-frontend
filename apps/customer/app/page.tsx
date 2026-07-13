@@ -10,7 +10,7 @@ import { addAnalysis, listAnalyses, maskCpf, type StoredAnalysis } from '@repo/u
 
 export default function CustomerHome() {
   const [cpf, setCpf] = useState('');
-  const [amount, setAmount] = useState('');
+  const [amountCents, setAmountCents] = useState(0);
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const [analyses, setAnalyses] = useState<StoredAnalysis[]>([]);
@@ -22,6 +22,12 @@ export default function CustomerHome() {
 
   const activeAnalyses = useMemo(() => analyses.filter((item) => !item.final_verdict), [analyses]);
   const latestActive = activeAnalyses[0];
+
+  const formatCurrency = (cents: number) =>
+    (cents / 100).toLocaleString('pt-BR', {
+      minimumFractionDigits: 2,
+      maximumFractionDigits: 2,
+    });
 
   const handleCpfChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     let value = e.target.value.replace(/\D/g, '');
@@ -37,6 +43,13 @@ export default function CustomerHome() {
     setError(null);
   };
 
+  const handleAmountChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    const digits = e.target.value.replace(/\D/g, '');
+    const cents = Number.parseInt(digits || '0', 10);
+    setAmountCents(Math.min(cents, 999_999_999));
+    setError(null);
+  };
+
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault();
     const cleanCpf = cpf.replace(/\D/g, '');
@@ -44,17 +57,18 @@ export default function CustomerHome() {
       setError('Por favor, insira um CPF válido com 11 dígitos.');
       return;
     }
-    if (!amount || parseFloat(amount) <= 0) {
-      setError('Por favor, insira um valor solicitado válido maior que zero.');
+    if (amountCents < 100) {
+      setError('O valor mínimo para análise é R$ 1,00.');
       return;
     }
+    const requestedAmount = amountCents / 100;
     setLoading(true);
     setError(null);
 
     fetch('http://localhost:8086/analysis', {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({ cpf: cleanCpf, amount: parseFloat(amount) }),
+      body: JSON.stringify({ cpf: cleanCpf, amount: requestedAmount }),
     })
       .then((res) => {
         if (!res.ok) throw new Error('Não foi possível inicializar a análise no orquestrador de crédito.');
@@ -64,11 +78,11 @@ export default function CustomerHome() {
         addAnalysis({
           request_id: data.request_id,
           cpf_masked: maskCpf(cpf),
-          amount_brl: parseFloat(amount),
+          amount_brl: requestedAmount,
           final_verdict: null,
           last_status: data.status === 'hitl_required' ? 'hitl_required' : data.status === 'rejected' ? 'rejected' : 'analyzing',
         });
-        router.push(`/status/${data.request_id}?cpf=${encodeURIComponent(maskCpf(cpf))}&amount=${amount}`);
+        router.push(`/status/${data.request_id}?cpf=${encodeURIComponent(maskCpf(cpf))}&amount=${requestedAmount}`);
       })
       .catch((err) => {
         setError(err instanceof Error ? err.message : 'Falha na conexão com o orquestrador multiagente.');
@@ -126,20 +140,22 @@ export default function CustomerHome() {
           )}
 
           <div style={{ textAlign: 'center', marginBottom: '2.5rem' }}>
-            <Tag dim="step 01">solicitação</Tag>
-            <div
-              style={{
-                display: 'inline-flex',
-                alignItems: 'center',
-                justifyContent: 'center',
-                width: '48px',
-                height: '48px',
-                backgroundColor: 'transparent',
-                marginBottom: '1rem',
-                border: '1px solid var(--acc)',
-              }}
-            >
-              <Pulse color="acc" size={14} />
+            <div style={{ display: 'block', marginBottom: '1rem' }}>
+              <Tag dim="step 01">solicitação</Tag>
+            </div>
+            <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'center', marginBottom: '1.25rem' }}>
+              <div
+                style={{
+                  width: '44px',
+                  height: '44px',
+                  border: '1px solid var(--acc)',
+                  display: 'flex',
+                  alignItems: 'center',
+                  justifyContent: 'center',
+                }}
+              >
+                <Pulse color="acc" size={12} />
+              </div>
             </div>
             <h1
               style={{
@@ -194,10 +210,13 @@ export default function CustomerHome() {
               </label>
               <input
                 id="amount"
-                type="number"
-                placeholder="Ex: 25000"
-                value={amount}
-                onChange={(e) => { setAmount(e.target.value); setError(null); }}
+                type="text"
+                inputMode="numeric"
+                autoComplete="off"
+                aria-describedby="amount-hint"
+                placeholder="0,00"
+                value={formatCurrency(amountCents)}
+                onChange={handleAmountChange}
                 disabled={loading}
                 style={{
                   padding: '0.85rem 1rem',
@@ -214,6 +233,9 @@ export default function CustomerHome() {
                 onFocus={(e) => { e.currentTarget.style.borderColor = 'var(--acc)'; }}
                 onBlur={(e) => { e.currentTarget.style.borderColor = 'var(--line2)'; }}
               />
+              <span id="amount-hint" style={{ color: 'var(--muted)', fontFamily: 'var(--font-mono)', fontSize: '0.68rem' }}>
+                Digite os centavos da direita para a esquerda · máximo R$ 9.999.999,99
+              </span>
             </div>
 
             {error && (
