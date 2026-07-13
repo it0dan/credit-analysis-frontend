@@ -127,7 +127,7 @@ export default function OperatorHome() {
               <thead>
                 <tr>
                   {['ID', 'CPF', 'VALOR', 'STATUS', 'AGENTES', 'LATÊNCIA', 'TURNO'].map((heading) => (
-                    <th key={heading} scope="col" style={{ padding: '0.8rem 1rem', borderBottom: '1px solid var(--line2)', color: 'var(--muted)', fontSize: '0.65rem', fontWeight: 400, letterSpacing: 'var(--ls-label)', textAlign: heading === 'AGENTES' ? 'center' : 'left' }}>
+                    <th key={heading} scope="col" style={{ padding: '0.8rem 1rem', borderBottom: '1px solid var(--line2)', color: 'var(--text)', fontSize: '0.65rem', fontWeight: 400, letterSpacing: 'var(--ls-label)', textAlign: heading === 'AGENTES' ? 'center' : 'left' }}>
                       {heading}
                     </th>
                   ))}
@@ -146,7 +146,7 @@ export default function OperatorHome() {
                     </td>
                     <td style={{ padding: '0.85rem 1rem', borderBottom: '1px solid var(--line)', color: 'var(--text)', fontSize: '0.75rem', textAlign: 'center' }}>{decision.agents}</td>
                     <td style={{ padding: '0.85rem 1rem', borderBottom: '1px solid var(--line)', color: 'var(--blue)', fontSize: '0.75rem' }}>{decision.latency}</td>
-                    <td style={{ padding: '0.85rem 1rem', borderBottom: '1px solid var(--line)', color: 'var(--muted)', fontSize: '0.75rem' }}>{decision.turn}</td>
+                    <td style={{ padding: '0.85rem 1rem', borderBottom: '1px solid var(--line)', color: 'var(--text)', fontSize: '0.75rem' }}>{decision.turn}</td>
                   </tr>
                 ))}
               </tbody>

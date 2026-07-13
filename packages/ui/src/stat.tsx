@@ -39,7 +39,7 @@ export function Stat({ label, value, unit, delta, sub, color = 'var(--acc)' }: S
         style={{
           fontSize: '12px',
           fontWeight: 400,
-          color: 'var(--muted)',
+          color: 'var(--text)',
           maxWidth: '190px',
           lineHeight: 1.4,
         }}
@@ -65,7 +65,7 @@ export function Stat({ label, value, unit, delta, sub, color = 'var(--acc)' }: S
         )}
       </span>
       {sub && (
-        <span style={{ fontSize: '10px', color: 'var(--line2)', marginTop: '5px', fontFamily: 'var(--font-mono)' }}>
+        <span style={{ fontSize: '10px', color: 'var(--text)', marginTop: '5px', fontFamily: 'var(--font-mono)' }}>
           {sub}
         </span>
       )}

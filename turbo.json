@@ -1,6 +1,7 @@
 {
   "$schema": "https://turborepo.dev/schema.json",
   "ui": "tui",
+  "globalEnv": ["NEXT_PUBLIC_DEMO_AUTH_ENABLED"],
   "tasks": {
     "build": {
       "dependsOn": ["^build"],

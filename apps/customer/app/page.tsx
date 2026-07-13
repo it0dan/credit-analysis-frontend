@@ -259,7 +259,7 @@ export default function CustomerHome() {
                 onFocus={(e) => { e.currentTarget.style.borderColor = 'var(--acc)'; }}
                 onBlur={(e) => { e.currentTarget.style.borderColor = 'var(--line2)'; }}
               />
-              <span id="amount-hint" style={{ color: 'var(--muted)', fontFamily: 'var(--font-mono)', fontSize: '0.68rem' }}>
+              <span id="amount-hint" style={{ color: 'var(--text)', fontFamily: 'var(--font-mono)', fontSize: '0.68rem' }}>
                 Digite os centavos da direita para a esquerda · máximo R$ 9.999.999,99
               </span>
             </div>

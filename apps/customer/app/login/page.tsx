@@ -152,13 +152,13 @@ function LoginContent() {
 
         <div style={{ display: 'flex', alignItems: 'center', gap: '1rem', marginBottom: '1.5rem' }} aria-hidden="true">
           <div style={{ flex: 1, height: '1px', background: 'var(--line2)' }} />
-          <span style={{ fontFamily: 'var(--font-mono)', fontSize: '0.65rem', color: 'var(--muted)', letterSpacing: '0.15em', textTransform: 'uppercase' }}>
+          <span style={{ fontFamily: 'var(--font-mono)', fontSize: '0.65rem', color: 'var(--text)', letterSpacing: '0.15em', textTransform: 'uppercase' }}>
             ou
           </span>
           <div style={{ flex: 1, height: '1px', background: 'var(--line2)' }} />
         </div>
 
-        {process.env.NODE_ENV !== 'production' && (
+        {process.env.NEXT_PUBLIC_DEMO_AUTH_ENABLED !== 'false' && (
           <div style={{ display: 'flex', flexDirection: 'column', gap: '0.5rem' }}>
             {[
               { username: 'demo-cliente' as const, label: '→ Entrar como Cliente (demo)' },
@@ -174,7 +174,7 @@ function LoginContent() {
                   padding: '0.7rem',
                   background: 'transparent',
                   border: '1px solid var(--line2)',
-                  color: 'var(--muted)',
+                  color: 'var(--text)',
                   fontFamily: 'var(--font-mono)',
                   fontSize: '0.7rem',
                   textTransform: 'uppercase',
@@ -189,7 +189,7 @@ function LoginContent() {
           </div>
         )}
 
-        <p style={{ margin: '2rem 0 0', textAlign: 'center', fontFamily: 'var(--font-mono)', fontSize: '0.65rem', color: 'var(--muted)', letterSpacing: '0.1em' }}>
+        <p style={{ margin: '2rem 0 0', textAlign: 'center', fontFamily: 'var(--font-mono)', fontSize: '0.65rem', color: 'var(--text)', letterSpacing: '0.1em' }}>
           análise de crédito agêntica · ambiente de referência
         </p>
       </section>
