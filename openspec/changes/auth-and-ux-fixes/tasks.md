@@ -4,18 +4,18 @@
 - [x] 2. Gerar `keycloak/realm-export.json` com realm, clients, mapper de roles, usuários demo e IdPs Google/GitHub.
 - [x] 3. Instalar `next-auth@beta` nos workspaces customer, operator e auth conforme dependências efetivamente importadas.
 - [x] 4. Criar `packages/auth/src/auth.config.ts` com KeycloakProvider e CredentialsProvider demo.
-- [ ] 5. Criar inicialização Auth.js por app e exports compartilhados necessários.
+- [x] 5. Criar inicialização Auth.js por app e exports compartilhados necessários.
 - [x] 6. Criar `packages/auth/src/types.ts` e module augmentation para `Session`, `User` e `JWT`.
 - [x] 7. Substituir `packages/auth/src/useAuth.ts` por hooks sobre a sessão Auth.js.
 - [x] 8. Atualizar `packages/auth/src/index.ts` com os novos exports.
-- [ ] 9. Criar `apps/customer/app/api/auth/[...nextauth]/route.ts`.
-- [ ] 10. Criar `apps/customer/app/login/page.tsx` e fluxo de pós-login por role.
-- [ ] 11. Criar `apps/customer/middleware.ts` com proteção e redirect por role.
-- [ ] 12. Criar `apps/operator/app/api/auth/[...nextauth]/route.ts`.
-- [ ] 13. Criar `apps/operator/middleware.ts` exigindo role operator.
-- [ ] 14. Atualizar o layout customer com `SessionProvider`.
-- [ ] 15. Atualizar o layout operator com `SessionProvider`.
-- [ ] 16. Adicionar variáveis aos `.env.example` dos dois apps.
+- [x] 9. Criar `apps/customer/app/api/auth/[...nextauth]/route.ts`.
+- [x] 10. Criar `apps/customer/app/login/page.tsx` e fluxo de pós-login por role.
+- [x] 11. Criar `apps/customer/middleware.ts` com proteção e redirect por role.
+- [x] 12. Criar `apps/operator/app/api/auth/[...nextauth]/route.ts`.
+- [x] 13. Criar `apps/operator/middleware.ts` exigindo role operator.
+- [x] 14. Atualizar o layout customer com `SessionProvider`.
+- [x] 15. Atualizar o layout operator com `SessionProvider`.
+- [x] 16. Adicionar variáveis aos `.env.example` dos dois apps.
 - [ ] 17. Corrigir o input monetário do formulário customer.
 - [ ] 18. Separar visualmente Tag e Pulse no step indicator.
 - [ ] 19. Implementar oito KPIs e tabela de decisões no operator dashboard.
