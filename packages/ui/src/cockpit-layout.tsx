@@ -11,9 +11,10 @@ interface CockpitLayoutProps {
   portalType: 'customer' | 'operator';
   request_id?: string;
   liveState?: 'live' | 'concluded' | 'idle';
+  onSignOut?: () => void;
 }
 
-export function CockpitLayout({ children, activeLink, portalType, request_id, liveState = 'live' }: CockpitLayoutProps) {
+export function CockpitLayout({ children, activeLink, portalType, request_id, liveState = 'live', onSignOut }: CockpitLayoutProps) {
   const { enabled: debugEnabled } = useDebug();
   const [elapsedSeconds, setElapsedSeconds] = useState(0);
   const showTechnicalHud = portalType === 'operator' || debugEnabled;
@@ -24,13 +25,12 @@ export function CockpitLayout({ children, activeLink, portalType, request_id, li
     return () => window.clearInterval(id);
   }, []);
 
-  const portalLabel = portalType === 'customer' ? 'portal' : 'cockpit';
   const menuItems = portalType === 'customer'
     ? [
         { id: 'proposal', label: '> Solicitar Crédito', path: '/' },
-        { id: 'status', label: '> Acompanhamento', path: request_id ? `/status/${request_id}` : '/status/draft', disabled: !request_id },
-        { id: 'history', label: '> Histórico', path: '/historico' },
-        { id: 'settings', label: '> Configurações', path: '#', disabled: true },
+        { id: 'status', label: '> Minhas Propostas', path: request_id ? `/status/${request_id}` : '/status/draft', disabled: !request_id },
+        { id: 'history', label: '> Extrato de Propostas', path: '/historico' },
+        { id: 'settings', label: '> Minha Conta', path: '/configuracoes' },
       ]
     : [
         { id: 'home', label: '> Início', path: '/' },
@@ -79,8 +79,11 @@ export function CockpitLayout({ children, activeLink, portalType, request_id, li
               fontFamily: 'var(--font-mono)',
             }}
           >
-            {portalType === 'customer' ? 'Customer ' : 'Operator '}
-            <span style={{ color: 'var(--acc)' }}>{portalLabel}</span>
+            {portalType === 'customer' ? (
+              <>Internet <span style={{ color: 'var(--acc)' }}>Banking</span></>
+            ) : (
+              <>Operator <span style={{ color: 'var(--acc)' }}>cockpit</span></>
+            )}
           </span>
         </div>
 
@@ -115,7 +118,7 @@ export function CockpitLayout({ children, activeLink, portalType, request_id, li
           ) : liveState === 'live' ? (
             <>
               <Pulse color="acc" size={7} />
-              <span style={{ color: 'var(--acc)' }}>AO VIVO</span>
+              <span style={{ color: 'var(--acc)' }}>{portalType === 'customer' ? 'EM ANDAMENTO' : 'AO VIVO'}</span>
               <span style={{ color: 'var(--line2)' }}>·</span>
               <span>Análise em andamento</span>
               <span style={{ color: 'var(--line2)' }}>·</span>
@@ -131,21 +134,20 @@ export function CockpitLayout({ children, activeLink, portalType, request_id, li
           <span style={{ color: 'var(--line2)' }}>]</span>
         </div>
 
-        {/* Right info */}
-        <DebugOnly>
-          <div
-            style={{
-              fontSize: '0.75rem',
-              color: 'var(--text)',
-              fontWeight: 400,
-              borderLeft: '1px solid var(--line)',
-              paddingLeft: '1rem',
-              fontFamily: 'var(--font-mono)',
-            }}
-          >
-            OP-1002
-          </div>
-        </DebugOnly>
+        <div style={{ display: 'flex', alignItems: 'center' }}>
+          <DebugOnly>
+            <div style={{ fontSize: '0.75rem', color: 'var(--text)', fontWeight: 400, borderLeft: '1px solid var(--line)', paddingLeft: '1rem', fontFamily: 'var(--font-mono)' }}>
+              OP-1002
+            </div>
+          </DebugOnly>
+          {onSignOut && (
+            <form action="http://localhost:3000/logout" method="get" style={{ margin: 0 }}>
+            <button type="submit" onClick={onSignOut} aria-label="Sair da conta" style={{ background: 'transparent', border: '1px solid var(--line2)', color: 'var(--text)', fontFamily: 'var(--font-mono)', fontSize: '0.65rem', letterSpacing: 'var(--ls-label)', textTransform: 'uppercase', padding: '0.3rem 0.75rem', cursor: 'pointer', transition: 'border-color 0.15s, color 0.15s', marginLeft: '1rem' }}>
+              → Sair
+            </button>
+            </form>
+          )}
+        </div>
       </header>
 
       {/* Main Container */}
@@ -235,13 +237,13 @@ export function CockpitLayout({ children, activeLink, portalType, request_id, li
             }}
           >
             <span style={{ fontSize: '0.6rem', fontWeight: 400, color: 'var(--text)', textTransform: 'uppercase', letterSpacing: 'var(--ls-label)', fontFamily: 'var(--font-mono)' }}>
-              {showTechnicalHud ? 'Trace Conector' : 'Atendimento digital'}
+              {showTechnicalHud ? 'Trace Conector' : 'Internet Banking'}
             </span>
             <span style={{ fontSize: '0.7rem', color: 'var(--text)', fontFamily: 'var(--font-mono)' }}>
-              {showTechnicalHud ? 'W3C Propagator' : 'Acompanhamento seguro'}
+              {showTechnicalHud ? 'W3C Propagator' : 'Banco digital seguro'}
             </span>
             <span style={{ fontSize: '0.6rem', color: 'var(--acc)', wordBreak: 'break-all', fontFamily: 'var(--font-mono)' }}>
-              {showTechnicalHud ? 'env: reference-v2' : 'crédito em análise'}
+              {showTechnicalHud ? 'env: reference-v2' : 'proposta em análise'}
             </span>
           </div>
         </aside>

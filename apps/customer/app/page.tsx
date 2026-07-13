@@ -7,6 +7,7 @@ import { CockpitLayout } from '@repo/ui/cockpit-layout';
 import { Pulse } from '@repo/ui/pulse';
 import { Tag } from '@repo/ui/tag';
 import { addAnalysis, listAnalyses, maskCpf, type StoredAnalysis } from '@repo/ui/analysis-history';
+import { signOut } from '@repo/auth';
 
 export default function CustomerHome() {
   const [cpf, setCpf] = useState('');
@@ -95,7 +96,7 @@ export default function CustomerHome() {
       body: JSON.stringify({ cpf: cleanCpf, amount: requestedAmount }),
     })
       .then((res) => {
-        if (!res.ok) throw new Error('Não foi possível inicializar a análise no orquestrador de crédito.');
+        if (!res.ok) throw new Error('Não foi possível iniciar a análise. Tente novamente.');
         return res.json();
       })
       .then((data) => {
@@ -109,13 +110,13 @@ export default function CustomerHome() {
         router.push(`/status/${data.request_id}?cpf=${encodeURIComponent(maskCpf(cpf))}&amount=${requestedAmount}`);
       })
       .catch((err) => {
-        setError(err instanceof Error ? err.message : 'Falha na conexão com o orquestrador multiagente.');
+        setError(err instanceof Error ? err.message : 'Não foi possível iniciar a análise. Tente novamente.');
         setLoading(false);
       });
   };
 
   return (
-    <CockpitLayout activeLink="proposal" portalType="customer" liveState="idle">
+    <CockpitLayout activeLink="proposal" portalType="customer" liveState="idle" onSignOut={() => signOut({ redirectTo: 'http://localhost:3000/login' })}>
       <div
         style={{
           display: 'flex',
@@ -194,7 +195,7 @@ export default function CustomerHome() {
               Solicite seu <span style={{ color: 'var(--acc)' }}>crédito</span>
             </h1>
             <p style={{ margin: '0.6rem 0 0 0', fontSize: '0.875rem', color: 'var(--text)' }}>
-              Aprovação multiagente em segundos, com acompanhamento em tempo real
+              Análise de crédito rápida e segura
             </p>
           </div>
 
@@ -311,7 +312,7 @@ export default function CustomerHome() {
                   }}
                 />
               )}
-              {loading ? 'Inicializando Agentes...' : 'Iniciar Análise de Crédito'}
+              {loading ? 'Preparando sua análise...' : 'Iniciar Análise de Crédito'}
             </button>
           </form>
         </div>

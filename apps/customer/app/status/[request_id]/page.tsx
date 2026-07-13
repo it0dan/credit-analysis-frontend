@@ -8,10 +8,11 @@ import { CostDisplay } from '@repo/ui/cost-display';
 import { CockpitLayout } from '@repo/ui/cockpit-layout';
 import { Tag } from '@repo/ui/tag';
 import { Pulse } from '@repo/ui/pulse';
-import { ReasoningStream } from '@repo/ui/reasoning-stream';
+import { WorkflowCard } from '@repo/ui/workflow-card';
 import { DebugOnly, HumanLabel } from '@repo/ui/debug-context';
 import { getAnalysis, updateAnalysis } from '@repo/ui/analysis-history';
 import { useAgentStream } from '@repo/ag-ui-client';
+import { signOut } from '@repo/auth';
 import type { AgentCall, AgentTrajectory, CreditAnalysisStatus, ReasoningChunk } from '@repo/types';
 
 type FinalVerdict = 'approved' | 'rejected' | 'hitl_required';
@@ -20,48 +21,63 @@ type AgentName = 'bureau' | 'documents' | 'risk' | 'compliance' | 'decision';
 
 const AGENTS: AgentName[] = ['bureau', 'documents', 'risk', 'compliance', 'decision'];
 
+const BANKING_LABELS: Record<AgentName, string> = {
+  bureau: 'Consultando seu histórico de crédito',
+  documents: 'Validando seus documentos',
+  risk: 'Avaliando seu perfil financeiro',
+  compliance: 'Confirmando sua identidade',
+  decision: 'Finalizando sua proposta',
+};
+
+const STATUS_LABEL_BANKING: Record<string, string> = {
+  approved: 'APROVADA',
+  rejected: 'NÃO APROVADA',
+  hitl_required: 'EM REVISÃO ESPECIALIZADA',
+  error: 'ERRO',
+};
+
 const finalMessage: Record<string, string> = {
-  approved: 'Aprovado · seu crédito está pronto',
-  rejected: 'Não foi possível aprovar agora',
-  hitl_required: 'Em análise humana · retornamos em até 24h',
-  error: 'Algo deu errado · tente novamente em instantes',
+  approved: 'Proposta aprovada · seu crédito está disponível',
+  rejected: 'Não foi possível aprovar sua proposta no momento',
+  hitl_required: 'Proposta em análise especializada · retornamos em breve',
+  error: 'Ocorreu um problema · tente novamente em instantes',
   pending: 'Preparando sua análise',
-  analyzing: 'Análise em andamento',
+  analyzing: 'Sua proposta está sendo analisada',
   expired: 'Prazo expirado · inicie uma nova solicitação',
 };
 
 const baseReasoning: Record<Exclude<AgentName, 'decision'>, Omit<ReasoningChunk, 'timestamp_ms'>[]> = {
   bureau: [
-    { kind: 'thought', text_human: 'Consultando seu CPF no bureau de crédito', text_debug: 'tool=bureau_get_score input=cpf_masked request_id' },
-    { kind: 'tool_call', text_human: 'Score recuperado · histórico de 24 meses analisado', text_debug: 'result.score=780 restrictions=[] latency_budget=1500ms' },
-    { kind: 'conclusion', text_human: 'Histórico de crédito confirmado', text_debug: 'bureau.status=ok span=bureau' },
+    { kind: 'thought', text_human: 'Consultando seu CPF nos bureaus de crédito', text_debug: 'tool=bureau_get_score input=cpf_masked request_id' },
+    { kind: 'tool_call', text_human: 'Histórico de 24 meses analisado', text_debug: 'result.score=780 restrictions=[] latency_budget=1500ms' },
+    { kind: 'conclusion', text_human: 'Consulta ao bureau concluída', text_debug: 'bureau.status=ok span=bureau' },
   ],
   documents: [
-    { kind: 'thought', text_human: 'Validando documentos enviados', text_debug: 'tool=documents_validate inputs=document_urls applicant_name' },
-    { kind: 'tool_call', text_human: 'Cruzando dados com base federal', text_debug: 'identity_valid=true income_confirmed=true' },
-    { kind: 'conclusion', text_human: 'Documentos confirmados', text_debug: 'documents.status=ok income_source=ocr' },
+    { kind: 'thought', text_human: 'Verificando seus documentos', text_debug: 'tool=documents_validate inputs=document_urls applicant_name' },
+    { kind: 'tool_call', text_human: 'Conferindo dados cadastrais', text_debug: 'identity_valid=true income_confirmed=true' },
+    { kind: 'conclusion', text_human: 'Documentação validada', text_debug: 'documents.status=ok income_source=ocr' },
   ],
   risk: [
-    { kind: 'thought', text_human: 'Calculando seu perfil de risco', text_debug: 'tool=risk_evaluate inputs=bureau_score income_value requested_amount' },
-    { kind: 'tool_call', text_human: 'Considerando histórico, perfil e valor solicitado', text_debug: 'default_probability=0.04 risk_tier=low' },
-    { kind: 'conclusion', text_human: 'Avaliação concluída', text_debug: 'risk.status=ok internal_score=82' },
+    { kind: 'thought', text_human: 'Calculando sua capacidade de pagamento', text_debug: 'tool=risk_evaluate inputs=bureau_score income_value requested_amount' },
+    { kind: 'tool_call', text_human: 'Analisando o valor solicitado', text_debug: 'default_probability=0.04 risk_tier=low' },
+    { kind: 'conclusion', text_human: 'Perfil financeiro avaliado', text_debug: 'risk.status=ok internal_score=82' },
   ],
   compliance: [
-    { kind: 'thought', text_human: 'Conferindo conformidade regulatória', text_debug: 'tool=compliance_check inputs=cpf_masked request_id' },
-    { kind: 'tool_call', text_human: 'Verificações KYC e PLD em curso', text_debug: 'kyc=true pld=true lgpd=true' },
-    { kind: 'conclusion', text_human: 'Conformidade aprovada', text_debug: 'compliance.status=ok tools=verify_kyc,check_pld,verify_lgpd_consent' },
+    { kind: 'thought', text_human: 'Verificando sua identidade', text_debug: 'tool=compliance_check inputs=cpf_masked request_id' },
+    { kind: 'tool_call', text_human: 'Confirmando dados regulatórios', text_debug: 'kyc=true pld=true lgpd=true' },
+    { kind: 'conclusion', text_human: 'Identidade confirmada', text_debug: 'compliance.status=ok tools=verify_kyc,check_pld,verify_lgpd_consent' },
   ],
 };
 
 function decisionReasoning(finalStatus: FinalVerdict): Omit<ReasoningChunk, 'timestamp_ms'>[] {
   const conclusion = finalStatus === 'approved'
-    ? { text_human: 'Decisão favorável', text_debug: 'final.status=approved approved_amount=requested_amount' }
+    ? { text_human: 'Proposta aprovada', text_debug: 'final.status=approved approved_amount=requested_amount' }
     : finalStatus === 'rejected'
-      ? { text_human: 'Não aprovada', text_debug: 'final.status=rejected approved_amount=0' }
-      : { text_human: 'Encaminhada para análise humana', text_debug: 'final.status=hitl_required reason=threshold_exceeded' };
+      ? { text_human: 'Não foi possível aprovar no momento', text_debug: 'final.status=rejected approved_amount=0' }
+      : { text_human: 'Proposta em análise especializada', text_debug: 'final.status=hitl_required reason=threshold_exceeded' };
   return [
-    { kind: 'thought', text_human: 'Sintetizando a decisão final', text_debug: 'tool=decision_synthesize inputs=t1,t2,requested_amount' },
-    { kind: 'tool_call', text_human: 'Cruzando todos os sinais', text_debug: 'decision_model=explainable_synthesis' },
+    { kind: 'thought', text_human: 'Preparando sua proposta', text_debug: 'tool=decision_synthesize inputs=t1,t2,requested_amount' },
+    { kind: 'tool_call', text_human: finalStatus === 'hitl_required' ? 'Encaminhando para análise especializada' : finalStatus === 'rejected' ? 'Avaliando os dados' : 'Finalizando os detalhes', text_debug: 'decision_model=explainable_synthesis' },
     { kind: 'conclusion', ...conclusion },
   ];
 }
@@ -133,7 +149,7 @@ export default function CustomerStatusPage() {
   const amountValue = Number.isFinite(parseFloat(amount)) ? parseFloat(amount) : 0;
   const amountLabel = amountValue.toLocaleString('pt-BR', { style: 'currency', currency: 'BRL' });
 
-  const isFixture = reqIdStr.startsWith('test-') || reqIdStr.startsWith('polish-');
+  const isFixture = reqIdStr.startsWith('test-') || reqIdStr.startsWith('polish-') || reqIdStr.startsWith('banking-');
   const orchestratorUrl = process.env.NEXT_PUBLIC_ORCHESTRATOR_URL ?? 'http://localhost:8086';
   const stream = useAgentStream(`${orchestratorUrl}/analysis/${reqIdStr}/events`, !isFixture);
   const [isSimulated, setIsSimulated] = useState(false);
@@ -273,7 +289,7 @@ export default function CustomerStatusPage() {
   }, [activeStatus, reqIdStr]);
 
   return (
-    <CockpitLayout activeLink="status" portalType="customer" request_id={reqIdStr} liveState={isTerminal ? 'concluded' : 'live'}>
+    <CockpitLayout activeLink="status" portalType="customer" request_id={reqIdStr} liveState={isTerminal ? 'concluded' : 'live'} onSignOut={() => signOut({ redirectTo: 'http://localhost:3000/login' })}>
       <div
         style={{
           maxWidth: '1000px',
@@ -297,7 +313,7 @@ export default function CustomerStatusPage() {
           }}
         >
           <div>
-            <Tag dim="live">análise em curso</Tag>
+            <Tag dim="em andamento">solicitação em andamento</Tag>
             <h1
               style={{
                 margin: 0,
@@ -307,7 +323,7 @@ export default function CustomerStatusPage() {
                 fontFamily: 'var(--font-mono)',
               }}
             >
-              Análise em <span style={{ color: 'var(--acc)' }}>tempo real</span>
+              Acompanhe sua <span style={{ color: 'var(--acc)' }}>proposta</span>
             </h1>
             <p style={{ margin: '0.4rem 0 0 0', fontSize: '0.85rem', color: 'var(--text)', fontFamily: 'var(--font-mono)' }}>
               <HumanLabel
@@ -317,7 +333,7 @@ export default function CustomerStatusPage() {
             </p>
           </div>
           <div style={{ display: 'flex', alignItems: 'center', gap: '0.75rem' }}>
-            {(activeStatus === 'pending' || activeStatus === 'analyzing') && <Pulse color="acc" size={7} label="ao vivo" />}
+            {(activeStatus === 'pending' || activeStatus === 'analyzing') && <Pulse color="acc" size={7} label="em andamento" />}
             {isSimulated && (
               <DebugOnly>
                 <span
@@ -353,13 +369,28 @@ export default function CustomerStatusPage() {
               fontFamily: 'var(--font-mono)',
             }}
           >
-            ! Algo deu errado · tente novamente em instantes
+            ! Ocorreu um problema · tente novamente em instantes
           </div>
         )}
 
         {activeTrajectory ? (
           <div style={{ display: 'flex', flexDirection: 'column', gap: '2rem' }}>
-            <ReasoningStream phases={activeTrajectory.phases} analysisStatus={activeStatus as CreditAnalysisStatus} isLive={activeStatus === 'analyzing'} />
+            <section style={{ backgroundColor: 'var(--surf)', border: '1px solid var(--line)', borderLeft: '2px solid var(--acc)', padding: '1.25rem' }} aria-labelledby="workflow-title">
+              <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '1.25rem', flexWrap: 'wrap', gap: '0.5rem' }}>
+                <div>
+                  <span style={{ color: 'var(--acc)', fontFamily: 'var(--font-mono)', fontSize: '0.65rem', letterSpacing: 'var(--ls-label)', textTransform: 'uppercase' }}>Etapas da análise</span>
+                  <h2 id="workflow-title" style={{ margin: '0.25rem 0 0 0', fontSize: '1rem', fontWeight: 300, color: 'var(--text)', fontFamily: 'var(--font-mono)' }}>O que está acontecendo agora</h2>
+                </div>
+                <span style={{ color: activeStatus === 'analyzing' ? 'var(--acc)' : 'var(--text)', fontFamily: 'var(--font-mono)', fontSize: '0.7rem', letterSpacing: 'var(--ls-label)', textTransform: 'uppercase' }}>
+                  {activeStatus === 'analyzing' ? '● EM ANDAMENTO' : STATUS_LABEL_BANKING[activeStatus] ?? activeStatus}
+                </span>
+              </div>
+              <div style={{ display: 'flex', flexDirection: 'column' }}>
+                {AGENTS.map((agent, index) => (
+                  <WorkflowCard key={agent} index={index} total={AGENTS.length} label={BANKING_LABELS[agent]} phase={activeTrajectory.phases.find((phase) => phase.agent === agent)} isLast={index === AGENTS.length - 1} />
+                ))}
+              </div>
+            </section>
 
             <DebugOnly>
               {debugTrajectory && <TraceTimeline trajectory={debugTrajectory} />}
@@ -380,7 +411,7 @@ export default function CustomerStatusPage() {
             >
               <span style={{ fontSize: '0.875rem', color: 'var(--text)', flex: 1, minWidth: '280px' }}>
                 <span style={{ color: 'var(--acc)', fontFamily: 'var(--font-mono)' }}>→</span>{' '}
-                {finalMessage[activeStatus] ?? 'Análise em andamento'}
+                {finalMessage[activeStatus] ?? 'Sua proposta está sendo analisada'}
               </span>
               <DebugOnly>
                 <CostDisplay cost_brl={activeTrajectory.finops.estimated_cost_brl} />
@@ -424,7 +455,7 @@ export default function CustomerStatusPage() {
               Preparando sua análise...
             </h3>
             <p style={{ margin: '0.4rem 0 0 0', color: 'var(--text)', fontSize: '0.85rem' }}>
-              Estamos conectando as etapas de verificação para acompanhar tudo em tempo real.
+              Estamos conectando as etapas de verificação da sua proposta.
             </p>
           </div>
         )}
