@@ -19,7 +19,14 @@
 - [x] 17. Corrigir o input monetário do formulário customer.
 - [x] 18. Separar visualmente Tag e Pulse no step indicator.
 - [x] 19. Implementar oito KPIs e tabela de decisões no operator dashboard.
-- [ ] 20. Executar `npm run check-types`, lint e build; corrigir erros.
-- [ ] 21. Subir Keycloak e realizar smoke tests HTTP.
-- [ ] 22. Validar manualmente no navegador os fluxos demo cliente e operador.
-- [ ] 23. Validar responsividade, axe, reduced motion e densidade aquamarine.
+- [x] 20. Executar `npm run check-types`, lint e build; corrigir erros.
+- [x] 21. Subir Keycloak e realizar smoke tests HTTP.
+- [x] 22. Validar manualmente no navegador os fluxos demo cliente e operador.
+- [x] 23. Validar responsividade, axe, reduced motion e densidade aquamarine.
+
+## Evidências de fechamento
+
+- `npm run check-types`, `npm run lint` e `npm run build`: aprovados em 2026-07-13.
+- Playwright + Axe: 4 cenários aprovados, cobrindo os dois perfis, RBAC cross-port, input monetário, viewport 390×844 e reduced motion.
+- Densidade aquamarine sobre pixels não-fundo: login 23,28%, customer 17,41% e operator 12,00%.
+- Smoke HTTP: customer anônimo 307 para `/login`, login 200 e operator anônimo 307 para `?error=unauthorized`.
