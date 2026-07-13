@@ -1,116 +1,140 @@
-# HANDOFF
+# HANDOFF — Credit Analysis Frontend
 
-## Estado Atual
+Atualizado em 2026-07-13.
 
-- Branch local: `main`
-- Repositório frontend integrado ao SSE real do backend, com mudanças prontas para revisão
-- Backends auditados:
-  - `credit-analysis-agent`: possui alteração pré-existente em `src/episodic_memory.json`
-  - `compliance-agent`: sem alterações locais
-- Frontend rodando para teste manual em:
+## Estado do repositório
+
+- Repositório: `credit-analysis-frontend`.
+- Branch: `main`.
+- HEAD e `origin/main`: `d62e15a` (`test(ux): validate banking customer flows`).
+- Worktree estava limpo antes desta atualização do HANDOFF.
+- Frontends ativos:
   - Customer: `http://localhost:3000`
   - Operator: `http://localhost:3001`
+- Serviços integrados ativos:
+  - Keycloak: `http://localhost:8080`
+  - Compliance: `http://localhost:8085`
+  - Orquestrador/API: `http://localhost:8086`
 
-## Implementado Nesta Rodada
+## Auth.js v5, Keycloak e RBAC
 
-### consume-sse-reasoning-stream
+- Keycloak 25 roda via `docker-compose.yml` e importa `keycloak/realm-export.json`.
+- Realm: `agentic-credit`.
+- Clients: `frontend-public` (PKCE) e `agent-m2m`.
+- Roles: `customer` e `operator`.
+- IdPs Google/GitHub estão configurados como stubs desabilitados; os placeholders precisam ser substituídos antes do SSO real.
+- Auth.js/NextAuth v5 usa Keycloak e provider de credenciais demo em desenvolvimento.
+- Sessão JWT expõe `session.user.id` e `session.user.role`.
+- Cookie de sessão host-only é compartilhado entre as portas 3000 e 3001.
+- Middlewares aplicam RBAC:
+  - customer anônimo → `/login`
+  - operator anônimo ou customer → `/login?error=unauthorized`
+  - operator autenticado no customer → `:3001`
+- Usuários demo:
+  - `demo-cliente` / `demo`
+  - `demo-operador` / `demo`
+- Logout cross-port navega por `/logout` na origem customer, limpa o cookie com `signOut` e volta a `/login`.
 
-- `useAgentStream` atualizado para consumir eventos SSE nomeados do ADR-010
-- Replay e fila ao vivo deduplicados por identidade de evento
-- Eventos do backend convertidos em `AgentTrajectory` e `ReasoningChunk`
-- Customer conectado a `GET /analysis/:request_id/events`
-- Operator conectado ao mesmo replay para trajetória técnica
-- Reconexão exponencial, fixtures visuais e fallback offline preservados
-- URL do orquestrador centralizada em `NEXT_PUBLIC_ORCHESTRATOR_URL`
+## Banking UX
 
-### agentic-reasoning-and-memory
+- Header customer: `Internet Banking`.
+- Navegação customer:
+  - `> Solicitar Crédito`
+  - `> Minhas Propostas`
+  - `> Extrato de Propostas`
+  - `> Minha Conta`
+- Textos técnicos visíveis foram removidos do customer; o operator preserva terminologia interna.
+- `packages/ui/src/workflow-card.tsx` substitui o reasoning stream técnico no customer.
+- Estados do workflow: `Aguardando`, `Verificando`, `✓ Concluído`, `Em revisão` e `Erro`.
+- Card ativo expande via `max-height`, exibe spinner e recebe chunks com fade.
+- `prefers-reduced-motion` reduz animações a duração imperceptível.
+- `ReasoningStream` permanece no operator.
 
-- Rebrand frontend para **Análise de Crédito Agêntica**
-- Wordmark `◇ ANÁLISE AGÊNTICA`
-- `ReasoningChunk` e `AgentCall.reasoning?` em `packages/types`
-- `ReasoningStream` em `packages/ui/src/reasoning-stream.tsx`
-- Customer `/status/[request_id]` com chunks por agente e typing animation
-- Operator `/queue/[request_id]` usando o mesmo stream em debug técnico
-- Persistência local em `packages/ui/src/analysis-history.ts`
-- Customer `/historico`
-- Banner de análise ativa na home
-- Fallback local para status final quando backend não encontra o request
+## Configurações e logout
 
-### polish-pass-customer
+- `/configuracoes` contém tabs Perfil, Notificações e Exibição.
+- Perfil mostra usuário, e-mail, role e logout.
+- Preferências persistidas:
+  - `dan:pref-email-notify`
+  - `dan:pref-status-notify`
+- Toggle de debug usa o mesmo contexto do atalho `Ctrl+Shift+D`.
+- Botão `→ Sair` está no header de todas as páginas com `CockpitLayout`.
 
-- `CockpitLayout.liveState` estendido com `idle`
-- `liveState="idle"` aplicado em páginas sem análise em curso
-- `/historico` voltou ao padrão visual com acento lateral, sem barra aquamarine maciça
-- Labels finais do reasoning stream localizados para pt-BR (`APROVADO`, `NÃO APROVADA`, etc.)
-- Removido max-height/scroll interno que clipava o primeiro chunk do bureau em debug
+## Outros ajustes concluídos
 
-## OpenSpec Atualizado
+- Input monetário em centavos com preenchimento da direita para a esquerda e formato pt-BR.
+- Step indicator separa Tag e Pulse.
+- Operator dashboard possui dois grupos de quatro KPIs e tabela com cinco decisões representativas.
+- Contraste dos componentes novos foi corrigido sem alterar tokens globais.
+- Nenhuma dependência de runtime de UI foi adicionada.
 
-- `openspec/changes/agentic-reasoning-and-memory/`
-  - `proposal.md`
-  - `design.md`
-  - `spec.md`
-  - `tasks.md`
-  - `prompt.md`
-  - `backend-debts.md`
-- `openspec/changes/polish-pass-customer/`
-  - `proposal.md`
-  - `tasks.md`
-  - `prompt.md`
+## OpenSpecs
 
-## Documentação Atualizada
+- `openspec/changes/auth-and-ux-fixes/`: 5 artefatos.
+- `openspec/changes/banking-ux/`: 3 artefatos leves.
+- Os checklists das duas changes estão concluídos com evidências de validação.
 
-- `README.md`
-- `AGENTS.md`
-- `HANDOFF.md`
-- `apps/customer/README.md`
-- `apps/operator/README.md`
+## Validação final
 
-## Validação Rodada
+- `npm run check-types`: passou.
+- `npm run lint`: passou.
+- `npm run build`: passou para customer e operator.
+- Playwright Auth/RBAC + Banking UX: 7/7.
+- Axe: 0 violações sérias ou críticas nas telas validadas.
+- Scan de termos técnicos visíveis no customer: 0 ocorrências.
+- Densidade aquamarine:
+  - home: 11,57%
+  - workflow intermediário: 7,68%
+  - workflow concluído: 8,25%
+  - configurações: 6,33%
 
-- `npm run check-types`: passou após integração SSE
-- `npm run build`: passou para customer e operator
-- `npm run lint`: passou
-- Backend `python3 -m unittest discover -s tests -v`: 5/5
+## Screenshots principais
 
-- `npm run check-types`: passou
-- `npx @axe-core/cli http://localhost:3000 http://localhost:3001`: 0 violations
-- Rebrand grep frontend: zero ocorrências antigas
-- Contradição `valor solicitado confirmado`: zero ocorrências
-- HUD audit:
-  - `/`: `AO VIVO` = 0
-  - `/historico`: `AO VIVO` = 0
-- DOM reasoning:
-  - primeiro chunk bureau visível em debug
-  - `APROVADO` em pt-BR no estado final
-  - sem `APPROVED`/`approved` cru no badge
-- Densidade aquamarine polish:
-  - home: `13.65%`
-  - histórico: `8.88%`
-  - status mid: `7.27%`
-  - status end: `8.84%`
-  - status debug: `6.91%`
+- `docs/screenshots/banking-home.png`
+- `docs/screenshots/banking-home-mobile.png`
+- `docs/screenshots/banking-workflow-mid.png`
+- `docs/screenshots/banking-workflow-done.png`
+- `docs/screenshots/banking-settings.png`
+- `docs/screenshots/auth-login.png`
+- `docs/screenshots/auth-customer-home.png`
+- `docs/screenshots/auth-operator-dashboard.png`
 
-## Screenshots Gerados
+## Commits relevantes
 
-- `docs/screenshots/customer-home-rebrand.png`
-- `docs/screenshots/customer-status-reasoning-mid.png`
-- `docs/screenshots/customer-status-reasoning-end.png`
-- `docs/screenshots/customer-status-reasoning-debug.png`
-- `docs/screenshots/customer-historico.png`
-- `docs/screenshots/polish-customer-home.png`
-- `docs/screenshots/polish-customer-historico.png`
-- `docs/screenshots/polish-customer-status-mid.png`
-- `docs/screenshots/polish-customer-status-end.png`
-- `docs/screenshots/polish-customer-status-debug.png`
+### Auth e dashboard
 
-## Débitos Registrados
+- `7736e67 feat(auth): bootstrap Keycloak realm`
+- `a72e8d7 feat(auth): replace mock with Auth.js session`
+- `a964eed feat(auth): enforce cross-app RBAC`
+- `dece599 feat(operator): expand agentic banking dashboard`
+- `7fade80 test(auth): cover cross-app RBAC flows`
 
-Ver `openspec/changes/agentic-reasoning-and-memory/backend-debts.md`:
+### Banking UX
 
-- Persistência durável real no `credit-analysis-agent`
-- SSE real de reasoning chunks pelo backend
-- Inventário de rebrand backend
+- `15b2378 docs(ux): define banking experience change`
+- `d144071 fix(ux): adopt banking language and workflow`
+- `ab4cc19 fix(auth): add reliable cross-portal logout`
+- `ae48ff6 feat(customer): add account settings`
+- `d62e15a test(ux): validate banking customer flows`
 
-## Próximo Passo
-Revisar e versionar frontend e backend em commits separados. Não incluir `credit-analysis-agent/src/episodic_memory.json` no commit SSE; ele contém estado runtime gerado por execuções locais.
+## Débitos e avisos
+
+- Conectar KPIs do operator a `GET /analyses/stats`.
+- Conectar decisões recentes a `GET /analyses`.
+- Criar configurações específicas do operator: fila, SLA e alertas.
+- Ativar Google/GitHub no Keycloak após configurar client IDs e secrets reais.
+- Revisar timeout/idle de sessão do Keycloak.
+- O Next.js 16 avisa que `middleware.ts` será substituído por `proxy.ts`; os arquivos foram mantidos porque o contrato das changes exigia middleware.
+- Docker Compose avisa que o campo `version` está obsoleto; foi mantido conforme a especificação original da infraestrutura.
+
+## Como retomar
+
+```bash
+cd /home/daniloamaral/agentic/credit-analysis-frontend
+docker compose up keycloak -d
+npm run dev
+npm run check-types
+npx playwright test tests/e2e/auth-rbac.spec.ts tests/e2e/banking-ux.spec.ts --workers=1
+```
+
+Não alterar `credit-analysis-agent` nem `compliance-agent` ao trabalhar exclusivamente em UX frontend. Preservar terminal-brutalism, reduced motion e densidade aquamarine mínima de 2,5%.
