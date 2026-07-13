@@ -50,6 +50,30 @@ export default function CustomerHome() {
     setError(null);
   };
 
+  const handleAmountKeyDown = (e: React.KeyboardEvent<HTMLInputElement>) => {
+    if (e.ctrlKey || e.metaKey || e.altKey) return;
+
+    if (/^\d$/.test(e.key)) {
+      e.preventDefault();
+      setAmountCents((current) => Math.min(current * 10 + Number(e.key), 999_999_999));
+      setError(null);
+      return;
+    }
+
+    if (e.key === 'Backspace' || e.key === 'Delete') {
+      e.preventDefault();
+      setAmountCents((current) => Math.floor(current / 10));
+      setError(null);
+    }
+  };
+
+  const handleAmountPaste = (e: React.ClipboardEvent<HTMLInputElement>) => {
+    e.preventDefault();
+    const digits = e.clipboardData.getData('text').replace(/\D/g, '');
+    setAmountCents(Math.min(Number.parseInt(digits || '0', 10), 999_999_999));
+    setError(null);
+  };
+
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault();
     const cleanCpf = cpf.replace(/\D/g, '');
@@ -217,6 +241,8 @@ export default function CustomerHome() {
                 placeholder="0,00"
                 value={formatCurrency(amountCents)}
                 onChange={handleAmountChange}
+                onKeyDown={handleAmountKeyDown}
+                onPaste={handleAmountPaste}
                 disabled={loading}
                 style={{
                   padding: '0.85rem 1rem',
