@@ -2,12 +2,12 @@
 
 - [x] 1. Criar `docker-compose.yml` na raiz com serviço Keycloak 25.0.
 - [x] 2. Gerar `keycloak/realm-export.json` com realm, clients, mapper de roles, usuários demo e IdPs Google/GitHub.
-- [ ] 3. Instalar `next-auth@beta` nos workspaces customer, operator e auth conforme dependências efetivamente importadas.
-- [ ] 4. Criar `packages/auth/src/auth.config.ts` com KeycloakProvider e CredentialsProvider demo.
+- [x] 3. Instalar `next-auth@beta` nos workspaces customer, operator e auth conforme dependências efetivamente importadas.
+- [x] 4. Criar `packages/auth/src/auth.config.ts` com KeycloakProvider e CredentialsProvider demo.
 - [ ] 5. Criar inicialização Auth.js por app e exports compartilhados necessários.
-- [ ] 6. Criar `packages/auth/src/types.ts` e module augmentation para `Session`, `User` e `JWT`.
-- [ ] 7. Substituir `packages/auth/src/useAuth.ts` por hooks sobre a sessão Auth.js.
-- [ ] 8. Atualizar `packages/auth/src/index.ts` com os novos exports.
+- [x] 6. Criar `packages/auth/src/types.ts` e module augmentation para `Session`, `User` e `JWT`.
+- [x] 7. Substituir `packages/auth/src/useAuth.ts` por hooks sobre a sessão Auth.js.
+- [x] 8. Atualizar `packages/auth/src/index.ts` com os novos exports.
 - [ ] 9. Criar `apps/customer/app/api/auth/[...nextauth]/route.ts`.
 - [ ] 10. Criar `apps/customer/app/login/page.tsx` e fluxo de pós-login por role.
 - [ ] 11. Criar `apps/customer/middleware.ts` com proteção e redirect por role.

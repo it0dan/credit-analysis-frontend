@@ -95,7 +95,7 @@ export default function OperatorQueue() {
                 fontFamily: 'var(--font-mono)',
               }}
             >
-              Operador: <span style={{ color: 'var(--acc)' }}>{auth.user_id}</span>
+              Operador: <span style={{ color: 'var(--acc)' }}>{auth.id}</span>
             </span>
           )}
         </div>

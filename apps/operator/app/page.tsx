@@ -62,10 +62,10 @@ export default function OperatorHome() {
           {auth && (
             <div style={{ textAlign: 'right' }}>
               <span style={{ fontSize: '0.85rem', color: 'var(--text)', fontFamily: 'var(--font-mono)' }}>
-                Operador: <span style={{ color: 'var(--acc)' }}>{auth.user_id}</span>
+                Operador: <span style={{ color: 'var(--acc)' }}>{auth.id}</span>
               </span>
               <div style={{ fontSize: '0.7rem', color: 'var(--text)', marginTop: '0.2rem', fontFamily: 'var(--font-mono)' }}>
-                Perfil: {auth.role}
+                Perfil: {auth.role.toUpperCase()}
               </div>
             </div>
           )}
