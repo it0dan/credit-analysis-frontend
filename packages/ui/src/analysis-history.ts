@@ -10,7 +10,7 @@ export interface StoredAnalysis {
   cpf_masked: string;
   amount_brl: number;
   created_at: string;
-  final_verdict?: 'approved' | 'rejected' | 'hitl_required' | null;
+  final_verdict?: 'pre_approved' | 'approved' | 'rejected' | 'hitl_required' | null;
   last_status?: CreditAnalysisStatus;
   last_updated_at?: string;
 }

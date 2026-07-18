@@ -39,7 +39,7 @@ test.describe('Banking UX', () => {
     await expectNoSeriousA11yViolations(page);
     await page.screenshot({ path: 'docs/screenshots/banking-workflow-mid.png', fullPage: true });
 
-    await expect(page.getByText('Proposta aprovada · seu crédito está disponível')).toBeVisible({ timeout: 12_000 });
+    await expect(page.getByText('Pré-aprovada · proposta em análise final')).toBeVisible({ timeout: 12_000 });
     await expect(page.locator('[data-workflow-status="done"]')).toHaveCount(5);
     await page.screenshot({ path: 'docs/screenshots/banking-workflow-done.png', fullPage: true });
   });

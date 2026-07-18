@@ -25,6 +25,7 @@ const KIND_COLOR: Record<ReasoningChunk['kind'], string> = {
 const STATUS_LABEL_PT: Record<CreditAnalysisStatus, string> = {
   pending: 'PENDENTE',
   analyzing: 'EM ANÁLISE',
+  pre_approved: 'PRÉ-APROVADO',
   approved: 'APROVADO',
   rejected: 'NÃO APROVADA',
   hitl_required: 'EM ANÁLISE HUMANA',

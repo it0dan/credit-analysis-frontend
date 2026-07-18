@@ -190,11 +190,13 @@ export function useAgentStream(endpoint: string, enabled = true): UseAgentStream
         }
 
         if (event.type === 'analysis_done') {
-          const finalStatus: CreditAnalysisStatus = event.status === 'approved' || event.decision === 'approved'
-            ? 'approved'
-            : event.status === 'pending_human_review'
-              ? 'hitl_required'
-              : 'rejected';
+          const finalStatus: CreditAnalysisStatus = event.status === 'pre_approved' || event.decision === 'pre_approved'
+            ? 'pre_approved'
+            : event.status === 'approved' || event.decision === 'approved'
+              ? 'approved'
+              : event.status === 'pending_human_review'
+                ? 'hitl_required'
+                : 'rejected';
           terminalRef.current = true;
           setStatus(finalStatus);
           setTrajectory((current) => current ? {

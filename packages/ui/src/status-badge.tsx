@@ -19,6 +19,11 @@ const statusStyles: Record<CreditAnalysisStatus, React.CSSProperties> = {
     border: '1px solid var(--alert)',
     fontWeight: 700,
   },
+  pre_approved: {
+    color: 'var(--blue)',
+    border: '1px solid var(--blue)',
+    fontWeight: 700,
+  },
   approved: {
     color: 'var(--acc)',
     border: '1px solid var(--acc)',
@@ -42,6 +47,7 @@ const labels: Record<CreditAnalysisStatus, string> = {
   pending:       'Pendente',
   analyzing:     'Em Análise',
   hitl_required: 'Revisão Humana Requerida',
+  pre_approved:  'Pré-aprovado',
   approved:      'Aprovado',
   rejected:      'Reprovado',
   expired:       'Expirado',

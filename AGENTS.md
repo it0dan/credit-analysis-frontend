@@ -31,10 +31,13 @@ A tela de acompanhamento do customer não expõe eventos brutos do AG-UI por pad
 | `NA FILA` | Análise enfileirada, aguardando processamento |
 | `PROCESSANDO` | Agentes em execução |
 | `CONCLUÍDO` | Todos os agentes finalizados |
+| `PRÉ-APROVADO` | Análise automática bem-sucedida — aguarda validação final/liberação |
 | `AGUARDANDO HUMANO` | Intervenção necessária (HITL) |
 | `ERRO` | Falha técnica na análise |
 
 O HUD customer usa `idle` fora da página de status, detecta estados terminais e para de mostrar `AO VIVO`. O debug mode revela IDs técnicos, fallback badges, custos, timeline e `text_debug`. O histórico local usa `localStorage["dan:analyses"]` com CPF sempre mascarado.
+
+**Nota de negócio:** resultados automáticos bem-sucedidos são exibidos como `PRÉ-APROVADO`, nunca como crédito liberado. O status `APROVADO` é reservado para confirmação humana no HITL ou workflows futuros de liberação.
 
 ---
 

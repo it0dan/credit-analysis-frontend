@@ -105,7 +105,7 @@ export default function CustomerHome() {
           cpf_masked: maskCpf(cpf),
           amount_brl: requestedAmount,
           final_verdict: null,
-          last_status: data.status === 'hitl_required' ? 'hitl_required' : data.status === 'rejected' ? 'rejected' : 'analyzing',
+          last_status: data.status === 'hitl_required' ? 'hitl_required' : data.status === 'rejected' ? 'rejected' : data.status === 'pre_approved' ? 'pre_approved' : 'analyzing',
         });
         router.push(`/status/${data.request_id}?cpf=${encodeURIComponent(maskCpf(cpf))}&amount=${requestedAmount}`);
       })

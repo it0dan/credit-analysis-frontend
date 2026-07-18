@@ -15,7 +15,7 @@ import { useAgentStream } from '@repo/ag-ui-client';
 import { signOut } from '@repo/auth';
 import type { AgentCall, AgentTrajectory, CreditAnalysisStatus, ReasoningChunk } from '@repo/types';
 
-type FinalVerdict = 'approved' | 'rejected' | 'hitl_required';
+type FinalVerdict = 'pre_approved' | 'approved' | 'rejected' | 'hitl_required';
 type StreamTrajectory = AgentTrajectory;
 type AgentName = 'bureau' | 'documents' | 'risk' | 'compliance' | 'decision';
 
@@ -30,6 +30,7 @@ const BANKING_LABELS: Record<AgentName, string> = {
 };
 
 const STATUS_LABEL_BANKING: Record<string, string> = {
+  pre_approved: 'PRÉ-APROVADA',
   approved: 'APROVADA',
   rejected: 'NÃO APROVADA',
   hitl_required: 'EM REVISÃO ESPECIALIZADA',
@@ -37,7 +38,8 @@ const STATUS_LABEL_BANKING: Record<string, string> = {
 };
 
 const finalMessage: Record<string, string> = {
-  approved: 'Proposta aprovada · seu crédito está disponível',
+  pre_approved: 'Pré-aprovada · proposta em análise final',
+  approved: 'Proposta aprovada · crédito liberado',
   rejected: 'Não foi possível aprovar sua proposta no momento',
   hitl_required: 'Proposta em análise especializada · retornamos em breve',
   error: 'Ocorreu um problema · tente novamente em instantes',
@@ -70,11 +72,13 @@ const baseReasoning: Record<Exclude<AgentName, 'decision'>, Omit<ReasoningChunk,
 };
 
 function decisionReasoning(finalStatus: FinalVerdict): Omit<ReasoningChunk, 'timestamp_ms'>[] {
-  const conclusion = finalStatus === 'approved'
-    ? { text_human: 'Proposta aprovada', text_debug: 'final.status=approved approved_amount=requested_amount' }
-    : finalStatus === 'rejected'
-      ? { text_human: 'Não foi possível aprovar no momento', text_debug: 'final.status=rejected approved_amount=0' }
-      : { text_human: 'Proposta em análise especializada', text_debug: 'final.status=hitl_required reason=threshold_exceeded' };
+  const conclusion = finalStatus === 'pre_approved'
+    ? { text_human: 'Proposta pré-aprovada', text_debug: 'final.status=pre_approved approved_amount=requested_amount' }
+    : finalStatus === 'approved'
+      ? { text_human: 'Proposta aprovada', text_debug: 'final.status=approved approved_amount=requested_amount' }
+      : finalStatus === 'rejected'
+        ? { text_human: 'Não foi possível aprovar no momento', text_debug: 'final.status=rejected approved_amount=0' }
+        : { text_human: 'Proposta em análise especializada', text_debug: 'final.status=hitl_required reason=threshold_exceeded' };
   return [
     { kind: 'thought', text_human: 'Preparando sua proposta', text_debug: 'tool=decision_synthesize inputs=t1,t2,requested_amount' },
     { kind: 'tool_call', text_human: finalStatus === 'hitl_required' ? 'Encaminhando para análise especializada' : finalStatus === 'rejected' ? 'Avaliando os dados' : 'Finalizando os detalhes', text_debug: 'decision_model=explainable_synthesis' },
@@ -95,7 +99,7 @@ function phaseFor(agent: AgentName): AgentCall['phase'] {
 
 function inferFinalStatus(cpf: string, amount: string): FinalVerdict {
   if (cpf.includes('111') || cpf.includes('222')) return 'rejected';
-  return parseFloat(amount) <= 50000 ? 'approved' : 'hitl_required';
+  return parseFloat(amount) <= 50000 ? 'pre_approved' : 'hitl_required';
 }
 
 function toStreamTrajectory(trajectory: AgentTrajectory | StreamTrajectory | null): StreamTrajectory | null {
@@ -124,7 +128,7 @@ function appendReasoning(trajectory: StreamTrajectory, agent: AgentName, chunk: 
 }
 
 function completedTrajectory(request_id: string, finalStatus: FinalVerdict): StreamTrajectory {
-  const cost = finalStatus === 'approved' ? 0.121 : finalStatus === 'rejected' ? 0.104 : 0.132;
+  const cost = finalStatus === 'pre_approved' ? 0.121 : finalStatus === 'approved' ? 0.121 : finalStatus === 'rejected' ? 0.104 : 0.132;
   return {
     request_id,
     trace_id: 'tr-local-history',
@@ -186,7 +190,7 @@ export default function CustomerStatusPage() {
     if (!isSimulated) return;
 
     const finalStatus = instantFinal ?? inferFinalStatus(cpf, amount);
-    const finalCost = finalStatus === 'approved' ? 0.121 : finalStatus === 'rejected' ? 0.104 : 0.132;
+    const finalCost = finalStatus === 'pre_approved' ? 0.121 : finalStatus === 'approved' ? 0.121 : finalStatus === 'rejected' ? 0.104 : 0.132;
     const base: StreamTrajectory = {
       request_id: reqIdStr,
       trace_id: instantFinal ? 'tr-local-history' : 'tr-mock-1002931',
@@ -284,7 +288,7 @@ export default function CustomerStatusPage() {
   useEffect(() => {
     updateAnalysis(reqIdStr, {
       last_status: activeStatus,
-      ...(['approved', 'rejected', 'hitl_required'].includes(activeStatus) ? { final_verdict: activeStatus as FinalVerdict } : {}),
+      ...(['pre_approved', 'approved', 'rejected', 'hitl_required'].includes(activeStatus) ? { final_verdict: activeStatus as FinalVerdict } : {}),
     });
   }, [activeStatus, reqIdStr]);
 

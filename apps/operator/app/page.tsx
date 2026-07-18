@@ -17,20 +17,21 @@ const systemStats = [
 
 const portfolioStats = [
   { value: '2.847', label: 'análises hoje', sub: 'volume processado', color: 'var(--acc)' },
-  { value: '68.2%', label: 'taxa de aprovação', sub: 'aprovados automáticos', color: 'var(--acc)' },
-  { value: 'R$ 4.2M', label: 'volume aprovado hoje', sub: 'soma dos créditos liberados', color: 'var(--text)' },
+  { value: '68.2%', label: 'taxa de pré-aprovação', sub: 'pré-aprovados automáticos', color: 'var(--blue)' },
+  { value: 'R$ 4.2M', label: 'volume pré-aprovado hoje', sub: 'soma dos créditos pré-aprovados', color: 'var(--text)' },
   { value: '3.1%', label: 'rejeições por compliance', sub: 'KYC / PLD / LGPD', color: 'var(--alert)' },
 ];
 
 const recentDecisions = [
-  { id: 'req-9f3a', cpf: '***.234.567-**', amount: 'R$ 45.000', status: 'approved', agents: 5, latency: '7.2s', turn: 'T3' },
+  { id: 'req-9f3a', cpf: '***.234.567-**', amount: 'R$ 45.000', status: 'pre_approved', agents: 5, latency: '7.2s', turn: 'T3' },
   { id: 'req-8b2c', cpf: '***.891.234-**', amount: 'R$ 120.000', status: 'hitl_required', agents: 4, latency: '6.8s', turn: 'T2' },
   { id: 'req-7e1d', cpf: '***.567.890-**', amount: 'R$ 28.000', status: 'rejected', agents: 3, latency: '4.1s', turn: 'T2' },
-  { id: 'req-6d4e', cpf: '***.123.456-**', amount: 'R$ 15.000', status: 'approved', agents: 5, latency: '8.9s', turn: 'T3' },
+  { id: 'req-6d4e', cpf: '***.123.456-**', amount: 'R$ 15.000', status: 'pre_approved', agents: 5, latency: '8.9s', turn: 'T3' },
   { id: 'req-5c3f', cpf: '***.789.012-**', amount: 'R$ 75.000', status: 'hitl_required', agents: 4, latency: '5.3s', turn: 'T2' },
 ] as const;
 
 const statusColor = {
+  pre_approved: 'var(--blue)',
   approved: 'var(--acc)',
   hitl_required: 'var(--warn)',
   rejected: 'var(--alert)',
