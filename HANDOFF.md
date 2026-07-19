@@ -146,6 +146,9 @@ Os screenshots em `docs/screenshots/` foram regenerados pelos testes e2e e refle
 - `5375dc5 docs(handoff): registra ajuste de UX no input de valor`
 - `1eef533 fix(ui): remove timer de tempo real do CockpitLayout`
 - `e095446 docs(screenshots): regenera screenshots após remoção do timer`
+- `192b2b5 docs(handoff): registra remoção do timer do CockpitLayout`
+- `e56e1b5 test(auth-rbac): ajusta expectativas do input de valor para incluir R$`
+- `ffd97f2 docs(screenshots): regenera screenshots após ajuste de teste`
 
 ## Correções de runtime
 
