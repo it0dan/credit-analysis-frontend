@@ -143,6 +143,9 @@ Os screenshots em `docs/screenshots/` foram regenerados pelos testes e2e e refle
 - `21bd0bd docs(handoff): registra correção de AuthCompletePage`
 - `e69ffda fix(customer): remove hint e exibe R$ no input de valor`
 - `e6ff33c docs(screenshots): regenera screenshots após ajuste do input de valor`
+- `5375dc5 docs(handoff): registra ajuste de UX no input de valor`
+- `1eef533 fix(ui): remove timer de tempo real do CockpitLayout`
+- `e095446 docs(screenshots): regenera screenshots após remoção do timer`
 
 ## Correções de runtime
 
@@ -153,6 +156,7 @@ Os screenshots em `docs/screenshots/` foram regenerados pelos testes e2e e refle
 - Campo de valor solicitado no customer:
   - Removeu-se a mensagem de hint "Digite os centavos da direita para a esquerda · máximo R$ 9.999.999,99".
   - Adicionou-se o prefixo `R$ ` fixo no valor digitado e no placeholder, deixando explícito que o valor é em reais brasileiros.
+- Removeu-se o timer/contador de tempo real (`T+MM:SS` / `elapsed`) da navbar e do footer do `CockpitLayout`, pois não fazia sentido no contexto da análise de crédito.
 
 ## Débitos e avisos
 
