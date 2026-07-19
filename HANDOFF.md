@@ -1,12 +1,12 @@
 # HANDOFF — Credit Analysis Frontend
 
-Atualizado em 2026-07-13.
+Atualizado em 2026-07-18.
 
 ## Estado do repositório
 
 - Repositório: `credit-analysis-frontend`.
 - Branch: `main`.
-- HEAD e `origin/main`: `d62e15a` (`test(ux): validate banking customer flows`).
+- HEAD e `origin/main`: `a916192` (`feat: suporta status pre_approved no frontend e ajusta UX de pré-aprovação`).
 - Worktree estava limpo antes desta atualização do HANDOFF.
 - Frontends ativos:
   - Customer: `http://localhost:3000`
@@ -15,6 +15,23 @@ Atualizado em 2026-07-13.
   - Keycloak: `http://localhost:8080`
   - Compliance: `http://localhost:8085`
   - Orquestrador/API: `http://localhost:8086`
+
+## Mudança de negócio — Pré-aprovação automática
+
+O frontend foi ajustado para refletir a mudança no orquestrador: análises automáticas bem-sucedidas terminam em `pre_approved`, e `approved` passa a ser reservado para confirmação humana no HITL.
+
+### Entregas
+
+- `packages/types/src/status.ts`: adicionado `pre_approved` ao tipo `CreditAnalysisStatus`.
+- `packages/ui/src/status-badge.tsx`: estilo e label para `pre_approved`.
+- `packages/ui/src/reasoning-stream.tsx`: label `PRÉ-APROVADO`.
+- `packages/ui/src/analysis-history.ts`: `final_verdict` aceita `pre_approved`.
+- `packages/ag-ui-client/src/useAgentStream.ts`: mapeia `pre_approved` vindo do SSE.
+- `apps/customer/app/status/[request_id]/page.tsx`: mensagem final automática agora é **"Pré-aprovada · proposta em análise final"**; a mensagem "Proposta aprovada · seu crédito está disponível" foi removida.
+- `apps/customer/app/page.tsx`: reconhece `pre_approved` no retorno da criação.
+- `apps/operator/app/page.tsx`: dashboard mockado usa `pre_approved` nas decisões recentes.
+- `tests/e2e/banking-ux.spec.ts` atualizado para validar a nova mensagem de pré-aprovação.
+- `AGENTS.md` atualizado com nota de negócio sobre pré-aprovação vs aprovação humana.
 
 ## Auth.js v5, Keycloak e RBAC
 
@@ -76,17 +93,21 @@ Atualizado em 2026-07-13.
 
 ## Validação final
 
-- `npm run check-types`: passou.
+- `npm run check-types`: passou (6/6 pacotes).
 - `npm run lint`: passou.
 - `npm run build`: passou para customer e operator.
 - Playwright Auth/RBAC + Banking UX: 7/7.
 - Axe: 0 violações sérias ou críticas nas telas validadas.
 - Scan de termos técnicos visíveis no customer: 0 ocorrências.
-- Densidade aquamarine:
+- Densidade aquamarine (screenshots atualizados):
   - home: 11,57%
   - workflow intermediário: 7,68%
   - workflow concluído: 8,25%
   - configurações: 6,33%
+
+## Screenshots atualizados
+
+Os screenshots em `docs/screenshots/` foram regenerados pelos testes e2e e refletem a mensagem de pré-aprovação.
 
 ## Screenshots principais
 
@@ -116,6 +137,7 @@ Atualizado em 2026-07-13.
 - `ab4cc19 fix(auth): add reliable cross-portal logout`
 - `ae48ff6 feat(customer): add account settings`
 - `d62e15a test(ux): validate banking customer flows`
+- `a916192 feat: suporta status pre_approved no frontend e ajusta UX de pré-aprovação`
 
 ## Débitos e avisos
 
