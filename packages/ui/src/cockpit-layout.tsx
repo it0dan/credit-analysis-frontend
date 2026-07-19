@@ -1,6 +1,6 @@
 'use client';
 
-import React, { useEffect, useState } from 'react';
+import React from 'react';
 import { Pulse } from './pulse';
 import { Brand } from './brand';
 import { DebugOnly, useDebug } from './debug-context';
@@ -16,14 +16,7 @@ interface CockpitLayoutProps {
 
 export function CockpitLayout({ children, activeLink, portalType, request_id, liveState = 'live', onSignOut }: CockpitLayoutProps) {
   const { enabled: debugEnabled } = useDebug();
-  const [elapsedSeconds, setElapsedSeconds] = useState(0);
   const showTechnicalHud = portalType === 'operator' || debugEnabled;
-  const elapsed = `${String(Math.floor(elapsedSeconds / 60)).padStart(2, '0')}:${String(elapsedSeconds % 60).padStart(2, '0')}`;
-
-  useEffect(() => {
-    const id = window.setInterval(() => setElapsedSeconds((value) => value + 1), 1000);
-    return () => window.clearInterval(id);
-  }, []);
 
   const menuItems = portalType === 'customer'
     ? [
@@ -112,8 +105,6 @@ export function CockpitLayout({ children, activeLink, portalType, request_id, li
               <span style={{ color: 'var(--acc)' }}>LIVE</span>
               <span style={{ color: 'var(--line2)' }}>·</span>
               <span><span style={{ color: 'var(--text)' }}>3</span> agents</span>
-              <span style={{ color: 'var(--line2)' }}>·</span>
-              <span>T+<span style={{ color: 'var(--text)' }}>{elapsed}</span></span>
             </>
           ) : liveState === 'live' ? (
             <>
@@ -121,14 +112,10 @@ export function CockpitLayout({ children, activeLink, portalType, request_id, li
               <span style={{ color: 'var(--acc)' }}>{portalType === 'customer' ? 'EM ANDAMENTO' : 'AO VIVO'}</span>
               <span style={{ color: 'var(--line2)' }}>·</span>
               <span>Análise em andamento</span>
-              <span style={{ color: 'var(--line2)' }}>·</span>
-              <span style={{ color: 'var(--text)' }}>{elapsed}</span>
             </>
           ) : (
             <>
               <span style={{ color: 'var(--acc)' }}>CONCLUÍDA</span>
-              <span style={{ color: 'var(--line2)' }}>·</span>
-              <span style={{ color: 'var(--text)' }}>{elapsed}</span>
             </>
           )}
           <span style={{ color: 'var(--line2)' }}>]</span>
@@ -297,14 +284,10 @@ export function CockpitLayout({ children, activeLink, portalType, request_id, li
             <>
               <Pulse color="acc" size={7} />
               <span style={{ color: 'var(--acc)' }}>analisando</span>
-              <span style={{ color: 'var(--line2)' }}>·</span>
-              <span style={{ color: 'var(--text)' }}>{elapsed}</span>
             </>
           ) : (
             <>
               <span style={{ color: 'var(--acc)' }}>concluída</span>
-              <span style={{ color: 'var(--line2)' }}>·</span>
-              <span style={{ color: 'var(--text)' }}>{elapsed}</span>
             </>
           )}
         </div>
