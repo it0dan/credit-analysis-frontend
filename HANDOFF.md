@@ -138,6 +138,12 @@ Os screenshots em `docs/screenshots/` foram regenerados pelos testes e2e e refle
 - `ae48ff6 feat(customer): add account settings`
 - `d62e15a test(ux): validate banking customer flows`
 - `a916192 feat: suporta status pre_approved no frontend e ajusta UX de pré-aprovação`
+- `4f338af fix(auth): evita erro de Performance negative timestamp em AuthCompletePage`
+- `4b566dc docs(screenshots): regenera screenshots após correção de login`
+
+## Correções de runtime
+
+- `/auth/complete` foi convertido para Client Component usando `useSession` e `window.location.replace`, contornando um bug do Next.js 16/Turbopack que gerava `Failed to execute 'measure' on 'Performance': 'AuthCompletePage' cannot have a negative time stamp.` quando Server Components muito rápidos eram medidos.
 
 ## Débitos e avisos
 
