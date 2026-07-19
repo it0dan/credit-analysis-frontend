@@ -1,10 +1,26 @@
-import { redirect } from 'next/navigation';
-import { auth } from '../../../auth';
+'use client';
 
-export default async function AuthCompletePage() {
-  const session = await auth();
+import { useEffect } from 'react';
+import { useSession } from '@repo/auth';
 
-  if (!session?.user) redirect('/login?error=unauthorized');
-  if (session.user.role === 'operator') redirect('http://localhost:3001');
-  redirect('/');
+export default function AuthCompletePage() {
+  const { data: session, status } = useSession();
+
+  useEffect(() => {
+    if (status === 'loading') return;
+
+    if (!session?.user) {
+      window.location.replace('/login?error=unauthorized');
+      return;
+    }
+
+    if (session.user.role === 'operator') {
+      window.location.replace('http://localhost:3001');
+      return;
+    }
+
+    window.location.replace('/');
+  }, [session, status]);
+
+  return null;
 }
