@@ -31,9 +31,9 @@ test.describe('Auth.js demo and cross-port RBAC', () => {
     expect((await session.json()).user.role).toBe('customer');
 
     const amount = page.getByLabel(/valor solicitado/i);
-    await expect(amount).toHaveValue('0,00');
+    await expect(amount).toHaveValue('R$ 0,00');
     await amount.pressSequentially('2500000');
-    await expect(amount).toHaveValue('25.000,00');
+    await expect(amount).toHaveValue('R$ 25.000,00');
     await expectNoA11yViolations(page);
     await page.screenshot({ path: 'docs/screenshots/auth-customer-home.png', fullPage: true });
 
