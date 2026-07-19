@@ -25,10 +25,10 @@ export default function CustomerHome() {
   const latestActive = activeAnalyses[0];
 
   const formatCurrency = (cents: number) =>
-    (cents / 100).toLocaleString('pt-BR', {
+    `R$ ${(cents / 100).toLocaleString('pt-BR', {
       minimumFractionDigits: 2,
       maximumFractionDigits: 2,
-    });
+    })}`;
 
   const handleCpfChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     let value = e.target.value.replace(/\D/g, '');
@@ -238,8 +238,7 @@ export default function CustomerHome() {
                 type="text"
                 inputMode="numeric"
                 autoComplete="off"
-                aria-describedby="amount-hint"
-                placeholder="0,00"
+                placeholder="R$ 0,00"
                 value={formatCurrency(amountCents)}
                 onChange={handleAmountChange}
                 onKeyDown={handleAmountKeyDown}
@@ -260,9 +259,6 @@ export default function CustomerHome() {
                 onFocus={(e) => { e.currentTarget.style.borderColor = 'var(--acc)'; }}
                 onBlur={(e) => { e.currentTarget.style.borderColor = 'var(--line2)'; }}
               />
-              <span id="amount-hint" style={{ color: 'var(--text)', fontFamily: 'var(--font-mono)', fontSize: '0.68rem' }}>
-                Digite os centavos da direita para a esquerda · máximo R$ 9.999.999,99
-              </span>
             </div>
 
             {error && (
