@@ -140,10 +140,19 @@ Os screenshots em `docs/screenshots/` foram regenerados pelos testes e2e e refle
 - `a916192 feat: suporta status pre_approved no frontend e ajusta UX de pré-aprovação`
 - `4f338af fix(auth): evita erro de Performance negative timestamp em AuthCompletePage`
 - `4b566dc docs(screenshots): regenera screenshots após correção de login`
+- `21bd0bd docs(handoff): registra correção de AuthCompletePage`
+- `e69ffda fix(customer): remove hint e exibe R$ no input de valor`
+- `e6ff33c docs(screenshots): regenera screenshots após ajuste do input de valor`
 
 ## Correções de runtime
 
 - `/auth/complete` foi convertido para Client Component usando `useSession` e `window.location.replace`, contornando um bug do Next.js 16/Turbopack que gerava `Failed to execute 'measure' on 'Performance': 'AuthCompletePage' cannot have a negative time stamp.` quando Server Components muito rápidos eram medidos.
+
+## Ajustes de UX
+
+- Campo de valor solicitado no customer:
+  - Removeu-se a mensagem de hint "Digite os centavos da direita para a esquerda · máximo R$ 9.999.999,99".
+  - Adicionou-se o prefixo `R$ ` fixo no valor digitado e no placeholder, deixando explícito que o valor é em reais brasileiros.
 
 ## Débitos e avisos
 
